@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Page</title>
+  <title>Home</title>
 </head>
-
 <body>
+
+<h2>Welcome</h2>
+
+<p>Mobile: <span id="mobile"></span></p>
+<p>Balance: <span id="balance"></span></p>
+
+<script>
+document.getElementById("mobile").innerText = localStorage.getItem("mobile");
+document.getElementById("balance").innerText = localStorage.getItem("balance");
+</script>
 
 </body>
 </html>
