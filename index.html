@@ -1,49 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+<title>Login</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:#f2f2f2;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
 
-    .box {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
+.box {
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  width:90%;
+  max-width:350px;
+  box-shadow:0 0 10px rgba(0,0,0,0.2);
+  text-align:center;
+}
 
-    h2 {
-      margin-bottom: 20px;
-    }
+h2 {
+  margin-bottom:20px;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
-    }
+input {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      background: green;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+button {
+  width:100%;
+  padding:10px;
+  background:#1565c0;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+}
+
+a {
+  display:block;
+  margin-top:10px;
+  color:#1a0dab;
+  text-decoration:none;
+}
+</style>
+
 </head>
 
 <body>
@@ -55,45 +66,47 @@
   <input type="password" id="password" placeholder="Password">
 
   <button onclick="login()">Login</button>
+
+  <a href="#">Create Account (Signup)</a>
 </div>
 
 <script>
-function login() {
 
-  var mobile = document.getElementById("mobile").value.trim();
-  var password = document.getElementById("password").value.trim();
+// 🔥 FIXED USERS
+const users = [
+  {mobile:"8901239533", password:"2222"},
+  {mobile:"7357871944", password:"1111"},
+  {mobile:"9000000001", password:"3333"},
+  {mobile:"9000000002", password:"4444"},
+  {mobile:"9000000003", password:"5555"},
+  {mobile:"9000000004", password:"6666"},
+  {mobile:"9000000005", password:"7777"},
+  {mobile:"9000000006", password:"8888"},
+  {mobile:"9000000007", password:"9999"},
+  {mobile:"9000000008", password:"1010"}
+];
 
-  // 👇 users list (edit here)
-  var users = {
-    "8901239533": "1111",
-    "7357871944": "2222",
-    "9999999999": "3333",
-    "8888888888": "4444",
-    "7777777777": "5555",
-    "6666666666": "6666",
-    "5555555555": "7777",
-    "4444444444": "8888",
-    "3333333333": "9999",
-    "2222222222": "0000"
-  };
+function login(){
 
-  // check empty
-  if (mobile === "" || password === "") {
-    alert("Enter mobile and password");
-    return;
-  }
+  let mobile = document.getElementById("mobile").value.trim();
+  let password = document.getElementById("password").value.trim();
 
-  // login check
-  if (users[mobile] && users[mobile] === password) {
+  let user = users.find(u => u.mobile === mobile && u.password === password);
+
+  if(user){
     alert("Login Success ✅");
 
-    localStorage.setItem("mobile", mobile);
+    // save login
+    localStorage.setItem("user", mobile);
 
+    // redirect
     window.location.href = "home.html";
+
   } else {
-    alert("Wrong mobile or password ❌");
+    alert("Wrong login ❌");
   }
 }
+
 </script>
 
 </body>
