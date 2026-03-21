@@ -92,7 +92,7 @@ async function login() {
     .select("*")
     .eq("Mobile number", mobile)
     .eq("Password", password)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
     alert("Login failed ❌");
