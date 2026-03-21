@@ -1,172 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Home</title>
+  <title>Home</title>
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(45deg,#6a5acd,#8a2be2);
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(135deg, #5f5fff, #a64dff);
+      color: white;
+    }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-}
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+    }
 
-.idbox {
-  background: green;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-}
+    .idbox {
+      background: green;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
 
-.balancebox {
-  background: red;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-}
+    .balancebox {
+      background: red;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  padding: 10px;
-}
+    .grid {
+      padding: 10px;
+    }
 
-.card {
-  background: white;
-  border-radius: 15px;
-  padding: 15px;
-  text-align: center;
-  border: 2px solid green;
-}
+    .card {
+      background: white;
+      color: black;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+    }
 
-.number {
-  color: red;
-  font-size: 20px;
-  font-weight: bold;
-}
+    .bottom {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background: #eee;
+      padding: 10px 0;
+    }
 
-.time {
-  color: blue;
-  font-size: 14px;
-}
-
-.bottom {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  background: white;
-  padding: 15px;
-}
-
-.btn {
-  background: #ddd;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-weight: bold;
-}
-</style>
+    .btn {
+      background: #ddd;
+      padding: 10px 15px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- TOP -->
-<div class="topbar">
-  <div class="idbox" id="userId">ID: --</div>
-  <div class="balancebox" id="balance">₹0</div>
-</div>
+  <!-- TOP -->
+  <div class="topbar">
+    <div class="idbox" id="userId">ID: -</div>
+    <div class="balancebox" id="balance">₹0</div>
+  </div>
 
-<!-- BOX AREA -->
-<div class="grid" id="boxContainer"></div>
+  <!-- BOX DATA -->
+  <div class="grid" id="boxContainer"></div>
 
-<!-- BOTTOM -->
-<div class="bottom">
-  <div class="btn" onclick="location.href='home.html'">Home</div>
-  <div class="btn" onclick="location.href='wallet.html'">Wallet</div>
-  <div class="btn" onclick="location.href='add.html'">Add</div>
-  <div class="btn" onclick="location.href='profile.html'">Profile</div>
-</div>
+  <!-- BOTTOM MENU -->
+  <div class="bottom">
+    <div class="btn" onclick="location.href='home.html'">Home</div>
+    <div class="btn" onclick="location.href='wallet.html'">Wallet</div>
+    <div class="btn" onclick="location.href='add.html'">Add</div>
+    <div class="btn" onclick="location.href='profile.html'">Profile</div>
+  </div>
 
-<script>
+  <script>
 
-/* LOGIN CHECK */
-let mobile = localStorage.getItem("mobile");
+    /* LOGIN CHECK */
+    let mobile = localStorage.getItem("mobile");
 
-if (!mobile) {
-  alert("Login first");
-  window.location.href = "index.html";
-}
-
-/* USER DATA */
-let user = JSON.parse(localStorage.getItem("user"));
-
-if (user) {
-  document.getElementById("userId").innerText = "ID: " + user.id;
-  document.getElementById("balance").innerText = "₹" + user.balance;
-}
-
-/* GOOGLE SHEET DATA */
-async function loadBoxes() {
-  let res = await fetch("https://script.google.com/macros/s/AKfycbzVuAQurUrZRFHUF_wpk3NYQjrm0eBBP9k3rct8ZpX0MWZ6pr7bnCvz6Jq-zxyTaM0GpA/exec")
-  let data = await res.json();
-
-  let container = document.getElementById("boxContainer");
-  container.innerHTML = "";
-
-  data.forEach(item => {
-    let box = `
-      <div class="card">
-        <h3>${item.name}</h3>
-        <div class="number">${item.number || ""}</div>
-        <div class="time">${item.open || ""} - ${item.close || ""}</div>
-      </div>
-    `;
-    container.innerHTML += box;
-  });
-}
-
-loadBoxes();
-  
-async function loadBoxes() {
-  try {
-    let res = await fetch("https://script.google.com/macros/s/AKfycbzVuAQurUrZRFHUF_wpk3NYQjrm0eBBP9k3rct8ZpX0MWZ6pr7bnCvz6Jq-zxyTaM0GpA/exec");
-    let data = await res.json();
-
-    console.log("DATA:", data); // 👈 debug
-
-    let container = document.getElementById("boxContainer");
-    container.innerHTML = "";
-
-    if (data.length === 0) {
-      container.innerHTML = "<p style='color:white;text-align:center'>No Data Found</p>";
-      return;
+    if (!mobile) {
+      alert("Login first");
+      window.location.href = "index.html";
     }
 
-    data.forEach(item => {
-      let box = `
-        <div style="background:white;margin:10px;padding:15px;border-radius:10px">
-          <h3>${item.name || ""}</h3>
-          <div>${item.number || ""}</div>
-          <div>${item.open || ""} - ${item.close || ""}</div>
-        </div>
-      `;
-      container.innerHTML += box;
-    });
+    /* USER DATA */
+    let user = JSON.parse(localStorage.getItem("user"));
 
-  } catch (err) {
-    console.log("ERROR:", err);
-  }
-}
+    if (user) {
+      document.getElementById("userId").innerText = "ID: " + user.id;
+      document.getElementById("balance").innerText = "₹" + user.balance;
+    }
 
-loadBoxes();
-</script>
+    /* GOOGLE SHEET DATA */
+    async function loadBoxes() {
+      try {
+
+        let res = await fetch("https://script.google.com/macros/s/AKfycbzVuAQurUrZRFHUF_wpk3NYQjrm0eBBP9k3rct8ZpX0MWZ6pr7bnCvz6Jq-zxyTaM0GpA/exec");
+        let data = await res.json();
+
+        let container = document.getElementById("boxContainer");
+        container.innerHTML = "";
+
+        if (data.length === 0) {
+          container.innerHTML = "<p style='text-align:center'>No Data Found</p>";
+          return;
+        }
+
+        data.forEach(item => {
+          let box = `
+            <div class="card">
+              <h3>${item.name}</h3>
+              <div>${item.number}</div>
+              <div>${item.open} - ${item.close}</div>
+            </div>
+          `;
+          container.innerHTML += box;
+        });
+
+      } catch (e) {
+        console.log("ERROR:", e);
+      }
+    }
+
+    loadBoxes();
+
+  </script>
 
 </body>
 </html>
