@@ -1,197 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+<title>Home</title>
 
 <style>
 body {
-margin: 0;
-font-family: Arial;
-background: linear-gradient(135deg, #667eea, #764ba2);
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#667eea,#764ba2);
 }
 
 /* TOP BAR */
-.topbar {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-background: #0ea5e9;
-display: flex;
-justify-content: space-between;
-padding: 10px;
-z-index: 999;
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#0ea5e9;
+  color:white;
+  position:fixed;
+  width:100%;
+  top:0;
 }
 
-.userid {
-background: green;
-color: #fff;
-padding: 5px 10px;
-border-radius: 8px;
+.userid{
+  background:green;
+  padding:5px 10px;
+  border-radius:10px;
 }
 
-.balancebox {
-background: red;
-color: #fff;
-padding: 5px 10px;
-border-radius: 8px;
+.balancebox{
+  background:red;
+  padding:5px 10px;
+  border-radius:10px;
 }
 
 /* CARD */
-.container {
-margin-top: 70px;
-margin-bottom: 80px;
-display: flex;
-justify-content: center;
+.container{
+  margin-top:70px;
+  padding:10px;
 }
 
-.card {
-background: #fff;
-padding: 20px;
-border-radius: 15px;
-width: 300px;
-text-align: center;
-}
-
-.balance {
-color: green;
-font-weight: bold;
+.card{
+  background:white;
+  padding:15px;
+  border-radius:15px;
 }
 
 /* GRID */
-.grid {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 10px;
-margin-top: 10px;
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:15px;
 }
 
-.box {
-background: #fff;
-border: 2px solid green;
-border-radius: 10px;
-padding: 10px;
-font-weight: bold;
+.box{
+  border:2px solid green;
+  border-radius:10px;
+  padding:10px;
+  text-align:center;
+  font-weight:bold;
 }
 
-.box span {
-color: red;
-font-size: 18px;
+.box span{
+  color:red;
+  font-size:20px;
 }
 
-.box p {
-color: blue;
-font-size: 12px;
+.box p{
+  color:blue;
+  font-size:13px;
 }
 
 /* BUTTON */
-.btn {
-margin-top: 10px;
-padding: 10px;
-width: 100%;
-background: #667eea;
-color: #fff;
-border: none;
-border-radius: 8px;
+.btn{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#667eea;
+  color:white;
+  border:none;
+  border-radius:8px;
 }
 
 /* BOTTOM NAV */
-.bottom-nav {
-position: fixed;
-bottom: 0;
-left: 0;
-width: 100%;
-background: #fff;
-display: flex;
-justify-content: space-around;
-padding: 10px;
-border-top: 1px solid #ccc;
-z-index: 999;
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:white;
+  padding:10px;
+  border-top:1px solid #ccc;
 }
 </style>
-</head>
 
+</head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOP -->
 <div class="topbar">
-<div class="userid" id="userid"></div>
-<div class="balancebox">₹<span id="topbalance"></span></div>
+  <div id="userid">ID: --</div>
+  <div id="topbalance">₹0</div>
 </div>
 
-<!-- CARD -->
 <div class="container">
 <div class="card">
 
-<h2>Welcome 👋</h2>
-
-<p>Mobile: <span id="mobile"></span></p>
-<p class="balance">Balance: ₹<span id="balance"></span></p>
+<h3>Welcome 👋</h3>
+<p>📱 <span id="mobile"></span></p>
+<p>💰 Balance: ₹<span id="balance"></span></p>
 
 <button class="btn" onclick="logout()">Logout</button>
 
-<div class="grid">
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-<div class="box"></div>
-</div>
+<div class="grid" id="grid"></div>
 
 </div>
 </div>
 
-<!-- SCRIPT -->
+<!-- BOTTOM -->
+<div class="bottom-nav">
+  <div>🏠 Home</div>
+  <div>💰 Wallet</div>
+  <div>➕ Add</div>
+  <div>👤 Profile</div>
+</div>
+
 <script>
 const user = JSON.parse(localStorage.getItem("user"));
 
-if(user){
+if(!user){
+  window.location.href="index.html";
+}
 
+// USER DATA
 document.getElementById("mobile").innerText = user.mobile;
 document.getElementById("balance").innerText = user.balance || 0;
 document.getElementById("userid").innerText = "ID: " + user.mobile;
-document.getElementById("topbalance").innerText = user.balance || 0;
+document.getElementById("topbalance").innerText = "₹" + (user.balance || 0);
 
+// GOOGLE SHEET DATA
 fetch("https://script.google.com/macros/s/AKfycbyiNv6QJCOobWdJDfOE9hpLhAy4OHxA1uAlpsat9aXTkMKpslLODNtxLttbwQr9IAejpQ/exec")
-.then(res => res.json())
-.then(data => {
+.then(res=>res.json())
+.then(data=>{
 
-const boxes = document.querySelectorAll(".box");
+  let html = "";
 
-data.forEach((item, index) => {
-if(boxes[index]){
-boxes[index].innerHTML = `
-${item.name}<br>
-<span>${item.number}</span>
-<p>${item.time}</p>
-`;
-}
+  data.forEach(item=>{
+    html += `
+      <div class="box">
+        ${item.name}<br>
+        <span>${item.number}</span>
+        <p>${item.time}</p>
+      </div>
+    `;
+  });
+
+  document.getElementById("grid").innerHTML = html;
+
 });
-
-});
-
-}else{
-alert("Login first!");
-window.location.href = "index.html";
-}
 
 function logout(){
-localStorage.removeItem("user");
-window.location.href = "index.html";
+  localStorage.removeItem("user");
+  window.location.href="index.html";
 }
 </script>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-<div>🏠 Home</div>
-<div>💰 Wallet</div>
-<div>👤 Profile</div>
-</div>
 
 </body>
 </html>
