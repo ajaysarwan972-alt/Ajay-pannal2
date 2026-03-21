@@ -112,10 +112,7 @@ async function loadUser() {
     .eq("mobile", mobile)
     .single();
 
-  if (data) {
-    document.getElementById("userId").innerText = "ID: " + data.mobile;
-    document.getElementById("balance").innerText = "₹" + data.balance;
-  }
+  document.getElementById("userId").innerText = "ID: " + data.id;
 }
 
 loadUser();
