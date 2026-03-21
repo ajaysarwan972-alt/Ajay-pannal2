@@ -2,45 +2,78 @@
 <html>
 <head>
   <title>Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 300px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .signup {
+      margin-top: 15px;
+      display: block;
+      color: blue;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Login</h2>
+<div class="box">
+  <h2>Login</h2>
 
-<input type="text" id="mobile" placeholder="Mobile"><br><br>
-<input type="password" id="password" placeholder="Password"><br><br>
+  <input type="text" id="mobile" placeholder="Mobile Number">
+  <input type="password" id="password" placeholder="Password">
 
-<button onclick="login()">Login</button>
+  <button onclick="login()">Login</button>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <span class="signup" onclick="goSignup()">Create Account (Signup)</span>
+</div>
 
 <script>
-const supabase = supabase.createClient(
-  "YOUR_SUPABASE_URL",
-  "YOUR_ANON_KEY"
-);
-
-async function login() {
-  let mobile = document.getElementById("mobile").value;
-  let password = document.getElementById("password").value;
-
-  let { data, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("mobile", mobile)
-    .eq("password", password);
-
-  if (data.length > 0) {
-    alert("Login Success ✅");
-
-    // save mobile locally
-    localStorage.setItem("mobile", mobile);
-
-    // redirect
-    window.location.href = "dashboard.html";
-  } else {
-    alert("Wrong details ❌");
-  }
+function goSignup(){
+  window.location.href = "signup.html";
 }
 </script>
 
