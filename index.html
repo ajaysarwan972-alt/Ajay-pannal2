@@ -79,7 +79,7 @@ function goSignup(){
 </script>
   <script>
 const supabaseUrl = "https://kvvmkddbkgrtiiuswikt.supabase.co"; // tera project URL
-const supabaseKey = "sb_publishable_vOQ4Re-oWkaZ5zDmc7vjmg_OdR0Dzck";
+const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -88,10 +88,10 @@ async function login() {
   const password = document.getElementById("password").value;
 
   const { data, error } = await supabaseClient
-    .from("users")
+    .from("Wallet")
     .select("*")
-    .eq("mobile", mobile)
-    .eq("password", password)
+    .eq("Mobile number", mobile)
+    .eq("Password", password)
     .single();
 
   if (error || !data) {
