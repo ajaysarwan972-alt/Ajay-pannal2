@@ -158,10 +158,12 @@ for (let item of data) {
       }
     ]);
 
-  if(error){
+  
+if (error) {
     console.log("Supabase Error:", error);
-  }
-
+    alert("Error aa gaya");
+    return;
+}
 }
     alert("Submit ho gaya");
 
