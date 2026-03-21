@@ -116,7 +116,7 @@ function calcTotal() {
 }
 
 // SUBMIT FUNCTION
-function submitGame() {
+async function submitGame() {
     let inputs = document.querySelectorAll("input");
     let data = [];
 
@@ -144,7 +144,7 @@ function submitGame() {
 
     localStorage.setItem("history", JSON.stringify(history));
 // 🔥 Supabase Save
-data.forEach(async (item) => {
+for (let item of data) {
 
   let { error } = await supabase
     .from("records_duplicate")
@@ -162,7 +162,7 @@ data.forEach(async (item) => {
     console.log("Supabase Error:", error);
   }
 
-});
+}
     alert("Submit ho gaya");
 
     location.reload();
