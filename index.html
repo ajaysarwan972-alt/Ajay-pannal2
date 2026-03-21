@@ -2,59 +2,36 @@
 <html>
 <head>
   <title>Login</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       font-family: Arial;
-      background: #f2f2f2;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background: #f2f2f2;
     }
-
     .box {
       background: white;
-      padding: 25px;
+      padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
       width: 300px;
       text-align: center;
     }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
     input {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
     }
-
     button {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 5px;
-      background: #007bff;
+      background: blue;
       color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
-    }
-
-    .signup {
-      margin-top: 15px;
-      display: block;
-      color: blue;
-      cursor: pointer;
+      border: none;
     }
   </style>
 </head>
@@ -68,42 +45,44 @@
   <input type="password" id="password" placeholder="Password">
 
   <button onclick="login()">Login</button>
-
-  <span class="signup" onclick="goSignup()">Create Account (Signup)</span>
 </div>
 
 <script>
-function goSignup(){
-  window.location.href = "signup.html";
-}
-</script>
-  <script>
-const supabaseUrl = "https://kvvmkddbkgrtiiuswikt.supabase.co"; // tera project URL
-const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a
+const supabaseUrl = "https://kvvmkddbkgrtiiuswikt.supabase.co";
+const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 async function login() {
-  const mobile = document.getElementById("mobile").value;
-  const password = document.getElementById("password").value;
+  const mobile = document.getElementById("mobile").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!mobile || !password) {
+    alert("Enter mobile & password");
+    return;
+  }
 
   const { data, error } = await supabaseClient
     .from("Wallet")
     .select("*")
     .eq("Mobile number", mobile)
-    .eq("Password", password)
-    .maybeSingle();
+    .eq("Password", password);
 
-  if (error || !data) {
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
+
+  if (data.length === 0) {
     alert("Login failed ❌");
   } else {
     alert("Login success ✅");
     localStorage.setItem("mobile", mobile);
-    localStorage.setItem("user", JSON.stringify(data));
+    localStorage.setItem("user", JSON.stringify(data[0]));
     window.location.href = "home.html";
   }
 }
-    </script>
-<script src="script.js"></script>
+</script>
+
 </body>
 </html>
