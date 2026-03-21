@@ -10,11 +10,10 @@
 <input type="text" id="mobile" placeholder="Mobile Number"><br><br>
 <input type="password" id="password" placeholder="Password"><br><br>
 
-<button onclick="login()">Login</button><br><br>
+<button id="loginBtn">Login</button><br><br>
 
 <a href="signup.html">Create Account (Signup)</a>
 
-<!-- ✅ Sabse pehle ye script load hoga -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -22,6 +21,9 @@ const supabase = window.supabase.createClient(
   "https://katbdbzoufiblnnsoxkk.supabase.co",
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
+
+// ✅ button click fix
+document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
   const mobile = document.getElementById("mobile").value.trim();
