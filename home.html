@@ -133,7 +133,39 @@ async function loadBoxes() {
 }
 
 loadBoxes();
+  
+async function loadBoxes() {
+  try {
+    let res = await fetch("https://script.google.com/macros/s/AKfycbzVuAQurUrZRFHUF_wpk3NYQjrm0eBBP9k3rct8ZpX0MWZ6pr7bnCvz6Jq-zxyTaM0GpA/exec");
+    let data = await res.json();
 
+    console.log("DATA:", data); // 👈 debug
+
+    let container = document.getElementById("boxContainer");
+    container.innerHTML = "";
+
+    if (data.length === 0) {
+      container.innerHTML = "<p style='color:white;text-align:center'>No Data Found</p>";
+      return;
+    }
+
+    data.forEach(item => {
+      let box = `
+        <div style="background:white;margin:10px;padding:15px;border-radius:10px">
+          <h3>${item.name || ""}</h3>
+          <div>${item.number || ""}</div>
+          <div>${item.open || ""} - ${item.close || ""}</div>
+        </div>
+      `;
+      container.innerHTML += box;
+    });
+
+  } catch (err) {
+    console.log("ERROR:", err);
+  }
+}
+
+loadBoxes();
 </script>
 
 </body>
