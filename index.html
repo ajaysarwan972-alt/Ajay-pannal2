@@ -3,7 +3,7 @@
 <head>
   <title>Login</title>
 
-  <!-- ✅ Supabase Library -->
+  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -70,8 +70,8 @@ const supabaseKey = "sb_publishable_--fdpQMmS1Uyt2ywjUErgQ_LXGvQH-a";
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 async function login() {
-  const mobile = document.getElementById("mobile").value;
-  const password = document.getElementById("password").value;
+  const mobile = document.getElementById("mobile").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   if (!mobile || !password) {
     alert("Fill all fields ❌");
@@ -85,12 +85,14 @@ async function login() {
       .eq("mobile", mobile)
       .single();
 
+    console.log(data, error); // debug
+
     if (error || !data) {
       alert("User not found ❌");
       return;
     }
 
-    if (data.password === password) {
+    if (data.password == password) {
       alert("Login Success ✅");
 
       localStorage.setItem("mobile", mobile);
