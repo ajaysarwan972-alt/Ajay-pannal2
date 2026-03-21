@@ -1,32 +1,14 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Login Test</title>
-</head>
+<body>
 
-<body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial;">
+<h1>TEST</h1>
 
-<div style="text-align:center;">
-  <h2>Login</h2>
-
-  <input type="text" id="mobile" placeholder="Mobile"><br><br>
-  <input type="password" id="password" placeholder="Password"><br><br>
-
-  <button onclick="login()">Login</button>
-</div>
+<button onclick="test()">Click Me</button>
 
 <script>
-function login() {
-  alert("Button working ✅");
-
-  const mobile = document.getElementById("mobile").value;
-  const password = document.getElementById("password").value;
-
-  if (mobile === "1234" && password === "1234") {
-    alert("Login Success ✅");
-  } else {
-    alert("Wrong ❌");
-  }
+function test() {
+  alert("Working ✅");
 }
 </script>
 
