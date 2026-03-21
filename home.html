@@ -1,170 +1,146 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Home</title>
+  <title>Home</title>
 
-<style>
-body {
-  margin:0;
-  font-family: Arial;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-}
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-/* TOP BAR */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  background:#0ea5e9;
-  color:white;
-  position:fixed;
-  width:100%;
-  top:0;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(45deg,#6a5acd,#8a2be2);
+    }
 
-.userid{
-  background:green;
-  padding:5px 10px;
-  border-radius:10px;
-}
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+    }
 
-.balancebox{
-  background:red;
-  padding:5px 10px;
-  border-radius:10px;
-}
+    .idbox {
+      background: green;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
 
-/* CARD */
-.container{
-  margin-top:70px;
-  padding:10px;
-}
+    .balancebox {
+      background: red;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
 
-.card{
-  background:white;
-  padding:15px;
-  border-radius:15px;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 10px;
+    }
 
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:15px;
-}
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+      text-align: center;
+      border: 2px solid green;
+    }
 
-.box{
-  border:2px solid green;
-  border-radius:10px;
-  padding:10px;
-  text-align:center;
-  font-weight:bold;
-}
+    .number {
+      color: red;
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-.box span{
-  color:red;
-  font-size:20px;
-}
+    .time {
+      color: blue;
+      font-size: 14px;
+    }
 
-.box p{
-  color:blue;
-  font-size:13px;
-}
+    .bottom {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background: white;
+      padding: 15px;
+    }
 
-/* BUTTON */
-.btn{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:#667eea;
-  color:white;
-  border:none;
-  border-radius:8px;
-}
-
-/* BOTTOM NAV */
-.bottom-nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  display:flex;
-  justify-content:space-around;
-  background:white;
-  padding:10px;
-  border-top:1px solid #ccc;
-}
-</style>
-
+    .btn {
+      background: #ddd;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <body>
 
 <!-- TOP -->
 <div class="topbar">
-  <div id="userid">ID: --</div>
-  <div id="topbalance">₹0</div>
+  <div class="idbox" id="userId">ID: ...</div>
+  <div class="balancebox" id="balance">₹0</div>
 </div>
 
-<div class="container">
-<div class="card">
-
-<h3>Welcome 👋</h3>
-<p>📱 <span id="mobile"></span></p>
-<p>💰 Balance: ₹<span id="balance"></span></p>
-
-<button class="btn" onclick="logout()">Logout</button>
-
-<div class="grid" id="grid"></div>
-
-</div>
-</div>
+<!-- BOX AREA -->
+<div class="grid" id="boxContainer"></div>
 
 <!-- BOTTOM -->
-<div class="bottom-nav">
-  <div>🏠 Home</div>
-  <div>💰 Wallet</div>
-  <div>➕ Add</div>
-  <div>👤 Profile</div>
+<div class="bottom">
+  <div class="btn">Home</div>
+  <div class="btn">Wallet</div>
+  <div class="btn">Add</div>
+  <div class="btn">Profile</div>
 </div>
 
 <script>
-const user = JSON.parse(localStorage.getItem("user"));
+/* ---------------- SUPABASE ---------------- */
+const supabase = supabase.createClient(
+  "https://kvvmkddbkgrtiiuswikt.supabase.co",
+  "sb_publishable_vOQ4Re-oWkaZ5zDmc7vjmg_OdR0Dzck"
+);
 
-if(!user){
-  window.location.href="index.html";
+let mobile = localStorage.getItem("mobile");
+
+async function loadUser() {
+  const { data } = await supabase
+    .from("users")
+    .select("*")
+    .eq("mobile", mobile)
+    .single();
+
+  if (data) {
+    document.getElementById("userId").innerText = "ID: " + data.mobile;
+    document.getElementById("balance").innerText = "₹" + data.balance;
+  }
 }
 
-// USER DATA
-document.getElementById("mobile").innerText = user.mobile;
-document.getElementById("balance").innerText = user.balance || 0;
-document.getElementById("userid").innerText = "ID: " + user.mobile;
-document.getElementById("topbalance").innerText = "₹" + (user.balance || 0);
+loadUser();
 
-// GOOGLE SHEET DATA
-fetch("https://script.google.com/macros/s/AKfycbyiNv6QJCOobWdJDfOE9hpLhAy4OHxA1uAlpsat9aXTkMKpslLODNtxLttbwQr9IAejpQ/exec")
-.then(res=>res.json())
-.then(data=>{
+/* ---------------- GOOGLE SHEET ---------------- */
+async function loadBoxes() {
+  let res = await fetch("https://script.google.com/macros/s/AKfycbzy6pX71_p37zPNGXebpuOd_2SbDPBCZuU_lntTV5ytYisjwVAocbJHbstjWGistJKZoA/exec");
+  let data = await res.json();
 
-  let html = "";
+  let container = document.getElementById("boxContainer");
+  container.innerHTML = "";
 
-  data.forEach(item=>{
-    html += `
-      <div class="box">
-        ${item.name}<br>
-        <span>${item.number}</span>
-        <p>${item.time}</p>
+  data.forEach(item => {
+    let box = `
+      <div class="card">
+        <h3>${item.name}</h3>
+        <div class="number">${item.number || ""}</div>
+        <div class="time">${item.open} - ${item.close}</div>
       </div>
     `;
+    container.innerHTML += box;
   });
-
-  document.getElementById("grid").innerHTML = html;
-
-});
-
-function logout(){
-  localStorage.removeItem("user");
-  window.location.href="index.html";
 }
+
+loadBoxes();
 </script>
 
 </body>
