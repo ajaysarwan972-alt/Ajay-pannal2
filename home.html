@@ -1,154 +1,149 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Home</title>
+<style>
+.container{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+padding:10px;
+}
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #f2f2f2;
-    }
+.game-box{
+background:#f3f3f3;
+border-radius:20px;
+padding:25px;
+text-align:center;
+border:3px solid #00e676;
+box-shadow:0 0 15px #00e676;
+}
 
-    /* 🔥 TOP WALLET */
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: black;
-      color: white;
-      padding: 15px;
-    }
+.game-box.closed{
+border:3px solid red;
+box-shadow:0 0 15px red;
+}
 
-    .wallet {
-      background: red;
-      padding: 8px 15px;
-      border-radius: 20px;
-    }
+.name{
+font-size:22px;
+font-weight:bold;
+margin-bottom:5px;
+}
 
-    /* 🎮 GRID */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 10px;
-    }
+.result{
+font-size:26px;
+color:red;
+margin:8px 0;
+}
 
-    .box {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-      cursor: pointer;
-    }
+.time{
+color:#1565c0;
+font-weight:bold;
+margin-bottom:10px;
+}
 
-    .box:hover {
-      background: #e6ffe6;
-    }
+.status img{
+width:80px;
+}
+</style>
 
-    .title {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
 
-    .time {
-      color: gray;
-      font-size: 14px;
-    }
-  </style>
-</head>
+<div class="container">
 
-<body>
-
-<!-- 🔝 TOP BAR -->
-<div class="top">
-  <div id="user">User</div>
-  <div class="wallet">₹ <span id="balance">0</span></div>
+<!-- 1 -->
+<div class="game-box">
+<div class="name">DISAWAR</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 4:00 am</div>
+<div class="status">
+<img src="https://i.imgur.com/6YV1Z3T.png">
+</div>
 </div>
 
-<!-- 🎮 GAME BOXES -->
-<div class="grid">
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 1</div>
-    <div class="time">10:00 AM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 2</div>
-    <div class="time">11:00 AM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 3</div>
-    <div class="time">12:00 PM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 4</div>
-    <div class="time">01:00 PM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 5</div>
-    <div class="time">02:00 PM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 6</div>
-    <div class="time">03:00 PM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 7</div>
-    <div class="time">04:00 PM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 8</div>
-    <div class="time">05:00 PM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 9</div>
-    <div class="time">06:00 PM</div>
-  </div>
-
-  <div class="box" onclick="openGame()">
-    <div class="title">Game 10</div>
-    <div class="time">07:00 PM</div>
-  </div>
-
+<!-- 2 -->
+<div class="game-box">
+<div class="name">DISAWAR BAZAR</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 4:30 am</div>
+<div class="status">
+<img src="https://i.imgur.com/6YV1Z3T.png">
+</div>
 </div>
 
-<script>
-// 🔐 user check
-const mobile = localStorage.getItem("mobile");
+<!-- 3 -->
+<div class="game-box closed">
+<div class="name">DELHI BAZAR</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 2:45 pm</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
-if (!mobile) {
-  window.location.href = "index.html";
-}
+<!-- 4 -->
+<div class="game-box closed">
+<div class="name">TAJ</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 3:00 pm</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
-document.getElementById("user").innerText = mobile;
+<!-- 5 -->
+<div class="game-box closed">
+<div class="name">SHRI GANESH</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 4:10 pm</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
-// 💰 balance
-let key = "balance_" + mobile;
-let balance = localStorage.getItem(key);
+<!-- 6 -->
+<div class="game-box closed">
+<div class="name">FARIDABAD</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 5:45 pm</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
-if (!balance) {
-  balance = 1000;
-  localStorage.setItem(key, balance);
-}
+<!-- 7 -->
+<div class="game-box closed">
+<div class="name">FARIDABAD VIP</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 8:00 pm</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
-document.getElementById("balance").innerText = balance;
+<!-- 8 -->
+<div class="game-box closed">
+<div class="name">GHAZIABAD</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 8:45 pm</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
+<!-- 9 -->
+<div class="game-box closed">
+<div class="name">GALI</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 11:00 pm</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
-// 🎮 open game
-function openGame() {
-  window.location.href = "game.html";
-}
-</script>
+<!-- 10 -->
+<div class="game-box closed">
+<div class="name">MUMBAI</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 12:00 am</div>
+<div class="status">
+<img src="https://i.imgur.com/8Qf6WQk.png">
+</div>
+</div>
 
-</body>
-</html>
+</div>
