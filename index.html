@@ -2,36 +2,43 @@
 <html>
 <head>
   <title>Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       font-family: Arial;
-      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f2f2f2;
     }
 
     .box {
-      width: 300px;
-      margin: 100px auto;
-      padding: 20px;
       background: white;
+      padding: 30px;
       border-radius: 10px;
+      width: 300px;
       text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     input {
-      width: 90%;
+      width: 100%;
       padding: 10px;
-      margin: 10px;
+      margin: 10px 0;
     }
 
     button {
-      padding: 10px 20px;
-      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      background: black;
+      color: white;
+      border: none;
     }
 
     a {
       display: block;
-      margin-top: 15px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -46,33 +53,48 @@
 
   <button onclick="login()">Login</button>
 
-  <!-- Signup Button -->
   <a href="signup.html">Create Account (Signup)</a>
 </div>
 
 <script>
-function login() {
-  var mobile = document.getElementById("mobile").value;
-  var password = document.getElementById("password").value;
+  const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
+  const supabaseKey = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
 
-  if(mobile === "" || password === "") {
-    alert("Fill all fields");
-    return;
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function login() {
+    const mobile = document.getElementById("mobile").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("mobile", mobile)
+        .eq("password", password);
+
+      if (error) {
+        alert("Error: " + error.message);
+        return;
+      }
+
+      if (data.length > 0) {
+        alert("Login Success ✅");
+
+        // save user
+        localStorage.setItem("mobile", mobile);
+
+        // redirect
+        window.location.href = "home.html";
+
+      } else {
+        alert("Wrong login ❌");
+      }
+
+    } catch (err) {
+      alert("Network error ❌");
+    }
   }
-
-  // TEMP LOGIN (abhi test ke liye)
-  if(mobile === "8901239533" && password === "1234") {
-    alert("Login Success ✅");
-
-    // Save user
-    localStorage.setItem("user", mobile);
-
-    // Redirect to home
-    window.location.href = "home.html";
-  } else {
-    alert("Wrong login ❌");
-  }
-}
 </script>
 
 </body>
