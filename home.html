@@ -1,74 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Top Data</title>
+<h2 id="user"></h2>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<h3>Balance: ₹<span id="balance">0</span></h3>
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(45deg, purple, blue);
-  color: white;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-}
-
-.idbox {
-  background: green;
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-
-.balancebox {
-  background: red;
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="topbar">
-  <div class="idbox" id="userid">ID: Loading...</div>
-  <div class="balancebox" id="balance">Loading...</div>
-</div>
+<button onclick="playGame()">Play Game (₹50)</button>
 
 <script>
-const supabaseClient = supabase.createClient(
-  "YOUR_PROJECT_URL",
-  "YOUR_ANON_KEY"
-);
+const mobile = localStorage.getItem("mobile");
 
-async function loadData() {
-
-  let userId = 1; // abhi fix rakha
-
-  let { data, error } = await supabaseClient
-    .from("users")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  if (error) {
-    document.getElementById("userid").innerText = "Error";
-    document.getElementById("balance").innerText = "Error";
-    return;
-  }
-
-  document.getElementById("userid").innerText = "ID: " + data.id;
-  document.getElementById("balance").innerText = "₹" + data.balance;
+if (!mobile) {
+  window.location.href = "index.html";
 }
 
-loadData();
-</script>
+// show user
+document.getElementById("user").innerText = "User: " + mobile;
 
-</body>
-</html>
+// balance key
+const balanceKey = "balance_" + mobile;
+
+// get balance
+let balance = localStorage.getItem(balanceKey);
+
+if (!balance) {
+  balance = 0;
+  localStorage.setItem(balanceKey, balance);
+}
+
+balance = parseInt(balance);
+
+// show balance
+document.getElementById("balance").innerText = balance;
+
+
+// 🎮 GAME FUNCTION
+function playGame() {
+  let gameCost = 50;
+
+  if (balance >= gameCost) {
+    balance = balance - gameCost;
+
+    localStorage.setItem(balanceKey, balance);
+    document.getElementById("balance").innerText = balance;
+
+    alert("Game Started 🎮\n₹50 deducted");
+
+    // 👉 yaha game page pe bhej sakta hai
+    // window.location.href = "game.html";
+
+  } else {
+    alert("Insufficient Balance ❌");
+  }
+}
+</script>
