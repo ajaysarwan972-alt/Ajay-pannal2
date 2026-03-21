@@ -89,30 +89,35 @@
 <div class="grid" id="boxContainer"></div>
 
 <!-- BOTTOM -->
-<div class="bottom">
-  <div class="btn">Home</div>
-  <div class="btn">Wallet</div>
-  <div class="btn">Add</div>
-  <div class="btn">Profile</div>
+<div class="btn" onclick="window.location.href='home.html'">Home</div>
+<div class="btn" onclick="window.location.href='wallet.html'">Wallet</div>
+<div class="btn" onclick="window.location.href='add.html'">Add</div>
+<div class="btn" onclick="window.location.href='profile.html'">Profile</div>
 </div>
 
 <script>
 /* ---------------- SUPABASE ---------------- */
-const supabase = supabase.createClient(
+const supabaseClient = supabase.createClient(
   "https://kvvmkddbkgrtiiuswikt.supabase.co",
   "sb_publishable_vOQ4Re-oWkaZ5zDmc7vjmg_OdR0Dzck"
 );
 
 let mobile = localStorage.getItem("mobile");
-
+if (!mobile) {
+  alert("Login first");
+  window.location.href = "index.html";
+  return;
+}
 async function loadUser() {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("users")
     .select("*")
     .eq("mobile", mobile)
     .single();
 
+  if (data) {
   document.getElementById("userId").innerText = "ID: " + data.id;
+  document.getElementById("balance").innerText = "₹" + (data.balance || 0);
 }
 
 loadUser();
@@ -130,7 +135,7 @@ async function loadBoxes() {
       <div class="card">
         <h3>${item.name}</h3>
         <div class="number">${item.number || ""}</div>
-        <div class="time">${item.open} - ${item.close}</div>
+        <div class="time">${item.open || ""} - ${item.close || ""}</div>
       </div>
     `;
     container.innerHTML += box;
