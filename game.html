@@ -143,7 +143,26 @@ function submitGame() {
     });
 
     localStorage.setItem("history", JSON.stringify(history));
+// 🔥 Supabase Save
+data.forEach(async (item) => {
 
+  let { error } = await supabase
+    .from("records_duplicate")
+    .insert([
+      {
+        mobile: "8901239533",
+        game: "MAIN",
+        number: item.number,
+        amount: parseInt(item.amount),
+        time: new Date().toLocaleString()
+      }
+    ]);
+
+  if(error){
+    console.log("Supabase Error:", error);
+  }
+
+});
     alert("Submit ho gaya");
 
     location.reload();
