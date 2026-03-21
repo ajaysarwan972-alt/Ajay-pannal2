@@ -2,17 +2,67 @@
 <html>
 <head>
   <title>Login</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      background: blue;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    a {
+      display: block;
+      margin-top: 15px;
+      color: blue;
+      text-decoration: none;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Login</h2>
+<div class="box">
+  <h2>Login</h2>
 
-<input type="text" id="mobile" placeholder="Mobile Number"><br><br>
-<input type="password" id="password" placeholder="Password"><br><br>
+  <input type="text" id="mobile" placeholder="Mobile Number">
+  <input type="password" id="password" placeholder="Password">
 
-<button id="loginBtn">Login</button><br><br>
+  <button id="loginBtn">Login</button>
 
-<a href="signup.html">Create Account (Signup)</a>
+  <a href="signup.html">Create Account (Signup)</a>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -22,7 +72,6 @@ const supabase = window.supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// ✅ button click fix
 document.getElementById("loginBtn").addEventListener("click", login);
 
 async function login() {
