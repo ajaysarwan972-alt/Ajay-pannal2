@@ -142,6 +142,30 @@ async function loadBoxes() {
 
 loadBoxes();
 </script>
+<script>
+const supabase = window.supabase.createClient(
+  "https://kvvmkddbkgrtiiuswikt.supabase.co",
+  "sb_publishable_vOQ4Re-oWkaZ5zDmc7vjmg_OdR0Dzck"
+);
 
+const mobile = localStorage.getItem("mobile");
+
+async function loadUser() {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("mobile", mobile)
+    .single();
+
+  if (data) {
+    document.getElementById("userId").innerText = "ID: " + data.id;
+    document.getElementById("balance").innerText = "₹" + data.balance;
+  } else {
+    console.log(error);
+  }
+}
+
+loadUser();
+</script>
 </body>
 </html>
