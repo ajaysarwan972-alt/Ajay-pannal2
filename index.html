@@ -8,29 +8,18 @@
     body {
       font-family: Arial;
       background: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
       text-align: center;
+      margin-top: 100px;
     }
 
     input {
-      width: 100%;
+      width: 250px;
       padding: 10px;
-      margin: 10px 0;
+      margin: 10px;
     }
 
     button {
-      width: 100%;
-      padding: 10px;
+      padding: 10px 20px;
       background: blue;
       color: white;
       border: none;
@@ -40,47 +29,56 @@
 
 <body>
 
-<div class="box">
-  <h2>Login</h2>
+<h2>Login</h2>
 
-  <input type="text" id="mobile" placeholder="Mobile Number">
-  <input type="password" id="password" placeholder="Password">
+<input type="text" id="mobile" placeholder="Mobile Number"><br>
+<input type="password" id="password" placeholder="Password"><br>
 
-  <button onclick="login()">Login</button>
+<button onclick="login()">Login</button>
 
-  <p onclick="window.location.href='signup.html'" style="color:blue;cursor:pointer;">
-    Create Account (Signup)
-  </p>
-</div>
+<p onclick="window.location.href='signup.html'" style="color:blue;cursor:pointer;">
+  Create Account (Signup)
+</p>
 
 <script>
 
 function login(){
 
-  let mobile = document.getElementById("mobile").value;
-  let password = document.getElementById("password").value;
+  var mobile = document.getElementById("mobile").value;
+  var password = document.getElementById("password").value;
 
-  // 🔥 DEMO ACCOUNTS (simple)
-  if(
-    (mobile=="8901239533" && password=="1111") ||
-    (mobile=="9000000001" && password=="1111") ||
-    (mobile=="9000000002" && password=="2222") ||
-    (mobile=="9000000003" && password=="3333") ||
-    (mobile=="9000000004" && password=="4444") ||
-    (mobile=="9000000005" && password=="5555") ||
-    (mobile=="9000000006" && password=="6666") ||
-    (mobile=="9000000007" && password=="7777") ||
-    (mobile=="9000000008" && password=="8888") ||
-    (mobile=="9000000009" && password=="9999")
-  ){
-    alert("Login Success ✅");
+  if(mobile=="8901239533" && password=="1111"){
+    alert("Login Success");
+    localStorage.setItem("user", mobile);
+    window.location.href="home.html";
+  }
 
-    localStorage.setItem("loginUser", mobile);
+  else if(mobile=="9000000001" && password=="1111"){
+    alert("Login Success");
+    localStorage.setItem("user", mobile);
+    window.location.href="home.html";
+  }
 
-    window.location.href = "home.html";
+  else if(mobile=="9000000002" && password=="2222"){
+    alert("Login Success");
+    localStorage.setItem("user", mobile);
+    window.location.href="home.html";
+  }
 
-  } else {
-    alert("Wrong Mobile or Password ❌");
+  else if(mobile=="9000000003" && password=="3333"){
+    alert("Login Success");
+    localStorage.setItem("user", mobile);
+    window.location.href="home.html";
+  }
+
+  else if(mobile=="9000000004" && password=="4444"){
+    alert("Login Success");
+    localStorage.setItem("user", mobile);
+    window.location.href="home.html";
+  }
+
+  else{
+    alert("Wrong Mobile or Password");
   }
 
 }
