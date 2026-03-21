@@ -1,149 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Golden App</title>
+
 <style>
-.container{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:15px;
-padding:10px;
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f2f2f2;
 }
 
-.game-box{
-background:#f3f3f3;
-border-radius:20px;
-padding:25px;
-text-align:center;
-border:3px solid #00e676;
-box-shadow:0 0 15px #00e676;
+/* TOP BAR */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: linear-gradient(to right,#dfe9f3,#ffffff);
 }
 
-.game-box.closed{
-border:3px solid red;
-box-shadow:0 0 15px red;
+.userid {
+    background: green;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
 }
 
-.name{
-font-size:22px;
-font-weight:bold;
-margin-bottom:5px;
+.wallet {
+    background: red;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
 }
 
-.result{
-font-size:26px;
-color:red;
-margin:8px 0;
+/* BOX GRID */
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 15px;
 }
 
-.time{
-color:#1565c0;
-font-weight:bold;
-margin-bottom:10px;
+.box {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    border: 4px solid green;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 
-.status img{
-width:80px;
+.box.closed {
+    border-color: red;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.result {
+    font-size: 28px;
+    color: red;
+    margin: 10px 0;
+}
+
+.time {
+    color: blue;
+    font-weight: bold;
+}
+
+.status {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
 }
 </style>
+</head>
 
+<body>
 
-<div class="container">
-
-<!-- 1 -->
-<div class="game-box">
-<div class="name">DISAWAR</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 4:00 am</div>
-<div class="status">
-<img src="https://i.imgur.com/6YV1Z3T.png">
-</div>
+<!-- TOP -->
+<div class="topbar">
+    <div class="userid">ID: 29484</div>
+    <div class="wallet">₹ 120.30</div>
 </div>
 
-<!-- 2 -->
-<div class="game-box">
-<div class="name">DISAWAR BAZAR</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 4:30 am</div>
-<div class="status">
-<img src="https://i.imgur.com/6YV1Z3T.png">
-</div>
-</div>
+<!-- BOXES -->
+<div class="container" id="gameContainer"></div>
 
-<!-- 3 -->
-<div class="game-box closed">
-<div class="name">DELHI BAZAR</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 2:45 pm</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+<script>
 
-<!-- 4 -->
-<div class="game-box closed">
-<div class="name">TAJ</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 3:00 pm</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+// 🔥 GAME DATA (yaha change kar sakta hai)
+let games = [
+ {name:"DISAWAR", open:"06:00", close:"04:00", result:"16"},
+ {name:"DISAWAR BAZAR", open:"06:00", close:"04:30", result:"62"},
+ {name:"DELHI BAZAR", open:"06:00", close:"14:45", result:"**"},
+ {name:"TAJ", open:"06:00", close:"15:00", result:"**"},
+ {name:"SHRI GANESH", open:"06:00", close:"16:10", result:"**"},
+ {name:"FARIDABAD", open:"06:00", close:"17:45", result:"**"},
+ {name:"FARIDABAD VIP", open:"06:00", close:"20:00", result:"**"},
+ {name:"GHAZIABAD", open:"06:00", close:"20:45", result:"**"},
+ {name:"GAME 9", open:"06:00", close:"21:30", result:"**"},
+ {name:"GAME 10", open:"06:00", close:"22:00", result:"**"}
+];
 
-<!-- 5 -->
-<div class="game-box closed">
-<div class="name">SHRI GANESH</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 4:10 pm</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+// 🔥 TIME CHECK FUNCTION
+function isOpen(open, close) {
+    let now = new Date();
+    let current = now.getHours()*60 + now.getMinutes();
 
-<!-- 6 -->
-<div class="game-box closed">
-<div class="name">FARIDABAD</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 5:45 pm</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+    let o = open.split(":");
+    let c = close.split(":");
 
-<!-- 7 -->
-<div class="game-box closed">
-<div class="name">FARIDABAD VIP</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 8:00 pm</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+    let openTime = parseInt(o[0])*60 + parseInt(o[1]);
+    let closeTime = parseInt(c[0])*60 + parseInt(c[1]);
 
-<!-- 8 -->
-<div class="game-box closed">
-<div class="name">GHAZIABAD</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 8:45 pm</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+    return current >= openTime && current <= closeTime;
+}
 
-<!-- 9 -->
-<div class="game-box closed">
-<div class="name">GALI</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 11:00 pm</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+// 🔥 LOAD BOXES
+let container = document.getElementById("gameContainer");
 
-<!-- 10 -->
-<div class="game-box closed">
-<div class="name">MUMBAI</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 12:00 am</div>
-<div class="status">
-<img src="https://i.imgur.com/8Qf6WQk.png">
-</div>
-</div>
+games.forEach(game => {
 
-</div>
+    let open = isOpen(game.open, game.close);
+
+    let box = document.createElement("div");
+    box.className = "box " + (open ? "" : "closed");
+
+    box.innerHTML = `
+        <div class="title">${game.name}</div>
+        <div class="result">${game.result}</div>
+        <div class="time">${game.open} - ${game.close}</div>
+        <div class="status">${open ? "🟢 OPEN" : "🔴 CLOSED"}</div>
+    `;
+
+    // 👉 future game link
+    box.onclick = function(){
+        alert(game.name + " game open karega");
+        // yaha link dal sakta hai
+        // window.location.href = "game1.html";
+    };
+
+    container.appendChild(box);
+});
+
+</script>
+
+</body>
+</html>
