@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Home</title>
+<title>Home</title>
 </head>
+
 <body>
 
 <h2>Welcome</h2>
@@ -11,8 +12,15 @@
 <p>Balance: <span id="balance"></span></p>
 
 <script>
-document.getElementById("mobile").innerText = localStorage.getItem("mobile");
-document.getElementById("balance").innerText = localStorage.getItem("balance");
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(user){
+  document.getElementById("mobile").innerText = user.mobile;
+  document.getElementById("balance").innerText = user.balance || 0;
+} else {
+  alert("Login first!");
+  window.location.href = "index.html";
+}
 </script>
 
 </body>
