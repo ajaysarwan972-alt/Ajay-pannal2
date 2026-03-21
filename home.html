@@ -1,78 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Home</title>
+<title>Home</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(45deg,#6a5acd,#8a2be2);
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(45deg,#6a5acd,#8a2be2);
+}
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-    }
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
 
-    .idbox {
-      background: green;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 10px;
-    }
+.idbox {
+  background: green;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
 
-    .balancebox {
-      background: red;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 10px;
-    }
+.balancebox {
+  background: red;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 10px;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
+}
 
-    .card {
-      background: white;
-      border-radius: 15px;
-      padding: 15px;
-      text-align: center;
-      border: 2px solid green;
-    }
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  border: 2px solid green;
+}
 
-    .number {
-      color: red;
-      font-size: 20px;
-      font-weight: bold;
-    }
+.number {
+  color: red;
+  font-size: 20px;
+  font-weight: bold;
+}
 
-    .time {
-      color: blue;
-      font-size: 14px;
-    }
+.time {
+  color: blue;
+  font-size: 14px;
+}
 
-    .bottom {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: white;
-      padding: 15px;
-    }
+.bottom {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  padding: 15px;
+}
 
-    .btn {
-      background: #ddd;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: bold;
-    }
-  </style>
+.btn {
+  background: #ddd;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+</style>
 </head>
 
 <body>
@@ -88,13 +88,14 @@
 
 <!-- BOTTOM -->
 <div class="bottom">
-  <div class="btn" onclick="window.location.href='home.html'">Home</div>
-  <div class="btn" onclick="window.location.href='wallet.html'">Wallet</div>
-  <div class="btn" onclick="window.location.href='add.html'">Add</div>
-  <div class="btn" onclick="window.location.href='profile.html'">Profile</div>
+  <div class="btn" onclick="location.href='home.html'">Home</div>
+  <div class="btn" onclick="location.href='wallet.html'">Wallet</div>
+  <div class="btn" onclick="location.href='add.html'">Add</div>
+  <div class="btn" onclick="location.href='profile.html'">Profile</div>
 </div>
 
 <script>
+
 /* LOGIN CHECK */
 let mobile = localStorage.getItem("mobile");
 
@@ -103,35 +104,36 @@ if (!mobile) {
   window.location.href = "index.html";
 }
 
-/* USER DATA (localStorage se) */
-const user = JSON.parse(localStorage.getItem("user"));
+/* USER DATA */
+let user = JSON.parse(localStorage.getItem("user"));
 
-if(user){
+if (user) {
   document.getElementById("userId").innerText = "ID: " + user.id;
   document.getElementById("balance").innerText = "₹" + user.balance;
 }
 
 /* GOOGLE SHEET DATA */
 async function loadBoxes() {
-  let res = await fetch("https://script.google.com/macros/s/AKfycbzY6pX71_p37zPNGXebpuOd_2sbDPBCZUU_lntTV5yTisjwVAocbJhbs/exec");
+  let res = await fetch("https://script.google.com/macros/s/AKfycbw8k46w6XaPL0RR8KeHH1fzMLQj5aVHo7_qWJfQ0YX0IUWPDdbic2agmhl/exec");
   let data = await res.json();
 
   let container = document.getElementById("boxContainer");
   container.innerHTML = "";
 
   data.forEach(item => {
-  let box = `
-  <div class="card">
-    <h3>${item.name}</h3>
-    <div class="number">${item.number || ""}</div>
-    <div class="time">${item.open || ""} - ${item.close || ""}</div>
-  </div>
-`;
+    let box = `
+      <div class="card">
+        <h3>${item.name}</h3>
+        <div class="number">${item.number || ""}</div>
+        <div class="time">${item.open || ""} - ${item.close || ""}</div>
+      </div>
+    `;
     container.innerHTML += box;
   });
 }
 
 loadBoxes();
+
 </script>
 
 </body>
