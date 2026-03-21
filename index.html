@@ -25,10 +25,6 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    h2 {
-      margin-bottom: 20px;
-    }
-
     input {
       width: 100%;
       padding: 12px;
@@ -46,7 +42,6 @@
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      margin-top: 10px;
     }
 
     .signup {
@@ -62,8 +57,8 @@
 <div class="login-box">
   <h2>Login</h2>
 
-  <input type="text" id="mobile" placeholder="Enter Mobile Number">
-  <input type="password" id="password" placeholder="Enter Password">
+  <input type="text" id="mobile" placeholder="Mobile Number">
+  <input type="password" id="password" placeholder="Password">
 
   <button onclick="login()">Login</button>
 
@@ -73,20 +68,46 @@
 </div>
 
 <script>
+
+// 🔥 10 DEMO USERS
+const demoUsers = [
+  {mobile:"9000000001", password:"1111"},
+  {mobile:"9000000002", password:"2222"},
+  {mobile:"9000000003", password:"3333"},
+  {mobile:"9000000004", password:"4444"},
+  {mobile:"9000000005", password:"5555"},
+  {mobile:"9000000006", password:"6666"},
+  {mobile:"9000000007", password:"7777"},
+  {mobile:"9000000008", password:"8888"},
+  {mobile:"9000000009", password:"9999"},
+  {mobile:"9000000010", password:"1010"}
+];
+
 function login() {
-  let mobile = document.getElementById("mobile").value;
-  let password = document.getElementById("password").value;
 
-  let savedMobile = localStorage.getItem("mobile");
-  let savedPassword = localStorage.getItem("password");
+  let mobile = document.getElementById("mobile").value.trim();
+  let password = document.getElementById("password").value.trim();
 
-  if(mobile === savedMobile && password === savedPassword){
-    alert("Login Success");
+  // 🔥 signup users
+  let savedUsers = JSON.parse(localStorage.getItem("users")) || [];
+
+  // merge
+  let allUsers = demoUsers.concat(savedUsers);
+
+  let user = allUsers.find(u => u.mobile === mobile && u.password === password);
+
+  if(user){
+    alert("Login Success ✅");
+
+    localStorage.setItem("loginUser", mobile);
+
     window.location.href = "home.html";
+
   } else {
-    alert("Wrong Mobile or Password");
+    alert("Wrong Mobile or Password ❌");
   }
 }
+
 </script>
 
 </body>
