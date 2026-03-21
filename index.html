@@ -1,74 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login</title>
-
-<style>
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #f2f2f2;
-    font-family: Arial;
-}
-
-.box {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px gray;
-    text-align: center;
-}
-
-input {
-    width: 200px;
-    padding: 8px;
-    margin: 5px;
-}
-
-button {
-    padding: 8px 15px;
-    margin: 5px;
-    cursor: pointer;
-}
-</style>
-
+  <title>Login</title>
 </head>
-
 <body>
 
-<div class="box">
-    <h2>Login</h2>
+<h2>Login</h2>
 
-    <input type="text" id="mobile" placeholder="Mobile"><br>
-    <input type="password" id="password" placeholder="Password"><br>
+<input type="text" id="mobile" placeholder="Mobile"><br><br>
+<input type="password" id="password" placeholder="Password"><br><br>
 
-    <button onclick="login()">Login</button>
-    <br>
-    <button onclick="window.location.href='signup.html'">Signup</button>
-</div>
+<button onclick="login()">Login</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
-function login() {
-    var mobile = document.getElementById("mobile").value;
-    var password = document.getElementById("password").value;
+const supabase = supabase.createClient(
+  "YOUR_SUPABASE_URL",
+  "YOUR_ANON_KEY"
+);
 
-    var url = "https://script.google.com/macros/s/AKfycbwohLCKUO_AZaKa530gZ1AN6n_J9lJmQWzZ_ISmFIHVzo4KtpEAg5Halb8i3q7qu-Ob/exec"
-    + "?mobile=" + mobile + "&password=" + password;
+async function login() {
+  let mobile = document.getElementById("mobile").value;
+  let password = document.getElementById("password").value;
 
-    fetch(url)
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "success") {
-            alert("Login Success ✅ Balance: " + data.balance);
-            localStorage.setItem("mobile", mobile);
-            localStorage.setItem("balance", data.balance);
-            window.location.href = "home.html";
-        } else {
-            alert("Wrong Mobile or Password ❌");
-        }
-    });
+  let { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("mobile", mobile)
+    .eq("password", password);
+
+  if (data.length > 0) {
+    alert("Login Success ✅");
+
+    // save mobile locally
+    localStorage.setItem("mobile", mobile);
+
+    // redirect
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Wrong details ❌");
+  }
 }
 </script>
 
