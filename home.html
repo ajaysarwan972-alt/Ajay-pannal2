@@ -1,53 +1,154 @@
-<h2 id="user"></h2>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
 
-<h3>Balance: ₹<span id="balance">0</span></h3>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #f2f2f2;
+    }
 
-<button onclick="playGame()">Play Game (₹50)</button>
+    /* 🔥 TOP WALLET */
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: black;
+      color: white;
+      padding: 15px;
+    }
+
+    .wallet {
+      background: red;
+      padding: 8px 15px;
+      border-radius: 20px;
+    }
+
+    /* 🎮 GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .box {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    .box:hover {
+      background: #e6ffe6;
+    }
+
+    .title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .time {
+      color: gray;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 🔝 TOP BAR -->
+<div class="top">
+  <div id="user">User</div>
+  <div class="wallet">₹ <span id="balance">0</span></div>
+</div>
+
+<!-- 🎮 GAME BOXES -->
+<div class="grid">
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 1</div>
+    <div class="time">10:00 AM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 2</div>
+    <div class="time">11:00 AM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 3</div>
+    <div class="time">12:00 PM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 4</div>
+    <div class="time">01:00 PM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 5</div>
+    <div class="time">02:00 PM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 6</div>
+    <div class="time">03:00 PM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 7</div>
+    <div class="time">04:00 PM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 8</div>
+    <div class="time">05:00 PM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 9</div>
+    <div class="time">06:00 PM</div>
+  </div>
+
+  <div class="box" onclick="openGame()">
+    <div class="title">Game 10</div>
+    <div class="time">07:00 PM</div>
+  </div>
+
+</div>
 
 <script>
+// 🔐 user check
 const mobile = localStorage.getItem("mobile");
 
 if (!mobile) {
   window.location.href = "index.html";
 }
 
-// show user
-document.getElementById("user").innerText = "User: " + mobile;
+document.getElementById("user").innerText = mobile;
 
-// balance key
-const balanceKey = "balance_" + mobile;
-
-// get balance
-let balance = localStorage.getItem(balanceKey);
+// 💰 balance
+let key = "balance_" + mobile;
+let balance = localStorage.getItem(key);
 
 if (!balance) {
-  balance = 0;
-  localStorage.setItem(balanceKey, balance);
+  balance = 1000;
+  localStorage.setItem(key, balance);
 }
 
-balance = parseInt(balance);
-
-// show balance
 document.getElementById("balance").innerText = balance;
 
 
-// 🎮 GAME FUNCTION
-function playGame() {
-  let gameCost = 50;
-
-  if (balance >= gameCost) {
-    balance = balance - gameCost;
-
-    localStorage.setItem(balanceKey, balance);
-    document.getElementById("balance").innerText = balance;
-
-    alert("Game Started 🎮\n₹50 deducted");
-
-    // 👉 yaha game page pe bhej sakta hai
-    // window.location.href = "game.html";
-
-  } else {
-    alert("Insufficient Balance ❌");
-  }
+// 🎮 open game
+function openGame() {
+  window.location.href = "game.html";
 }
 </script>
+
+</body>
+</html>
