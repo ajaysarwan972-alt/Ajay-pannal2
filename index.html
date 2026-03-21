@@ -1,92 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Login</title>
-
-  <!-- ✅ SUPABASE SCRIPT (IMPORTANT) -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      font-family: Arial;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #f2f2f2;
-    }
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background: blue;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="box">
-  <h2>Login</h2>
-
-  <input type="text" id="mobile" placeholder="Mobile Number">
-  <input type="password" id="password" placeholder="Password">
-
-  <button onclick="login()">Login</button>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://kvvmkddbkgrtiiuswikt.supabase.co";
+const supabaseUrl = "https://kvvmkddbkgtriiuswxyz.supabase.co"; // apna exact URL dal
 const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 async function login() {
-  alert("Button clicked ✅"); // 👉 ye batayega button chal raha hai
+    const mobile = document.getElementById("mobile").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-  const mobile = document.getElementById("mobile").value.trim();
-  const password = document.getElementById("password").value.trim();
+    if (!mobile || !password) {
+        alert("Enter mobile & password");
+        return;
+    }
 
-  if (!mobile || !password) {
-    alert("Enter mobile & password");
-    return;
-  }
+    try {
+        const { data, error } = await supabaseClient
+            .from("Wallet")
+            .select("*")
+            .eq("Mobile number", mobile)
+            .eq("Password", password)
+            .single();
 
-  const { data, error } = await supabaseClient
-    .from("Wallet")
-    .select("*")
-    .eq("Mobile number", mobile)
-    .eq("Password", password);
-
-  if (error) {
-    alert("Error: " + error.message);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    alert("Login failed ❌");
-  } else {
-    alert("Login success ✅");
-    localStorage.setItem("mobile", mobile);
-    localStorage.setItem("user", JSON.stringify(data[0]));
-    window.location.href = "home.html";
-  }
+        if (error || !data) {
+            alert("Login failed ❌");
+        } else {
+            alert("Login success ✅");
+            localStorage.setItem("user", JSON.stringify(data));
+            window.location.href = "home.html";
+        }
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
 }
 </script>
-
-</body>
-</html>
