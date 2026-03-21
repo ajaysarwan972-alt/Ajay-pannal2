@@ -1,110 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
-
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <title>Login Test</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial;
-      background: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      background:#eee;
+      font-family:Arial;
     }
-
     .box {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      background:#fff;
+      padding:20px;
+      border-radius:10px;
+      width:300px;
+      text-align:center;
     }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
+    input, button {
+      width:100%;
+      padding:10px;
+      margin:10px 0;
     }
-
     button {
-      width: 100%;
-      padding: 10px;
-      background: green;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    a {
-      display: block;
-      margin-top: 10px;
+      background:green;
+      color:white;
+      border:none;
     }
   </style>
 </head>
-
 <body>
 
 <div class="box">
   <h2>Login</h2>
 
-  <input type="text" id="mobile" placeholder="Mobile Number">
+  <input type="text" id="mobile" placeholder="Mobile">
   <input type="password" id="password" placeholder="Password">
 
   <button onclick="login()">Login</button>
-
-  <a href="signup.html">Create Account (Signup)</a>
 </div>
 
 <script>
-const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
-const supabaseKey = "sb_publishable_--fdpQMmS1Uyt2ywjUErgQ_LXGvQH-a";
+function login() {
+  const mobile = document.getElementById("mobile").value;
+  const password = document.getElementById("password").value;
 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-async function login() {
-  const mobile = document.getElementById("mobile").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!mobile || !password) {
-    alert("Fill all fields ❌");
-    return;
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("mobile", mobile)
-      .single();
-
-    console.log(data, error); // debug
-
-    if (error || !data) {
-      alert("User not found ❌");
-      return;
-    }
-
-    if (data.password == password) {
-      alert("Login Success ✅");
-
-      localStorage.setItem("mobile", mobile);
-
-      window.location.href = "home.html";
-
-    } else {
-      alert("Wrong password ❌");
-    }
-
-  } catch (err) {
-    alert("Network error ❌");
+  // 👇 hardcoded test
+  if (mobile === "8901239533" && password === "123456") {
+    alert("Login Success ✅");
+    window.location.href = "home.html";
+  } else {
+    alert("Wrong login ❌");
   }
 }
 </script>
