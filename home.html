@@ -1,227 +1,197 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+<title>Dashboard</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-    }
+<style>
+body {
+margin: 0;
+font-family: Arial;
+background: linear-gradient(135deg, #667eea, #764ba2);
+}
 
-    /* 🔷 TOP BAR */
-    .topbar {
-      width: 100%;
-      background: #0ea5e9;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 15px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      box-sizing: border-box;
-    }
+/* TOP BAR */
+.topbar {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+background: #0ea5e9;
+display: flex;
+justify-content: space-between;
+padding: 10px;
+z-index: 999;
+}
 
-    .menu {
-      font-size: 22px;
-      color: white;
-    }
+.userid {
+background: green;
+color: #fff;
+padding: 5px 10px;
+border-radius: 8px;
+}
 
-    .userid {
-      background: green;
-      color: white;
-      padding: 6px 15px;
-      border-radius: 10px;
-      font-weight: bold;
-    }
+.balancebox {
+background: red;
+color: #fff;
+padding: 5px 10px;
+border-radius: 8px;
+}
 
-    .balancebox {
-      background: red;
-      color: white;
-      padding: 6px 15px;
-      border-radius: 10px;
-      font-weight: bold;
-    }
+/* CARD */
+.container {
+margin-top: 70px;
+margin-bottom: 80px;
+display: flex;
+justify-content: center;
+}
 
-    /* 🔷 CARD */
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+.card {
+background: #fff;
+padding: 20px;
+border-radius: 15px;
+width: 300px;
+text-align: center;
+}
 
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      width: 280px;
-      text-align: center;
-      box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
-      margin-top: 60px;
-    }
+.balance {
+color: green;
+font-weight: bold;
+}
 
-    h2 {
-      margin-bottom: 15px;
-    }
-
-    .info {
-      font-size: 15px;
-      margin: 8px 0;
-    }
-
-    .balance {
-      font-size: 22px;
-      font-weight: bold;
-      color: green;
-    }
-
-    .btn {
-      margin-top: 15px;
-      padding: 10px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      background: #667eea;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background: #556cd6;
-    }
-    .grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 10px;
+/* GRID */
+.grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin-top: 10px;
 }
 
 .box {
-  background: #fff;
-  border: 2px solid green;
-  border-radius: 15px;
-  padding: 15px;
-  text-align: center;
-  font-weight: bold;
+background: #fff;
+border: 2px solid green;
+border-radius: 10px;
+padding: 10px;
+font-weight: bold;
 }
 
 .box span {
-  color: red;
-  font-size: 20px;
+color: red;
+font-size: 18px;
 }
 
 .box p {
-  color: blue;
-  font-size: 14px;
-}
-    .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #fff;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-top: 1px solid #ccc;
+color: blue;
+font-size: 12px;
 }
 
-.bottom-nav div {
-  text-align: center;
-  font-size: 14px;
-  }
-  </style>
+/* BUTTON */
+.btn {
+margin-top: 10px;
+padding: 10px;
+width: 100%;
+background: #667eea;
+color: #fff;
+border: none;
+border-radius: 8px;
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+background: #fff;
+display: flex;
+justify-content: space-around;
+padding: 10px;
+border-top: 1px solid #ccc;
+z-index: 999;
+}
+</style>
 </head>
 
 <body>
 
-<!-- 🔷 TOP BAR -->
+<!-- TOP BAR -->
 <div class="topbar">
-  <div class="menu">☰</div>
-
-  <div class="userid">
-    ID: <span id="userid"></span>
-  </div>
-
-  <div class="balancebox">
-    ₹ <span id="topbalance"></span>
-  </div>
+<div class="userid" id="userid"></div>
+<div class="balancebox">₹<span id="topbalance"></span></div>
 </div>
 
-<!-- 🔷 CENTER CARD -->
+<!-- CARD -->
 <div class="container">
-  <div class="card">
-    <h2>Welcome 👋</h2>
+<div class="card">
 
-    <div class="info">📱 Mobile: <span id="mobile"></span></div>
-    <div class="info balance">💰 Balance: ₹<span id="balance"></span></div>
+<h2>Welcome 👋</h2>
 
-    <button class="btn" onclick="logout()">Logout</button>
-    <div class="grid">
+<p>Mobile: <span id="mobile"></span></p>
+<p class="balance">Balance: ₹<span id="balance"></span></p>
 
-  <div class="box">DISAWAR<br><span>16</span><p>6:00 am - 4:00 am</p></div>
-  <div class="box">DISAWAR BAZAR<br><span>62</span><p>6:00 am - 4:30 am</p></div>
+<button class="btn" onclick="logout()">Logout</button>
 
-  <div class="box">DELHI BAZAR<br><span>**</span><p>6:00 am - 2:45 pm</p></div>
-  <div class="box">TAJ<br><span>**</span><p>6:00 am - 3:00 pm</p></div>
-
-  <div class="box">SHRI GANESH<br><span>**</span><p>6:00 am - 4:10 pm</p></div>
-  <div class="box">FARIDABAD<br><span>**</span><p>6:00 am - 5:45 pm</p></div>
-
-  <div class="box">FARIDABAD VIP<br><span>**</span><p>6:00 am - 8:00 pm</p></div>
-  <div class="box">GHAZIABAD<br><span>**</span><p>6:00 am - 8:45 pm</p></div>
-
-  <div class="box">GHAZIABAD CITY<br><span>**</span><p>6:00 am - 10:45 pm</p></div>
-  <div class="box">GALI GOLD<br><span>**</span><p>6:00 am - 11:40 pm</p></div>
-
-</div>
-  </div>
+<div class="grid">
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
 </div>
 
-<!-- 🔷 SCRIPT -->
+</div>
+</div>
+
+<!-- SCRIPT -->
 <script>
-  const user = JSON.parse(localStorage.getItem("user"));
+const user = JSON.parse(localStorage.getItem("user"));
 
-  if(user){
-    document.getElementById("mobile").innerText = user.mobile;
-    document.getElementById("balance").innerText = user.balance || 0;
+if(user){
+
+document.getElementById("mobile").innerText = user.mobile;
+document.getElementById("balance").innerText = user.balance || 0;
+document.getElementById("userid").innerText = "ID: " + user.mobile;
+document.getElementById("topbalance").innerText = user.balance || 0;
+
 fetch("https://script.google.com/macros/s/AKfycbyiNv6QJCOobWdJDfOE9hpLhAy4OHxA1uAlpsat9aXTkMKpslLODNtxLttbwQr9IAejpQ/exec")
-  .then(res => res.json())
-  .then(data => {
-    const boxes = document.querySelectorAll(".box");
+.then(res => res.json())
+.then(data => {
 
-    data.forEach((item, index) => {
-      if (boxes[index]) {
-        boxes[index].innerHTML = `
-          ${item.name}<br>
-          <span>${item.number}</span>
-          <p>${item.time}</p>
-        `;
-      }
-    });
-  });
-    
-    // TOP BAR
-    document.getElementById("userid").innerText = user.mobile;
-    document.getElementById("topbalance").innerText = user.balance || 0;
+const boxes = document.querySelectorAll(".box");
 
-  } else {
-    alert("Login first!");
-    window.location.href = "index.html";
-  }
+data.forEach((item, index) => {
+if(boxes[index]){
+boxes[index].innerHTML = `
+${item.name}<br>
+<span>${item.number}</span>
+<p>${item.time}</p>
+`;
+}
+});
 
-  function logout(){
-    localStorage.removeItem("user");
-    window.location.href = "index.html";
-  }
+});
+
+}else{
+alert("Login first!");
+window.location.href = "index.html";
+}
+
+function logout(){
+localStorage.removeItem("user");
+window.location.href = "index.html";
+}
 </script>
+
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <div>🏠 Home</div>
-  <div>💰 Wallet</div>
-  <div>👤 Profile</div>
+<div>🏠 Home</div>
+<div>💰 Wallet</div>
+<div>👤 Profile</div>
 </div>
+
 </body>
 </html>
