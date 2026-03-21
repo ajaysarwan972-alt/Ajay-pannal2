@@ -59,20 +59,19 @@
   <input type="text" id="mobile" placeholder="Mobile Number">
   <input type="password" id="password" placeholder="Password">
 
-  <button id="loginBtn">Login</button>
+  <button onclick="login()">Login</button>
 
   <a href="signup.html">Create Account (Signup)</a>
 </div>
 
+<!-- SUPABASE SCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = window.supabase.createClient(
-  "https://katbdbzoufiblnnsoxkk.supabase.co",
-  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
-);
+const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const supabaseKey = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
 
-document.getElementById("loginBtn").addEventListener("click", login);
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 async function login() {
   const mobile = document.getElementById("mobile").value.trim();
@@ -83,25 +82,22 @@ async function login() {
     return;
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("Wallet")
-      .select("*")
-      .eq("Moble number", mobile)
-      .eq("Pasword", password);
+  const { data, error } = await supabase
+    .from("Wallet")
+    .select("*")
+    .eq("Moble number", mobile)
+    .eq("Pasword", password);
 
-    if (error) throw error;
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
-    if (data.length > 0) {
-      localStorage.setItem("user", mobile);
-      alert("Login Success ✅");
-      window.location.href = "home.html";
-    } else {
-      alert("Wrong Mobile or Password ❌");
-    }
-
-  } catch (err) {
-    alert("Error: " + err.message);
+  if (data.length > 0) {
+    localStorage.setItem("user", mobile);
+    window.location.href = "home.html";
+  } else {
+    alert("Wrong Mobile or Password");
   }
 }
 </script>
