@@ -98,6 +98,7 @@ async function login() {
     alert("Login failed ❌");
   } else {
     alert("Login success ✅");
+    localStorage.setItem("mobile", mobile);
     localStorage.setItem("user", JSON.stringify(data));
     window.location.href = "home.html";
   }
