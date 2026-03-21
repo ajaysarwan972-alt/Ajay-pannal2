@@ -1,123 +1,81 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .login-box {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 350px;
-      text-align: center;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #0d6efd;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    .signup {
-      margin-top: 15px;
-      color: blue;
-      cursor: pointer;
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="login-box">
-  <h2>Login</h2>
-
-  <input type="text" id="mobile" placeholder="Mobile Number">
-  <input type="password" id="password" placeholder="Password">
-
-  <button onclick="login()">Login</button>
-
-  <div class="signup" onclick="window.location.href='signup.html'">
-    Create Account (Signup)
-  </div>
-</div>
-
-<script>
-
-// 🔥 PAGE LOAD CHECK (cache fix)
-console.log("NEW LOGIN CODE LOADED");
-
-// 🔥 DEMO USERS
-const demoUsers = [
-  {mobile:"8901239533", password:"1111"}, // main
-  {mobile:"9000000001", password:"1111"},
-  {mobile:"9000000002", password:"2222"},
-  {mobile:"9000000003", password:"3333"},
-  {mobile:"9000000004", password:"4444"},
-  {mobile:"9000000005", password:"5555"},
-  {mobile:"9000000006", password:"6666"},
-  {mobile:"9000000007", password:"7777"},
-  {mobile:"9000000008", password:"8888"},
-  {mobile:"9000000009", password:"9999"},
-  {mobile:"9000000010", password:"1010"}
-];
-
-function login() {
-
-  let mobile = document.getElementById("mobile").value.trim();
-  let password = document.getElementById("password").value.trim();
-
-  // 🔥 DIRECT CHECK (failsafe)
-  if(mobile === "8901239533" && password === "1111"){
-    alert("Login Success ✅");
-    localStorage.setItem("loginUser", mobile);
-    window.location.href = "home.html";
-    return;
-  }
-
-  // signup users
-  let savedUsers = JSON.parse(localStorage.getItem("users")) || [];
-
-  // combine
-  let allUsers = demoUsers.concat(savedUsers);
-
-  let user = allUsers.find(u => u.mobile === mobile && u.password === password);
-
-  if(user){
-    alert("Login Success ✅");
-    localStorage.setItem("loginUser", mobile);
-    window.location.href = "home.html";
-  } else {
-    alert("Wrong Mobile or Password ❌");
-  }
+<style>
+.container{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+padding:10px;
 }
 
-</script>
+.game-box{
+background:#f5f5f5;
+border-radius:20px;
+padding:20px;
+text-align:center;
+border:3px solid #00c853;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
 
-</body>
-</html>
+.game-name{
+font-size:20px;
+font-weight:bold;
+}
+
+.result{
+font-size:28px;
+color:red;
+margin:10px 0;
+}
+
+.time{
+color:#1565c0;
+font-weight:bold;
+}
+
+.status{
+margin-top:10px;
+font-size:14px;
+font-weight:bold;
+}
+
+.open{
+color:green;
+}
+
+.closed{
+color:red;
+border:3px solid red;
+}
+</style>
+
+
+<div class="container">
+
+<div class="game-box">
+<div class="game-name">DISAWAR</div>
+<div class="result">16</div>
+<div class="time">6:00 am - 4:00 am</div>
+<div class="status open">OPEN</div>
+</div>
+
+<div class="game-box">
+<div class="game-name">DISAWAR BAZAR</div>
+<div class="result">62</div>
+<div class="time">6:00 am - 4:30 am</div>
+<div class="status open">OPEN</div>
+</div>
+
+<div class="game-box closed">
+<div class="game-name">DELHI BAZAR</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 2:45 pm</div>
+<div class="status closed">CLOSED</div>
+</div>
+
+<div class="game-box closed">
+<div class="game-name">TAJ</div>
+<div class="result">**</div>
+<div class="time">6:00 am - 3:00 pm</div>
+<div class="status closed">CLOSED</div>
+</div>
+
+</div>
