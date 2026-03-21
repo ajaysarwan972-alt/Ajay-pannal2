@@ -120,13 +120,13 @@ async function loadBoxes() {
   container.innerHTML = "";
 
   data.forEach(item => {
-    let box = `
-      <div class="card">
-        <h3>${item.name}</h3>
-        <div class="number">${item.number || ""}</div>
-        <div class="time">${item.open || ""} - ${item.close || ""}</div>
-      </div>
-    `;
+  let box = `
+  <div class="card">
+    <h3>${item.name}</h3>
+    <div class="number">${item.number || ""}</div>
+    <div class="time">${item.open || ""} - ${item.close || ""}</div>
+  </div>
+`;
     container.innerHTML += box;
   });
 }
