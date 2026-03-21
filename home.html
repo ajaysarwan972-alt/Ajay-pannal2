@@ -108,20 +108,13 @@ if (!mobile) {
   window.location.href = "index.html";
   return;
 }
-async function loadUser() {
-  const { data } = await supabaseClient
-    .from("users")
-    .select("*")
-    .eq("mobile", mobile)
-    .single();
 
-  if (data) {
-  document.getElementById("userId").innerText = "ID: " + data.id;
-  document.getElementById("balance").innerText = "₹" + (data.balance || 0);
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(user){
+  document.getElementById("userId").innerText = "ID: " + user.id;
+  document.getElementById("balance").innerText = "₹" + user.balance;
 }
-
-loadUser();
-
 /* ---------------- GOOGLE SHEET ---------------- */
 async function loadBoxes() {
   let res = await fetch("https://script.google.com/macros/s/AKfycbzy6pX71_p37zPNGXebpuOd_2SbDPBCZuU_lntTV5ytYisjwVAocbJHbstjWGistJKZoA/exec");
