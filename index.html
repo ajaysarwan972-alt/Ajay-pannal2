@@ -1,37 +1,105 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: blue;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .signup {
+      margin-top: 10px;
+      color: blue;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Login</h2>
+
+  <input type="text" id="mobile" placeholder="Enter Mobile">
+  <input type="password" id="password" placeholder="Enter Password">
+
+  <button onclick="login()">Login</button>
+
+  <div class="signup" onclick="goSignup()">Create Account (Signup)</div>
+</div>
 
 <script>
-const supabaseUrl = "https://kvvmkddbkgtriiuswxyz.supabase.co"; // apna exact URL dal
+const supabaseUrl = "PASTE_YOUR_REAL_URL_HERE";
 const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+// LOGIN FUNCTION
 async function login() {
-    const mobile = document.getElementById("mobile").value.trim();
-    const password = document.getElementById("password").value.trim();
+  const mobile = document.getElementById("mobile").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-    if (!mobile || !password) {
-        alert("Enter mobile & password");
-        return;
+  if (!mobile || !password) {
+    alert("Enter mobile & password");
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("Wallet")
+      .select("*")
+      .eq("Mobile number", mobile)
+      .eq("Password", password)
+      .single();
+
+    if (error || !data) {
+      alert("Login failed ❌");
+    } else {
+      alert("Login success ✅");
+
+      // data save
+      localStorage.setItem("user", JSON.stringify(data));
+
+      // redirect to home
+      window.location.href = "home.html";
     }
 
-    try {
-        const { data, error } = await supabaseClient
-            .from("Wallet")
-            .select("*")
-            .eq("Mobile number", mobile)
-            .eq("Password", password)
-            .single();
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+}
 
-        if (error || !data) {
-            alert("Login failed ❌");
-        } else {
-            alert("Login success ✅");
-            localStorage.setItem("user", JSON.stringify(data));
-            window.location.href = "home.html";
-        }
-    } catch (err) {
-        alert("Error: " + err.message);
-    }
+// SIGNUP PAGE
+function goSignup() {
+  window.location.href = "signup.html";
 }
 </script>
+
+</body>
+</html>
