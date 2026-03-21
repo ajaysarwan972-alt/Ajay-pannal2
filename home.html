@@ -63,18 +63,15 @@ body {
 
 <body>
 
-<!-- TOP -->
 <div class="topbar">
-  <div class="idbox" id="userId">ID: 1</div>
-  <div class="balancebox" id="balance">₹100</div>
+  <div class="idbox">ID: 1</div>
+  <div class="balancebox">₹100</div>
 </div>
 
-<!-- BOX AREA -->
 <div class="grid" id="boxContainer">
   Loading...
 </div>
 
-<!-- BOTTOM -->
 <div class="bottom">
   <div class="btn">Home</div>
   <div class="btn">Wallet</div>
@@ -86,15 +83,12 @@ body {
 async function loadBoxes() {
   try {
     let res = await fetch("https://script.google.com/macros/s/AKfycbzVuAQurUrZRFHUF_wpk3NYQjrm0eBBP9k3rct8ZpX0MWZ6pr7bnCvz6Jq-zxyTaM0GpA/exec");
-    let data = await res.json();
+
+    let text = await res.text();   // 🔥 IMPORTANT FIX
+    let data = JSON.parse(text);
 
     let container = document.getElementById("boxContainer");
     container.innerHTML = "";
-
-    if (!data || data.length === 0) {
-      container.innerHTML = "No Data Found";
-      return;
-    }
 
     data.forEach(item => {
       let box = `
