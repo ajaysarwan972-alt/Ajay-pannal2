@@ -8,28 +8,68 @@
       margin: 0;
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
-      height: 100vh;
+    }
+
+    /* 🔷 TOP BAR */
+    .topbar {
+      width: 100%;
+      background: #0ea5e9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-sizing: border-box;
+    }
+
+    .menu {
+      font-size: 22px;
+      color: white;
+    }
+
+    .userid {
+      background: green;
+      color: white;
+      padding: 6px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .balancebox {
+      background: red;
+      color: white;
+      padding: 6px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    /* 🔷 CARD */
+    .container {
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
     }
 
     .card {
       background: white;
       padding: 25px;
       border-radius: 15px;
-      width: 300px;
+      width: 280px;
       text-align: center;
       box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
+      margin-top: 60px;
     }
 
     h2 {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .info {
-      font-size: 16px;
-      margin: 10px 0;
+      font-size: 15px;
+      margin: 8px 0;
     }
 
     .balance {
@@ -39,7 +79,7 @@
     }
 
     .btn {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 10px;
       width: 100%;
       border: none;
@@ -51,29 +91,50 @@
     }
 
     .btn:hover {
-      background: #5a67d8;
+      background: #556cd6;
     }
   </style>
-
 </head>
 
 <body>
 
-<div class="card">
-  <h2>Welcome 👋</h2>
+<!-- 🔷 TOP BAR -->
+<div class="topbar">
+  <div class="menu">☰</div>
 
-  <div class="info">📱 Mobile: <span id="mobile"></span></div>
-  <div class="info balance">💰 Balance: ₹<span id="balance"></span></div>
+  <div class="userid">
+    ID: <span id="userid"></span>
+  </div>
 
-  <button class="btn" onclick="logout()">Logout</button>
+  <div class="balancebox">
+    ₹ <span id="topbalance"></span>
+  </div>
 </div>
 
+<!-- 🔷 CENTER CARD -->
+<div class="container">
+  <div class="card">
+    <h2>Welcome 👋</h2>
+
+    <div class="info">📱 Mobile: <span id="mobile"></span></div>
+    <div class="info balance">💰 Balance: ₹<span id="balance"></span></div>
+
+    <button class="btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- 🔷 SCRIPT -->
 <script>
   const user = JSON.parse(localStorage.getItem("user"));
 
   if(user){
     document.getElementById("mobile").innerText = user.mobile;
     document.getElementById("balance").innerText = user.balance || 0;
+
+    // TOP BAR
+    document.getElementById("userid").innerText = user.mobile;
+    document.getElementById("topbalance").innerText = user.balance || 0;
+
   } else {
     alert("Login first!");
     window.location.href = "index.html";
@@ -86,15 +147,4 @@
 </script>
 
 </body>
-  <div class="topbar">
-  <div class="menu">☰</div>
-
-  <div class="userid">
-    ID: <span id="userid"></span>
-  </div>
-
-  <div class="balancebox">
-    ₹ <span id="topbalance"></span>
-  </div>
-</div>
 </html>
