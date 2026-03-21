@@ -93,6 +93,46 @@
     .btn:hover {
       background: #556cd6;
     }
+    .grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 10px;
+}
+
+.box {
+  background: #fff;
+  border: 2px solid green;
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.box span {
+  color: red;
+  font-size: 20px;
+}
+
+.box p {
+  color: blue;
+  font-size: 14px;
+}
+    .bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #ccc;
+}
+
+.bottom-nav div {
+  text-align: center;
+  font-size: 14px;
+  }
   </style>
 </head>
 
@@ -149,6 +189,7 @@
     document.getElementById("mobile").innerText = user.mobile;
     document.getElementById("balance").innerText = user.balance || 0;
 
+    
     // TOP BAR
     document.getElementById("userid").innerText = user.mobile;
     document.getElementById("topbalance").innerText = user.balance || 0;
@@ -163,6 +204,10 @@
     window.location.href = "index.html";
   }
 </script>
-
+<div class="bottom-nav">
+  <div>🏠 Home</div>
+  <div>💰 Wallet</div>
+  <div>👤 Profile</div>
+</div>
 </body>
 </html>
