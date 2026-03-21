@@ -188,7 +188,7 @@
   if(user){
     document.getElementById("mobile").innerText = user.mobile;
     document.getElementById("balance").innerText = user.balance || 0;
-fetch("https://script.google.com/macros/s/AKfycbw8k46w6XaPL0RR8KeHH1fzMLQj5aVHo7_qWJfQ0YX0IUWPDdbic2agmhlPC5bwiuJ7/exec")
+fetch("https://script.google.com/macros/s/AKfycbyiNv6QJCOobWdJDfOE9hpLhAy4OHxA1uAlpsat9aXTkMKpslLODNtxLttbwQr9IAejpQ/exec")
   .then(res => res.json())
   .then(data => {
     const boxes = document.querySelectorAll(".box");
