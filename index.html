@@ -1,14 +1,77 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f0f0f0;
+    }
+
+    .box {
+      width: 300px;
+      margin: 100px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+    }
+
+    a {
+      display: block;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
 <body>
 
-<h1>TEST</h1>
+<div class="box">
+  <h2>Login</h2>
 
-<button onclick="test()">Click Me</button>
+  <input type="text" id="mobile" placeholder="Mobile Number">
+  <input type="password" id="password" placeholder="Password">
+
+  <button onclick="login()">Login</button>
+
+  <!-- Signup Button -->
+  <a href="signup.html">Create Account (Signup)</a>
+</div>
 
 <script>
-function test() {
-  alert("Working ✅");
+function login() {
+  var mobile = document.getElementById("mobile").value;
+  var password = document.getElementById("password").value;
+
+  if(mobile === "" || password === "") {
+    alert("Fill all fields");
+    return;
+  }
+
+  // TEMP LOGIN (abhi test ke liye)
+  if(mobile === "8901239533" && password === "1234") {
+    alert("Login Success ✅");
+
+    // Save user
+    localStorage.setItem("user", mobile);
+
+    // Redirect to home
+    window.location.href = "home.html";
+  } else {
+    alert("Wrong login ❌");
+  }
 }
 </script>
 
