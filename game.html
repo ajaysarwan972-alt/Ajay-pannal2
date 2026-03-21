@@ -150,6 +150,17 @@ function submitGame() {
 }
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
+<script>
+
+const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
+
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+console.log("Supabase Connected ✅");
+
+</script>
 </body>
 </html>
