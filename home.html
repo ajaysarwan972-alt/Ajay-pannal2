@@ -1,81 +1,61 @@
-<style>
-.container{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:15px;
-padding:10px;
-}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.game-box{
-background:#f5f5f5;
-border-radius:20px;
-padding:20px;
-text-align:center;
-border:3px solid #00c853;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #f2f2f2;
+    }
 
-.game-name{
-font-size:20px;
-font-weight:bold;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      padding: 15px;
+    }
 
-.result{
-font-size:28px;
-color:red;
-margin:10px 0;
-}
+    .box {
+      background: #eee;
+      border-radius: 15px;
+      padding: 40px 10px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border: 3px solid green;
+    }
 
-.time{
-color:#1565c0;
-font-weight:bold;
-}
+    a {
+      text-decoration: none;
+      color: black;
+    }
+  </style>
+</head>
 
-.status{
-margin-top:10px;
-font-size:14px;
-font-weight:bold;
-}
+<body>
 
-.open{
-color:green;
-}
+<div class="grid">
 
-.closed{
-color:red;
-border:3px solid red;
-}
-</style>
+  <a href="game.html"><div class="box">Game 1</div></a>
+  <a href="game.html"><div class="box">Game 2</div></a>
 
+  <a href="game.html"><div class="box">Game 3</div></a>
+  <a href="game.html"><div class="box">Game 4</div></a>
 
-<div class="container">
+  <a href="game.html"><div class="box">Game 5</div></a>
+  <a href="game.html"><div class="box">Game 6</div></a>
 
-<div class="game-box">
-<div class="game-name">DISAWAR</div>
-<div class="result">16</div>
-<div class="time">6:00 am - 4:00 am</div>
-<div class="status open">OPEN</div>
-</div>
+  <a href="game.html"><div class="box">Game 7</div></a>
+  <a href="game.html"><div class="box">Game 8</div></a>
 
-<div class="game-box">
-<div class="game-name">DISAWAR BAZAR</div>
-<div class="result">62</div>
-<div class="time">6:00 am - 4:30 am</div>
-<div class="status open">OPEN</div>
-</div>
-
-<div class="game-box closed">
-<div class="game-name">DELHI BAZAR</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 2:45 pm</div>
-<div class="status closed">CLOSED</div>
-</div>
-
-<div class="game-box closed">
-<div class="game-name">TAJ</div>
-<div class="result">**</div>
-<div class="time">6:00 am - 3:00 pm</div>
-<div class="status closed">CLOSED</div>
-</div>
+  <a href="game.html"><div class="box">Game 9</div></a>
+  <a href="game.html"><div class="box">Game 10</div></a>
 
 </div>
+
+</body>
+</html>
