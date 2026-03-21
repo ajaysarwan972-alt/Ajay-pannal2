@@ -77,6 +77,32 @@ function goSignup(){
   window.location.href = "signup.html";
 }
 </script>
+  <script>
+const supabaseUrl = "https://kvvmkddbkgrtiiuswikt.supabase.co"; // tera project URL
+const supabaseKey = "sb_publishable_vOQ4Re-oWkaZ5zDmc7vjmg_OdR0Dzck";
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function login() {
+  const mobile = document.getElementById("mobile").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("mobile", mobile)
+    .eq("password", password)
+    .single();
+
+  if (error || !data) {
+    alert("Login failed ❌");
+  } else {
+    alert("Login success ✅");
+    localStorage.setItem("user", JSON.stringify(data));
+    window.location.href = "home.html";
+  }
+}
+    </script>
 <script src="script.js"></script>
 </body>
 </html>
