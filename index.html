@@ -40,20 +40,17 @@ const password = document.getElementById("password").value.trim();
 
   let found = false;
 
-  console.log(data.results);
-  console.log("Entered:", mobile, password);
-
   data.results.forEach(user => {
-    console.log("DB:", user.mobile, user.password);
-    if(
-  user.mobile && user.mobile.toString().trim() === mobile.toString().trim() &&
-  user.password && user.password.toString().trim() === password.toString().trim()
-){
-      found = true;
-      localStorage.setItem("mobile", mobile);
-    }
-  });
 
+  if(
+    user.mobile == mobile &&
+    user.password == password
+  ){
+    found = true;
+    localStorage.setItem("mobile", mobile);
+  }
+
+});
   if(found){
     alert("Login Success ✅");
     window.location.href = "home.html";
