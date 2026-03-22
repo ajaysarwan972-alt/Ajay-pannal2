@@ -23,48 +23,38 @@ button{width:100%;padding:10px;background:#1565c0;color:white;border:none;border
 <a href="signup.html">Create Account</a>
 </div>
 
+
 <script>
+async function login() {
 
-const fixedUsers = [
-{mobile:"8901239533",password:"2222",balance:1000},
-{mobile:"7357871944",password:"1111",balance:1000},
-{mobile:"9000000001",password:"3333",balance:1000},
-{mobile:"9000000002",password:"4444",balance:1000},
-{mobile:"9000000003",password:"5555",balance:1000},
-{mobile:"9000000004",password:"6666",balance:1000},
-{mobile:"9000000005",password:"7777",balance:1000},
-{mobile:"9000000006",password:"8888",balance:1000},
-{mobile:"9000000007",password:"9999",balance:1000},
-{mobile:"9000000008",password:"1010",balance:1000}
-];
+  const mobile = document.getElementById("mobile").value;
+  const password = document.getElementById("password").value;
 
-function login(){
+  const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
+    headers: {
+      "Authorization": "Token 3S3iB1eHvIZwRS163mml32fuZhQ5heQf"
+    }
+  });
 
-let mobile=document.getElementById("mobile").value.trim();
-let password=document.getElementById("password").value.trim();
+  const data = await res.json();
 
-let users=JSON.parse(localStorage.getItem("users"))||[];
+  let found = false;
 
-let allUsers=fixedUsers.concat(users);
+  data.results.forEach(user => {
+    if(user.mobile == mobile && user.password == password){
+      found = true;
+      localStorage.setItem("mobile", mobile);
+    }
+  });
 
-let user=allUsers.find(u=>u.mobile==mobile && u.password==password);
+  if(found){
+    alert("Login Success ✅");
+    window.location.href = "home.html";
+  } else {
+    alert("Wrong Mobile or Password ❌");
+  }
 
-if(user){
-localStorage.setItem("loginUser",mobile);
-
-// save balance if new
-if(!localStorage.getItem("balance_"+mobile)){
-localStorage.setItem("balance_"+mobile,user.balance||1000);
 }
-
-alert("Login Success ✅");
-window.location.href="home.html";
-
-}else{
-alert("Wrong login ❌");
-}
-}
-
 </script>
 
 </body>
