@@ -93,7 +93,7 @@ if(!user){
 let params = new URLSearchParams(window.location.search);
 let gameName = params.get("game") || "DEFAULT";
 
-// CREATE BOXES
+// 🔥 CREATE BOXES
 let grid = document.getElementById("grid");
 
 for (let i = 0; i < 100; i++) {
@@ -110,7 +110,7 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// 🔥 TOTAL CALCULATION (same tera system)
+// 🔥 TOTAL CALCULATION
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
@@ -124,16 +124,20 @@ function calcTotal() {
     document.getElementById("total").innerText = "₹ " + total;
 }
 
-// 🔥 SUBMIT GAME (tera system + history add)
+// 🔥 SUBMIT GAME
 function submitGame(){
 
     let inputs = document.querySelectorAll("input");
     let bets = [];
+    let total = 0;
 
     inputs.forEach((input, index) => {
         if(input.value){
             let num = index.toString().padStart(2,'0');
-            bets.push(num + "-" + input.value);
+            let amount = Number(input.value);
+
+            bets.push(num + "-" + amount);
+            total += amount;
         }
     });
 
@@ -142,7 +146,25 @@ function submitGame(){
         return;
     }
 
-    // 🔥 HISTORY SAVE (NEW ADD)
+    // 🔥 USER LOAD
+    let user = JSON.parse(localStorage.getItem("user"));
+
+    if(!user){
+        alert("Login first");
+        return;
+    }
+
+    // 🔥 BALANCE CHECK
+    if(user.balance < total){
+        alert("Balance kam hai ❌");
+        return;
+    }
+
+    // 🔥 BALANCE CUT
+    user.balance -= total;
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // 🔥 HISTORY SAVE
     let history = JSON.parse(localStorage.getItem("admin_history")) || [];
 
     history.push({
@@ -155,7 +177,7 @@ function submitGame(){
 
     alert("Submit Ho Gaya ✅");
 
-    // 🔄 RESET (same tera)
+    // 🔄 RESET
     inputs.forEach(input => input.value = "");
     document.getElementById("total").innerText = "₹ 0";
 }
