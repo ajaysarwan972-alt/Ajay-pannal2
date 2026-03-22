@@ -1,8 +1,21 @@
 <script>
+
+window.onerror = function(message, source, lineno, colno, error) {
+  alert("Error: " + message + " Line: " + lineno);
+};
+
 async function login() {
 
-  const mobile = document.getElementById("mobile").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const mobileInput = document.getElementById("mobile");
+  const passwordInput = document.getElementById("password");
+
+  if(!mobileInput || !passwordInput){
+    alert("Input field nahi mila");
+    return;
+  }
+
+  const mobile = mobileInput.value.trim();
+  const password = passwordInput.value.trim();
 
   if(!mobile || !password){
     alert("Mobile aur Password dalo");
@@ -10,6 +23,7 @@ async function login() {
   }
 
   try {
+
     const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
       headers: {
         "Authorization": "Token 3S3iB1eHvIZwRS163mm13ZfuzhQ5heQf"
@@ -18,11 +32,22 @@ async function login() {
 
     const data = await res.json();
 
+    console.log("DATA:", data); // DEBUG
+
+    if(!data.results){
+      alert("Data nahi aa raha Baserow se");
+      return;
+    }
+
     let found = false;
 
     for (let user of data.results) {
 
+      console.log(user); // DEBUG
+
       if(
+        user.mobile &&
+        user.password &&
         user.mobile.toString().trim() === mobile &&
         user.password.toString().trim() === password
       ){
@@ -30,7 +55,6 @@ async function login() {
         localStorage.setItem("mobile", mobile);
         break;
       }
-
     }
 
     if(found){
@@ -41,9 +65,10 @@ async function login() {
     }
 
   } catch (err) {
-    alert("Error aa gaya ❌");
+    alert("Fetch Error ❌");
     console.log(err);
   }
 
 }
+
 </script>
