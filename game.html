@@ -81,17 +81,45 @@ body {
 
 <script>
 
-// 🔥 USER CHECK
-let user = JSON.parse(localStorage.getItem("user"));
+// 🔐 CONFIG
+const API_TOKEN = "PASTE_NEW_TOKEN_HERE"; 3S3iB1eHvIZwRS163mml32fuZhQ5heQf apna NEW token daal
+const TABLE_ID = "897341";
 
-if(!user){
+// 🔥 USER ID (login ke time save hona chahiye)
+const USER_ID = localStorage.getItem("user_id");
+
+if(!USER_ID){
     alert("Login first");
     window.location.href = "index.html";
 }
 
-// 🔥 GAME NAME
-let params = new URLSearchParams(window.location.search);
-let gameName = params.get("game") || "DEFAULT";
+let currentBalance = 0;
+
+// 🔥 GET USER DATA
+async function getUser() {
+    let res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/${USER_ID}/`, {
+        headers: {
+            "Authorization": "Token " + API_TOKEN
+        }
+    });
+
+    let data = await res.json();
+    currentBalance = parseInt(data.balance) || 0;
+}
+
+// 🔥 UPDATE BALANCE
+async function updateBalance(newBalance) {
+    await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/${USER_ID}/`, {
+        method: "PATCH",
+        headers: {
+            "Authorization": "Token " + API_TOKEN,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            balance: newBalance
+        })
+    });
+}
 
 // 🔥 CREATE BOXES
 let grid = document.getElementById("grid");
@@ -110,75 +138,50 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// 🔥 TOTAL CALCULATION
+// 🔥 TOTAL CALC
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
 
     inputs.forEach(input => {
-        total += Number(input.value) || 0;
+        total += parseInt(input.value) || 0;
     });
 
     document.getElementById("total").innerText = "₹ " + total;
 }
 
 // 🔥 SUBMIT GAME
-function submitGame(){
+async function submitGame() {
 
     let inputs = document.querySelectorAll("input");
-    let bets = [];
     let total = 0;
 
-    inputs.forEach((input, index) => {
-        let val = Number(input.value);
-
-        if(val > 0){
-            let num = index.toString().padStart(2,'0');
-            bets.push(num + "-" + val);
-            total += val;
-        }
+    inputs.forEach(input => {
+        total += parseInt(input.value) || 0;
     });
 
-    if(total === 0){
+    if (total === 0) {
         alert("Amount dalo");
         return;
     }
 
-    // 🔥 USER
-    let user = JSON.parse(localStorage.getItem("user"));
-
-    let balance = Number(user.balance);
-
-    if(balance < total){
+    if (total > currentBalance) {
         alert("Balance kam hai ❌");
         return;
     }
 
-    // 🔥 WALLET CUT
-    balance -= total;
-    user.balance = balance;
+    let newBalance = currentBalance - total;
 
-    localStorage.setItem("user", JSON.stringify(user));
+    // 🔥 UPDATE BASEROW
+    await updateBalance(newBalance);
 
-    // 🔥 ADMIN HISTORY
-    let history = JSON.parse(localStorage.getItem("admin_history")) || [];
+    alert("Bet placed ✅");
 
-    history.push({
-        user: user.id,
-        game: gameName,
-        bets: bets.join(", "),
-        total: total,
-        date: new Date().toLocaleString()
-    });
-
-    localStorage.setItem("admin_history", JSON.stringify(history));
-
-    alert("Submit ho gaya ✅");
-
-    // 🔄 RESET
-    inputs.forEach(input => input.value = "");
-    document.getElementById("total").innerText = "₹ 0";
+    location.reload();
 }
+
+// 🔥 LOAD USER DATA
+getUser();
 
 </script>
 
