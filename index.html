@@ -80,6 +80,7 @@ let user = data.results.find(
 );
 
 if(user){
+  localStorage.setItem("user", JSON.stringify(user));
   alert("Login Success ✅");
   window.location.href = "home.html";
 }else{
