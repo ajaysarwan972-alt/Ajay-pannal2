@@ -11,7 +11,6 @@ body{
   background:#f2f2f2;
 }
 
-/* TOP */
 .top{
   background:#fff;
   margin:10px;
@@ -20,7 +19,6 @@ body{
   box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-/* GRID */
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -43,7 +41,6 @@ a{
   color:black;
 }
 
-/* BOTTOM NAV */
 .bottom{
   position:fixed;
   bottom:0;
@@ -74,16 +71,16 @@ a{
 <!-- GAMES -->
 <div class="grid">
 
-<a href="game1.html"><div class="box">Game 1</div></a>
-<a href="game2.html"><div class="box">Game 2</div></a>
-<a href="game3.html"><div class="box">Game 3</div></a>
-<a href="game4.html"><div class="box">Game 4</div></a>
-<a href="game5.html"><div class="box">Game 5</div></a>
-<a href="game6.html"><div class="box">Game 6</div></a>
-<a href="game7.html"><div class="box">Game 7</div></a>
-<a href="game8.html"><div class="box">Game 8</div></a>
-<a href="game9.html"><div class="box">Game 9</div></a>
-<a href="game10.html"><div class="box">Game 10</div></a>
+<a href="game.html"><div class="box">Game 1</div></a>
+<a href="game.html"><div class="box">Game 2</div></a>
+<a href="game.html"><div class="box">Game 3</div></a>
+<a href="game.html"><div class="box">Game 4</div></a>
+<a href="game.html"><div class="box">Game 5</div></a>
+<a href="game.html"><div class="box">Game 6</div></a>
+<a href="game.html"><div class="box">Game 7</div></a>
+<a href="game.html"><div class="box">Game 8</div></a>
+<a href="game.html"><div class="box">Game 9</div></a>
+<a href="game.html"><div class="box">Game 10</div></a>
 
 </div>
 
@@ -99,53 +96,41 @@ a{
 
 <script>
 
-async function loadUser(){
+// 🔥 USER LOAD (MAIN FIX)
+function loadUser(){
 
-let mobile = localStorage.getItem("mobile");
+let user = JSON.parse(localStorage.getItem("user"));
 
-if(!mobile){
-  alert("Login karo pehle");
+if(!user){
   window.location.href = "index.html";
   return;
 }
 
-const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
-  headers: {
-    "Authorization": "Token 3S3iB1eHvIZwRS163mnl32fuzhQ5heQf"
-  }
-});
-
-const data = await res.json();
-
-data.results.forEach(user => {
-
-  if(user.mobile.toString().trim() === mobile.toString().trim()){
-    document.getElementById("userId").innerText = user.id;
-    document.getElementById("balance").innerText = user.amount;
-  }
-
-});
+// ✅ SHOW DATA
+document.getElementById("userId").innerText = user.id;
+document.getElementById("balance").innerText = user.balance;
 
 }
 
-// NAVIGATION FUNCTIONS
+// 🔘 BUTTONS
 function goHome(){
-  window.location.href = "home.html";
+  location.reload();
 }
 
 function wallet(){
-  alert("Wallet page bana sakte hain next 😎");
+  alert("Wallet page bana denge next 🔥");
 }
 
 function support(){
-  window.open("https://wa.me/918901239533");
+  alert("WhatsApp support add karenge 🔥");
 }
 
 function logout(){
-  localStorage.removeItem("mobile");
+  localStorage.removeItem("user");
   window.location.href = "index.html";
 }
 
+// 🚀 LOAD
 loadUser();
 
 </script>
