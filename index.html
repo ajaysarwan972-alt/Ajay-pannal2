@@ -27,8 +27,8 @@ button{width:100%;padding:10px;background:#1565c0;color:white;border:none;border
 <script>
 async function login() {
 
-  const mobile = document.getElementById("mobile").value;
-  const password = document.getElementById("password").value;
+  const mobile = document.getElementById("mobile").value.trim();
+const password = document.getElementById("password").value.trim();
 
   const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
     headers: {
