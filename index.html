@@ -35,6 +35,7 @@
       margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 8px;
+      outline: none;
     }
 
     button {
@@ -80,18 +81,31 @@
   </div>
 
   <script>
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
       e.preventDefault();
 
       let mobile = document.getElementById("mobile").value;
       let password = document.getElementById("password").value;
 
-      // Demo login (temporary)
-      if(mobile === "9876543210" && password === "123456") {
-        alert("Login Successful ✅");
-        window.location.href = "home.html";
-      } else {
-        alert("Invalid Mobile or Password ❌");
+      try {
+        let res = await fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ mobile, password })
+        });
+
+        let data = await res.json();
+
+        if (data.success) {
+          alert("Login Successful ✅");
+          window.location.href = "home.html"; // 🔥 tumhara same home
+        } else {
+          alert("Wrong Mobile or Password ❌");
+        }
+      } catch (err) {
+        alert("Server error ❌");
       }
     });
   </script>
