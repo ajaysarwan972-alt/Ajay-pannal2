@@ -1,21 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 350px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 95%;
+      padding: 12px;
+      margin: 10px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+    }
+
+    .login-btn {
+      background: red;
+      color: white;
+    }
+
+    .signup-btn {
+      background: blue;
+      color: white;
+    }
+
+    .wa {
+      color: green;
+      margin-top: 10px;
+      display: block;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h2>Login</h2>
+
+  <input type="text" id="mobile" placeholder="Mobile Number">
+  <input type="password" id="password" placeholder="Password">
+
+  <button class="login-btn" onclick="login()">LOGIN</button>
+
+  <button class="signup-btn" onclick="goSignup()">REGISTER NOW</button>
+
+  <a class="wa" href="https://wa.me/918901239533">WhatsApp Support</a>
+
+</div>
+
 <script>
-
-window.onerror = function(message, source, lineno, colno, error) {
-  alert("Error: " + message + " Line: " + lineno);
-};
-
 async function login() {
 
-  const mobileInput = document.getElementById("mobile");
-  const passwordInput = document.getElementById("password");
-
-  if(!mobileInput || !passwordInput){
-    alert("Input field nahi mila");
-    return;
-  }
-
-  const mobile = mobileInput.value.trim();
-  const password = passwordInput.value.trim();
+  const mobile = document.getElementById("mobile").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   if(!mobile || !password){
     alert("Mobile aur Password dalo");
@@ -32,24 +94,13 @@ async function login() {
 
     const data = await res.json();
 
-    console.log("DATA:", data); // DEBUG
-
-    if(!data.results){
-      alert("Data nahi aa raha Baserow se");
-      return;
-    }
-
     let found = false;
 
     for (let user of data.results) {
 
-      console.log(user); // DEBUG
-
       if(
-        user.mobile &&
-        user.password &&
-        user.mobile.toString().trim() === mobile &&
-        user.password.toString().trim() === password
+        user.mobile == mobile &&
+        user.password == password
       ){
         found = true;
         localStorage.setItem("mobile", mobile);
@@ -65,10 +116,16 @@ async function login() {
     }
 
   } catch (err) {
-    alert("Fetch Error ❌");
+    alert("Error aa gaya ❌");
     console.log(err);
   }
 
 }
 
+function goSignup(){
+  window.location.href = "signup.html";
+}
 </script>
+
+</body>
+</html>
