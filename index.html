@@ -1,20 +1,49 @@
 <script>
+async function login() {
 
-async function testBaserow(){
+  const mobile = document.getElementById("mobile").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
-  headers: {
-    "Authorization": "Token 3S3iB1eHvIZwRS163mnl32fuzhQ5heQf"
+  if(!mobile || !password){
+    alert("Mobile aur Password dalo");
+    return;
   }
-});
 
-const data = await res.json();
+  try {
+    const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
+      headers: {
+        "Authorization": "Token 3S3iB1eHvIZwRS163mm13ZfuzhQ5heQf"
+      }
+    });
 
-console.log(data);
-alert("Check console");
+    const data = await res.json();
+
+    let found = false;
+
+    for (let user of data.results) {
+
+      if(
+        user.mobile.toString().trim() === mobile &&
+        user.password.toString().trim() === password
+      ){
+        found = true;
+        localStorage.setItem("mobile", mobile);
+        break;
+      }
+
+    }
+
+    if(found){
+      alert("Login Success ✅");
+      window.location.href = "home.html";
+    } else {
+      alert("Wrong Mobile or Password ❌");
+    }
+
+  } catch (err) {
+    alert("Error aa gaya ❌");
+    console.log(err);
+  }
 
 }
-
-testBaserow();
-
 </script>
