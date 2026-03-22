@@ -66,6 +66,7 @@ if(!mobile){
   alert("Login karo pehle");
   window.location.href = "index.html";
 }
+  
   const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
     headers: {
       "Authorization": "Token 353iB1eHvIZwRS163mml32fuzhQ5heQf"
@@ -75,7 +76,7 @@ if(!mobile){
   const data = await res.json();
 
   data.results.forEach(user => {
-    if(user.mobile && user.mobile.toString() === mobile)
+    if(user.mobile == mobile)
       document.getElementById("userId").innerText = user.id;
       document.getElementById("balance").innerText = user.amount;
     }
