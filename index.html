@@ -1,130 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
-
-  <style>
-    body {
-      font-family: Arial;
-      background: #f2f2f2;
-      text-align: center;
-      padding: 30px;
-    }
-
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      max-width: 350px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input {
-      width: 90%;
-      padding: 10px;
-      margin: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width: 95%;
-      padding: 12px;
-      margin: 10px;
-      border: none;
-      border-radius: 25px;
-      font-size: 16px;
-    }
-
-    .login-btn {
-      background: red;
-      color: white;
-    }
-
-    .signup-btn {
-      background: blue;
-      color: white;
-    }
-
-    .wa {
-      color: green;
-      margin-top: 10px;
-      display: block;
-    }
-
-  </style>
+<title>Login</title>
+<style>
+body{
+  font-family:Arial;
+  background:#f2f2f2;
+  text-align:center;
+  padding-top:50px;
+}
+.box{
+  background:white;
+  width:300px;
+  margin:auto;
+  padding:20px;
+  border-radius:10px;
+}
+input{
+  width:90%;
+  padding:10px;
+  margin:10px;
+}
+button{
+  width:95%;
+  padding:12px;
+  background:red;
+  color:white;
+  border:none;
+  border-radius:8px;
+}
+a{
+  display:block;
+  margin-top:10px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="box">
+<h2>Login</h2>
 
-  <h2>Login</h2>
+<input type="text" id="mobile" placeholder="Mobile Number">
+<input type="password" id="password" placeholder="Password">
 
-  <input type="text" id="mobile" placeholder="Mobile Number">
-  <input type="password" id="password" placeholder="Password">
+<button onclick="login()">LOGIN</button>
 
-  <button class="login-btn" onclick="login()">LOGIN</button>
+<a href="signup.html">REGISTER NOW</a>
 
-  <button class="signup-btn" onclick="goSignup()">REGISTER NOW</button>
-
-  <a class="wa" href="https://wa.me/918901239533">WhatsApp Support</a>
+<a href="https://wa.me/918901239533">WhatsApp Support</a>
 
 </div>
 
 <script>
-async function login() {
 
-  const mobile = document.getElementById("mobile").value.trim();
-  const password = document.getElementById("password").value.trim();
+async function login(){
 
-  if(!mobile || !password){
-    alert("Mobile aur Password dalo");
-    return;
-  }
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
 
-  try {
+try{
 
-    const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
-      headers: {
-        "Authorization": "Token 3S3iB1eHvIZwRS163mm13ZfuzhQ5heQf"
-      }
-    });
+let res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
+headers:{
+"Authorization":"Token 353iB1eHvIZwRS163mnl32fuzhQ5heQf"
+}
+});
 
-    const data = await res.json();
+let data = await res.json();
 
-    let found = false;
+let found = false;
 
-    for (let user of data.results) {
+for(let user of data.results){
 
-      if(
-        user.mobile == mobile &&
-        user.password == password
-      ){
-        found = true;
-        localStorage.setItem("mobile", mobile);
-        break;
-      }
-    }
-
-    if(found){
-      alert("Login Success ✅");
-      window.location.href = "home.html";
-    } else {
-      alert("Wrong Mobile or Password ❌");
-    }
-
-  } catch (err) {
-    alert("Error aa gaya ❌");
-    console.log(err);
-  }
+if(
+user.mobile == mobile &&
+user.password == password
+){
+found = true;
+localStorage.setItem("mobile", mobile);
+break;
+}
 
 }
 
-function goSignup(){
-  window.location.href = "signup.html";
+if(found){
+alert("Login Success ✅");
+window.location.href = "home.html";
+}else{
+alert("Wrong Mobile or Password ❌");
 }
+
+}catch(e){
+alert("Server Error ❌");
+console.log(e);
+}
+
+}
+
 </script>
 
 </body>
