@@ -67,6 +67,7 @@ body {
     cursor: pointer;
 }
 </style>
+
 </head>
 
 <body>
@@ -80,23 +81,21 @@ body {
 
 <script>
 
-// 🔥 USER CHECK
-let user = JSON.parse(localStorage.getItem("user"));
+// 🔥 SAFE USER (kabhi crash nahi hogi)
+let user = JSON.parse(localStorage.getItem("user")) || {
+    id: 1,
+    balance: 1000
+};
+localStorage.setItem("user", JSON.stringify(user));
 
-if (!user) {
-    alert("Login first");
-    window.location.href = "index.html";
-}
-
-// 🔥 GAME NAME (URL se)
+// 🔥 GAME NAME
 let params = new URLSearchParams(window.location.search);
 let gameName = params.get("game") || "DEFAULT";
 
-// 🔥 CREATE BOXES (00 - 99)
+// 🔥 CREATE BOXES
 let grid = document.getElementById("grid");
 
 for (let i = 0; i < 100; i++) {
-
     let num = i.toString().padStart(2, '0');
 
     let div = document.createElement("div");
@@ -110,13 +109,13 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// 🔥 TOTAL CALCULATION
+// 🔥 TOTAL CALC
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
 
     inputs.forEach(inp => {
-        total += parseInt(inp.value) || 0;
+        total += Number(inp.value) || 0;
     });
 
     document.getElementById("total").innerText = "₹ " + total;
@@ -129,43 +128,34 @@ function submitGame() {
     let total = 0;
     let bets = [];
 
-    inputs.forEach((inp, index) => {
-        let val = parseInt(inp.value) || 0;
-
+    inputs.forEach((inp, i) => {
+        let val = Number(inp.value);
         if (val > 0) {
-            let num = index.toString().padStart(2, '0');
-            bets.push(num + "-" + val);
             total += val;
+            bets.push(i.toString().padStart(2, '0') + " = ₹" + val);
         }
     });
 
     if (total === 0) {
-        alert("Enter amount first");
+        alert("Enter amount");
         return;
     }
 
-    // 🔥 USER GET
-    let user = JSON.parse(localStorage.getItem("user"));
-
-    // 🔥 IMPORTANT FIX (string → number)
-    let balance = Number(user.balance);
-
-    if (balance < total) {
-        alert("Insufficient balance");
+    // 🔥 BALANCE CHECK
+    if (Number(user.balance) < total) {
+        alert("Low balance");
         return;
     }
 
-    // 🔥 WALLET CUT
-    balance -= total;
-    user.balance = balance;
-
+    // 🔥 BALANCE CUT
+    user.balance = Number(user.balance) - total;
     localStorage.setItem("user", JSON.stringify(user));
 
     // 🔥 ADMIN HISTORY SAVE
     let history = JSON.parse(localStorage.getItem("admin_history")) || [];
 
     history.push({
-        user_id: user.id,
+        userId: user.id,
         game: gameName,
         bets: bets.join(", "),
         total: total,
@@ -174,11 +164,9 @@ function submitGame() {
 
     localStorage.setItem("admin_history", JSON.stringify(history));
 
-    alert("Game Submitted ✅");
+    alert("Bet placed ✅");
 
-    // 🔥 RESET
-    inputs.forEach(inp => inp.value = "");
-    document.getElementById("total").innerText = "₹ 0";
+    location.reload();
 }
 
 </script>
