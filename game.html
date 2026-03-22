@@ -11,7 +11,6 @@ body {
     margin: 0;
 }
 
-/* GRID */
 .container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -19,7 +18,6 @@ body {
     padding: 12px;
 }
 
-/* BOX */
 .box {
     background: white;
     border-radius: 12px;
@@ -43,7 +41,6 @@ body {
     font-size: 16px;
 }
 
-/* BOTTOM BAR */
 .bottom {
     position: fixed;
     bottom: 0;
@@ -84,7 +81,7 @@ body {
 
 <script>
 
-// 🔥 USER LOAD
+// 🔥 USER
 let user = JSON.parse(localStorage.getItem("user"));
 
 if(!user){
@@ -92,7 +89,11 @@ if(!user){
     window.location.href = "index.html";
 }
 
-// CREATE 00–99 BOXES
+// 🔥 GAME NAME (URL se)
+let params = new URLSearchParams(window.location.search);
+let gameName = params.get("game") || "DEFAULT";
+
+// CREATE BOXES
 let grid = document.getElementById("grid");
 
 for (let i = 0; i < 100; i++) {
@@ -109,7 +110,7 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// CALCULATE TOTAL
+// TOTAL
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
@@ -121,7 +122,23 @@ function calcTotal() {
     document.getElementById("total").innerText = "₹ " + total;
 }
 
-// 🔥 BASEROW UPDATE FUNCTION
+// 🔥 SAVE HISTORY (GAME WISE)
+function saveHistory(bets, total){
+
+let history = JSON.parse(localStorage.getItem("history")) || [];
+
+history.push({
+    game: gameName,
+    date: new Date().toLocaleString(),
+    bets: bets,
+    total: total
+});
+
+localStorage.setItem("history", JSON.stringify(history));
+
+}
+
+// 🔥 UPDATE BALANCE
 async function updateBalance(newBalance){
 
 let API_TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
@@ -137,44 +154,54 @@ await fetch(`https://api.baserow.io/api/database/rows/table/897341/${user.id}/?u
   })
 });
 
-// local update
 user.balance = newBalance;
 localStorage.setItem("user", JSON.stringify(user));
 
 }
 
-// 🔥 SUBMIT GAME
-function submitGame(){
+// 🔥 SUBMIT
+async function submitGame(){
 
 let inputs = document.querySelectorAll("input");
 let total = 0;
+let bets = [];
 
-inputs.forEach(input => {
-    total += Number(input.value) || 0;
+inputs.forEach((input, index) => {
+
+    let value = Number(input.value) || 0;
+
+    if(value > 0){
+        bets.push({
+            number: index.toString().padStart(2,'0'),
+            amount: value
+        });
+    }
+
+    total += value;
 });
 
-// ❌ EMPTY CHECK
 if(total <= 0){
     alert("Enter amount ❌");
     return;
 }
 
-// ❌ LOW BALANCE
 if(user.balance < total){
     alert("Low Balance ❌");
     return;
 }
 
-// 🔥 BALANCE MINUS
-let newBalance = user.balance - total;
+// SAVE HISTORY
+saveHistory(bets, total);
 
-// 🔥 UPDATE
-updateBalance(newBalance);
+// UPDATE BALANCE
+let newBalance = user.balance - total;
+await updateBalance(newBalance);
 
 alert("Game Submitted ✅");
 
-// HOME PAGE
-window.location.href = "home.html";
+// RESET
+document.querySelectorAll("input").forEach(input => input.value = "");
+document.getElementById("total").innerText = "₹ 0";
 
 }
 
