@@ -89,11 +89,11 @@ if(!user){
     window.location.href = "index.html";
 }
 
-// 🔥 GAME NAME
+// 🔥 GAME NAME (URL se)
 let params = new URLSearchParams(window.location.search);
 let gameName = params.get("game") || "DEFAULT";
 
-// 🔥 CREATE BOXES
+// CREATE BOXES
 let grid = document.getElementById("grid");
 
 for (let i = 0; i < 100; i++) {
@@ -106,83 +106,3 @@ for (let i = 0; i < 100; i++) {
         <div class="number">${num}</div>
         <input type="number" placeholder="₹" oninput="calcTotal()">
     `;
-
-    grid.appendChild(div);
-}
-
-// 🔥 TOTAL CALCULATION
-function calcTotal() {
-    let inputs = document.querySelectorAll("input");
-    let total = 0;
-
-    inputs.forEach(input => {
-        if(input.value){
-            total += Number(input.value);
-        }
-    });
-
-    document.getElementById("total").innerText = "₹ " + total;
-}
-
-// 🔥 SUBMIT GAME
-function submitGame(){
-
-    let inputs = document.querySelectorAll("input");
-    let bets = [];
-    let total = 0;
-
-    inputs.forEach((input, index) => {
-        if(input.value){
-            let num = index.toString().padStart(2,'0');
-            let amount = Number(input.value);
-
-            bets.push(num + "-" + amount);
-            total += amount;
-        }
-    });
-
-    if(bets.length === 0){
-        alert("Kuch enter karo ❌");
-        return;
-    }
-
-    // 🔥 USER LOAD
-    let user = JSON.parse(localStorage.getItem("user"));
-
-    if(!user){
-        alert("Login first");
-        return;
-    }
-
-    // 🔥 BALANCE CHECK
-    if(user.balance < total){
-        alert("Balance kam hai ❌");
-        return;
-    }
-
-    // 🔥 BALANCE CUT
-    user.balance -= total;
-    localStorage.setItem("user", JSON.stringify(user));
-
-    // 🔥 HISTORY SAVE
-    let history = JSON.parse(localStorage.getItem("admin_history")) || [];
-
-    history.push({
-        game: gameName,
-        bets: bets.join(", "),
-        date: new Date().toLocaleString()
-    });
-
-    localStorage.setItem("admin_history", JSON.stringify(history));
-
-    alert("Submit Ho Gaya ✅");
-
-    // 🔄 RESET
-    inputs.forEach(input => input.value = "");
-    document.getElementById("total").innerText = "₹ 0";
-}
-
-</script>
-
-</body>
-</html>
