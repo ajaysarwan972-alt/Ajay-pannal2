@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>More</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial;
+  background:#f2f2f2;
+}
+
+/* TOP BAR */
+.top{
+  background:#00aaff;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:white;
+}
+
+.id-box{
+  background:green;
+  padding:8px 15px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+.balance{
+  background:red;
+  padding:8px 15px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+/* MENU CARD */
+.card{
+  background:white;
+  margin:15px;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+/* ROW */
+.row{
+  padding:15px;
+  border-bottom:1px solid #eee;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.row:last-child{
+  border-bottom:none;
+}
+
+.arrow{
+  color:gray;
+}
+
+/* BOTTOM NAV */
+.bottom{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+}
+
+.btn{
+  text-align:center;
+  font-size:14px;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- TOP -->
+<div class="top">
+  <div class="id-box">ID: <span id="userId">---</span></div>
+  <div class="balance">₹ <span id="balance">0</span></div>
+</div>
+
+<!-- MENU -->
+<div class="card">
+
+<div class="row" onclick="go('history.html')">
+  <span>Game History</span>
+  <span class="arrow">›</span>
+</div>
+
+<div class="row" onclick="go('wallet.html')">
+  <span>Wallet</span>
+  <span class="arrow">›</span>
+</div>
+
+<div class="row" onclick="go('winning.html')">
+  <span>Winning History</span>
+  <span class="arrow">›</span>
+</div>
+
+<div class="row" onclick="go('result.html')">
+  <span>Result Chart</span>
+  <span class="arrow">›</span>
+</div>
+
+<div class="row" onclick="logout()">
+  <span>Logout</span>
+  <span class="arrow">›</span>
+</div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom">
+  <div class="btn" onclick="go('home.html')">🏠<br>Home</div>
+  <div class="btn" onclick="go('wallet.html')">💰<br>Wallet</div>
+  <div class="btn" onclick="go('more.html')">☰<br>More</div>
+</div>
+
+<script>
+
+// USER LOAD
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(user){
+  document.getElementById("userId").innerText = user.id || "User";
+  document.getElementById("balance").innerText = user.balance || 0;
+}
+
+// NAVIGATION
+function go(page){
+  window.location.href = page;
+}
+
+// LOGOUT
+function logout(){
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+}
+
+</script>
+
+</body>
+</html>
