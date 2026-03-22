@@ -9,9 +9,11 @@ app.use(express.static(__dirname));
 
 // Default route → open index.html
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+console.log("Server running on port " + PORT);
 });
+
+Le jo add krna he kr le pr servay kharab na kario
