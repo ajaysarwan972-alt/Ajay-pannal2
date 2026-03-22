@@ -59,13 +59,13 @@ button{
 
 async function login(){
 
-let mobile = document.getElementById("mobile").value;
-let password = document.getElementById("password").value;
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
 
-// 🔴🔴🔴 BAS YAHAN DALNA HAI 🔴🔴🔴
 let BASEROW_URL = "https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true";
 let API_TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
-// 🔴🔴🔴 BAS ITNA HI 🔴🔴🔴
+
+try{
 
 let res = await fetch(BASEROW_URL, {
   headers: {
@@ -74,18 +74,35 @@ let res = await fetch(BASEROW_URL, {
 });
 
 let data = await res.json();
-console.log(data);
+console.log("Baserow Data:", data);
+
+// ✅ SAFE MATCH (FIXED)
 let user = data.results?.find(
-  u => String(u.mobile) === String(mobile) &&
-       String(u.password) === String(password)
+  u => String(u.mobile).trim() === mobile &&
+       String(u.password).trim() === password
 );
 
 if(user){
-  localStorage.setItem("user", JSON.stringify(user));
+
+  // ✅ IMPORTANT: clean object save karo
+  let userData = {
+    id: user.id,
+    mobile: user.mobile,
+    balance: user.balance || 0
+  };
+
+  localStorage.setItem("user", JSON.stringify(userData));
+
   alert("Login Success ✅");
   window.location.href = "home.html";
+
 }else{
   alert("Wrong Mobile or Password ❌");
+}
+
+}catch(err){
+  console.log("Error:", err);
+  alert("Server Error ❌");
 }
 
 }
