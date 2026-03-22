@@ -80,7 +80,7 @@ if(!mobile){
   data.results.forEach(user => {
     if(user.mobile && user.mobile.toString().trim() === mobile.toString().trim())
       document.getElementById("userId").innerText = user.id;
-      document.getElementById("balance").innerText = user.amount;
+      document.getElementById("amount").innerText = user.amount;
     }
   });
 }
