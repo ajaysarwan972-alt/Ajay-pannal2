@@ -39,21 +39,22 @@ const password = document.getElementById("password").value.trim();
   const data = await res.json();
 
   let found = false;
+for (let user of data.results) {
 
-  data.results.forEach(user => {
+    if(
+        user.mobile.toString().trim() === mobile &&
+        user.password.toString().trim() === password
+    ){
+        found = true;
+        localStorage.setItem("mobile", mobile);
+        break;
+    }
 
-    console.log(user);
-  if(
-    user.mobile == mobile &&
-    user.password == password
-  ){
-    found = true;
-    localStorage.setItem("mobile", mobile);
-  }
-
-});
+}
   if(found){
+    alert("Login Success ✅");
     window.location.href = "home.html";
+}
   } else {
     alert("Wrong Mobile or Password ❌");
   }
