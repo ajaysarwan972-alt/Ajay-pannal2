@@ -1,91 +1,118 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Home</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #f2f2f2;
-    }
+<style>
+body{
+  font-family: Arial;
+  background:#f2f2f2;
+  text-align:center;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      padding: 15px;
-    }
+.box{
+  background:white;
+  margin:20px;
+  padding:20px;
+  border-radius:15px;
+}
 
-    .box {
-      background: #eee;
-      border-radius: 15px;
-      padding: 40px 10px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border: 3px solid green;
-    }
+input{
+  width:90%;
+  padding:12px;
+  margin:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
 
-    a {
-      text-decoration: none;
-      color: black;
-    }
-  </style>
+button{
+  width:90%;
+  padding:12px;
+  background:red;
+  color:white;
+  border:none;
+  border-radius:20px;
+  font-size:18px;
+}
+
+a{
+  text-decoration:none;
+}
+</style>
+
 </head>
 
 <body>
-<div style="padding:15px; background:#fff; margin:10px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center;">
-  <h3>User ID: <span id="userId">Loading...</span></h3>
-  <h3>Balance: ₹<span id="balance">Loading...</span></h3>
+
+<div class="box">
+
+<h2>Login</h2>
+
+<input type="text" id="mobile" placeholder="Mobile Number">
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="login()">LOGIN</button>
+
+<br><br>
+
+<a href="signup.html">
+<button style="background:blue;">REGISTER NOW</button>
+</a>
+
+<br><br>
+
+<a href="https://wa.me/918901239533">
+  WhatsApp Support
+</a>
+
 </div>
-<div class="grid">
 
-  <a href="game.html"><div class="box">Game 1</div></a>
-  <a href="game.html"><div class="box">Game 2</div></a>
-
-  <a href="game.html"><div class="box">Game 3</div></a>
-  <a href="game.html"><div class="box">Game 4</div></a>
-
-  <a href="game.html"><div class="box">Game 5</div></a>
-  <a href="game.html"><div class="box">Game 6</div></a>
-
-  <a href="game.html"><div class="box">Game 7</div></a>
-  <a href="game.html"><div class="box">Game 8</div></a>
-
-  <a href="game.html"><div class="box">Game 9</div></a>
-  <a href="game.html"><div class="box">Game 10</div></a>
-
-</div>
 <script>
-async function loadWallet() {
-  const mobile = localStorage.getItem("mobile");
-if(!mobile){
-  alert("Login karo pehle");
-  window.location.href = "index.html";
+
+async function login(){
+
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
+
+if(!mobile || !password){
+  alert("Enter details first");
   return;
 }
-  
-  
-  const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
-    headers: {
-      "Authorization": "Token 3S3iB1eHvIZwRS163mml32fuZhQ5heQf
-    }
-  });
 
-  const data = await res.json();
+const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
+  headers: {
+    "Authorization": "Token 3S3iB1eHvIZwRS163mnl32fuzhQ5heQf"
+  }
+});
 
-  data.results.forEach(user => {
-    if(user.mobile && user.mobile.toString().trim() === mobile.toString().trim())
-      document.getElementById("userId").innerText = user.id;
-      document.getElementById("balance").innerText = user.amount;
-    }
-  });
+const data = await res.json();
+
+let found = false;
+
+for(let user of data.results){
+
+  if(
+    user.mobile.toString().trim() === mobile &&
+    user.password.toString().trim() === password
+  ){
+    found = true;
+    localStorage.setItem("mobile", mobile);
+    break;
+  }
+
 }
 
-loadWallet();
-    </script>
+if(found){
+  alert("Login Success ✅");
+  window.location.href = "home.html";
+}else{
+  alert("Wrong Mobile or Password ❌");
+}
+
+}
+
+</script>
+
 </body>
 </html>
