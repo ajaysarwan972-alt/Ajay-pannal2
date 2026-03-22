@@ -7,80 +7,87 @@
 
 <style>
 body {
-  margin: 0;
+  margin:0;
   font-family: Arial;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  background:#eee;
+  text-align:center;
 }
 
-.login-box {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 320px;
-  text-align: center;
+h1{
+  color:red;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+.input-box{
+  width:80%;
+  margin:15px auto;
+  padding:15px;
+  border-radius:15px;
+  border:none;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
+button{
+  width:80%;
+  padding:15px;
+  background:red;
+  color:#fff;
+  border:none;
+  border-radius:30px;
+  font-size:18px;
 }
 
-button:hover {
-  background: #5a67d8;
+.register{
+  background:#3498db;
 }
 </style>
+
 </head>
 
 <body>
 
-<div class="login-box">
-  <h2>Login</h2>
+<h1>Login</h1>
 
-  <input type="tel" id="mobile" placeholder="Enter Mobile Number" maxlength="10">
-  <input type="password" id="password" placeholder="Enter Password">
+<input type="text" id="mobile" class="input-box" placeholder="Mobile Number">
+<input type="password" id="password" class="input-box" placeholder="Password">
 
-  <button onclick="login()">Login</button>
-</div>
+<button onclick="login()">LOGIN</button>
+
+<p>New User?</p>
+<button class="register" onclick="window.location.href='signup.html'">REGISTER NOW</button>
 
 <script>
-function login() {
-  const mobile = document.getElementById("mobile").value;
-  const password = document.getElementById("password").value;
 
-  if (mobile.length !== 10) {
-    alert("Enter valid 10 digit mobile number");
-    return;
+async function login(){
+
+let mobile = document.getElementById("mobile").value;
+let password = document.getElementById("password").value;
+
+// 🔴🔴🔴 BAS YAHAN DALNA HAI 🔴🔴🔴
+let BASEROW_URL = "https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true";
+let API_TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
+// 🔴🔴🔴 BAS ITNA HI 🔴🔴🔴
+
+let res = await fetch(BASEROW_URL, {
+  headers: {
+    "Authorization": "Token " + API_TOKEN
   }
+});
 
-  if (password === "") {
-    alert("Enter password");
-    return;
-  }
+let data = await res.json();
 
-  // Simple login (no database)
-  localStorage.setItem("user", mobile);
+let user = data.results.find(
+  u => u.mobile == mobile && u.password == password
+);
 
-  // redirect to home page
+if(user){
+  alert("Login Success ✅");
   window.location.href = "home.html";
+}else{
+  alert("Wrong Mobile or Password ❌");
 }
+
+}
+
 </script>
 
 </body>
