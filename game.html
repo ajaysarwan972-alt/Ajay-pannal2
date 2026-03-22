@@ -81,12 +81,13 @@ body {
 
 <script>
 
-// 🔥 SAFE USER (kabhi crash nahi hogi)
-let user = JSON.parse(localStorage.getItem("user")) || {
-    id: 1,
-    balance: 1000
-};
-localStorage.setItem("user", JSON.stringify(user));
+// 🔥 USER CHECK
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+    alert("Login first");
+    window.location.href = "index.html";
+}
 
 // 🔥 GAME NAME
 let params = new URLSearchParams(window.location.search);
@@ -109,53 +110,61 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// 🔥 TOTAL CALC
+// 🔥 TOTAL CALCULATION
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
 
-    inputs.forEach(inp => {
-        total += Number(inp.value) || 0;
+    inputs.forEach(input => {
+        total += Number(input.value) || 0;
     });
 
     document.getElementById("total").innerText = "₹ " + total;
 }
 
 // 🔥 SUBMIT GAME
-function submitGame() {
+function submitGame(){
 
     let inputs = document.querySelectorAll("input");
-    let total = 0;
     let bets = [];
+    let total = 0;
 
-    inputs.forEach((inp, i) => {
-        let val = Number(inp.value);
-        if (val > 0) {
+    inputs.forEach((input, index) => {
+        let val = Number(input.value);
+
+        if(val > 0){
+            let num = index.toString().padStart(2,'0');
+            bets.push(num + "-" + val);
             total += val;
-            bets.push(i.toString().padStart(2, '0') + " = ₹" + val);
         }
     });
 
-    if (total === 0) {
-        alert("Enter amount");
+    if(total === 0){
+        alert("Amount dalo");
         return;
     }
 
-    // 🔥 BALANCE CHECK
-    if (Number(user.balance) < total) {
-        alert("Low balance");
+    // 🔥 USER
+    let user = JSON.parse(localStorage.getItem("user"));
+
+    let balance = Number(user.balance);
+
+    if(balance < total){
+        alert("Balance kam hai ❌");
         return;
     }
 
-    // 🔥 BALANCE CUT
-    user.balance = Number(user.balance) - total;
+    // 🔥 WALLET CUT
+    balance -= total;
+    user.balance = balance;
+
     localStorage.setItem("user", JSON.stringify(user));
 
-    // 🔥 ADMIN HISTORY SAVE
+    // 🔥 ADMIN HISTORY
     let history = JSON.parse(localStorage.getItem("admin_history")) || [];
 
     history.push({
-        userId: user.id,
+        user: user.id,
         game: gameName,
         bets: bets.join(", "),
         total: total,
@@ -164,9 +173,11 @@ function submitGame() {
 
     localStorage.setItem("admin_history", JSON.stringify(history));
 
-    alert("Bet placed ✅");
+    alert("Submit ho gaya ✅");
 
-    location.reload();
+    // 🔄 RESET
+    inputs.forEach(input => input.value = "");
+    document.getElementById("total").innerText = "₹ 0";
 }
 
 </script>
