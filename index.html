@@ -41,6 +41,8 @@ const password = document.getElementById("password").value.trim();
   let found = false;
 
   console.log(data.results);
+  console.log("Entered:", mobile, password);
+console.log("DB:", user.mobile, user.password);
   data.results.forEach(user => {
     if(
   user.mobile && user.mobile.toString().trim() === mobile.toString().trim() &&
