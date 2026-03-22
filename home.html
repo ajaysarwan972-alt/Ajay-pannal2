@@ -1,43 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login</title>
+<title>Home</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
+  margin:0;
   font-family: Arial;
   background:#f2f2f2;
-  text-align:center;
+}
+
+/* TOP */
+.top{
+  background:#fff;
+  margin:10px;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:10px;
 }
 
 .box{
-  background:white;
-  margin:20px;
-  padding:20px;
+  background:#eee;
+  border:3px solid green;
   border-radius:15px;
-}
-
-input{
-  width:90%;
-  padding:12px;
-  margin:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-
-button{
-  width:90%;
-  padding:12px;
-  background:red;
-  color:white;
-  border:none;
-  border-radius:20px;
+  padding:30px 10px;
+  text-align:center;
   font-size:18px;
+  font-weight:bold;
 }
 
 a{
   text-decoration:none;
+  color:black;
+}
+
+/* BOTTOM NAV */
+.bottom{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:white;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.btn{
+  text-align:center;
+  font-size:14px;
 }
 </style>
 
@@ -45,38 +65,47 @@ a{
 
 <body>
 
-<div class="box">
+<!-- TOP -->
+<div class="top">
+  <h3>User ID: <span id="userId">Loading...</span></h3>
+  <h3>Balance: ₹<span id="balance">Loading...</span></h3>
+</div>
 
-<h2>Login</h2>
+<!-- GAMES -->
+<div class="grid">
 
-<input type="text" id="mobile" placeholder="Mobile Number">
-<input type="password" id="password" placeholder="Password">
+<a href="game1.html"><div class="box">Game 1</div></a>
+<a href="game2.html"><div class="box">Game 2</div></a>
+<a href="game3.html"><div class="box">Game 3</div></a>
+<a href="game4.html"><div class="box">Game 4</div></a>
+<a href="game5.html"><div class="box">Game 5</div></a>
+<a href="game6.html"><div class="box">Game 6</div></a>
+<a href="game7.html"><div class="box">Game 7</div></a>
+<a href="game8.html"><div class="box">Game 8</div></a>
+<a href="game9.html"><div class="box">Game 9</div></a>
+<a href="game10.html"><div class="box">Game 10</div></a>
 
-<button onclick="login()">LOGIN</button>
+</div>
 
-<br><br>
+<!-- BOTTOM NAV -->
+<div class="bottom">
 
-<a href="signup.html">
-<button style="background:blue;">REGISTER NOW</button>
-</a>
-
-<br><br>
-
-<a href="https://wa.me/918901239533">
-  WhatsApp Support
-</a>
+<div class="btn" onclick="goHome()">🏠<br>Home</div>
+<div class="btn" onclick="wallet()">💰<br>Wallet</div>
+<div class="btn" onclick="support()">📞<br>Support</div>
+<div class="btn" onclick="logout()">🚪<br>Logout</div>
 
 </div>
 
 <script>
 
-async function login(){
+async function loadUser(){
 
-let mobile = document.getElementById("mobile").value.trim();
-let password = document.getElementById("password").value.trim();
+let mobile = localStorage.getItem("mobile");
 
-if(!mobile || !password){
-  alert("Enter details first");
+if(!mobile){
+  alert("Login karo pehle");
+  window.location.href = "index.html";
   return;
 }
 
@@ -88,29 +117,36 @@ const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?
 
 const data = await res.json();
 
-let found = false;
+data.results.forEach(user => {
 
-for(let user of data.results){
-
-  if(
-    user.mobile.toString().trim() === mobile &&
-    user.password.toString().trim() === password
-  ){
-    found = true;
-    localStorage.setItem("mobile", mobile);
-    break;
+  if(user.mobile.toString().trim() === mobile.toString().trim()){
+    document.getElementById("userId").innerText = user.id;
+    document.getElementById("balance").innerText = user.amount;
   }
 
+});
+
 }
 
-if(found){
-  alert("Login Success ✅");
+// NAVIGATION FUNCTIONS
+function goHome(){
   window.location.href = "home.html";
-}else{
-  alert("Wrong Mobile or Password ❌");
 }
 
+function wallet(){
+  alert("Wallet page bana sakte hain next 😎");
 }
+
+function support(){
+  window.open("https://wa.me/918901239533");
+}
+
+function logout(){
+  localStorage.removeItem("mobile");
+  window.location.href = "index.html";
+}
+
+loadUser();
 
 </script>
 
