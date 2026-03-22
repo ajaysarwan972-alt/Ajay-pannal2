@@ -37,7 +37,10 @@
 </head>
 
 <body>
-
+<div style="padding:15px; background:#fff; margin:10px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center;">
+  <h3>User ID: <span id="userId">Loading...</span></h3>
+  <h3>Balance: ₹<span id="balance">Loading...</span></h3>
+</div>
 <div class="grid">
 
   <a href="game.html"><div class="box">Game 1</div></a>
@@ -56,6 +59,27 @@
   <a href="game.html"><div class="box">Game 10</div></a>
 
 </div>
+<script>
+async function loadWallet() {
+  const mobile = localStorage.getItem("mobile");
 
+  const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
+    headers: {
+      "Authorization": "Token 353iB1eHvIZwRS163mml32fuzhQ5heQf"
+    }
+  });
+
+  const data = await res.json();
+
+  data.results.forEach(user => {
+    if(user.mobile == mobile){
+      document.getElementById("userId").innerText = user.id;
+      document.getElementById("balance").innerText = user.amount;
+    }
+  });
+}
+
+loadWallet();
+    </script>
 </body>
 </html>
