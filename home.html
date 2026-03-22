@@ -72,7 +72,7 @@ async function loadWallet() {
   const data = await res.json();
 
   data.results.forEach(user => {
-    if(user.mobile == mobile){
+    if(user.mobile.toString() === mobile)
       document.getElementById("userId").innerText = user.id;
       document.getElementById("balance").innerText = user.amount;
     }
