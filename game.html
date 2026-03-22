@@ -89,7 +89,7 @@ if(!user){
     window.location.href = "index.html";
 }
 
-// 🔥 GAME NAME (URL se)
+// 🔥 GAME NAME
 let params = new URLSearchParams(window.location.search);
 let gameName = params.get("game") || "DEFAULT";
 
@@ -110,99 +110,54 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// TOTAL
+// 🔥 TOTAL CALCULATION (same tera system)
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
 
     inputs.forEach(input => {
-        total += Number(input.value) || 0;
+        if(input.value){
+            total += Number(input.value);
+        }
     });
 
     document.getElementById("total").innerText = "₹ " + total;
 }
 
-// 🔥 SAVE HISTORY (GAME WISE)
-function saveHistory(bets, total){
+// 🔥 SUBMIT GAME (tera system + history add)
+function submitGame(){
 
-let history = JSON.parse(localStorage.getItem("history")) || [];
+    let inputs = document.querySelectorAll("input");
+    let bets = [];
 
-history.push({
-    game: gameName,
-    date: new Date().toLocaleString(),
-    bets: bets,
-    total: total
-});
+    inputs.forEach((input, index) => {
+        if(input.value){
+            let num = index.toString().padStart(2,'0');
+            bets.push(num + "-" + input.value);
+        }
+    });
 
-localStorage.setItem("history", JSON.stringify(history));
-
-}
-
-// 🔥 UPDATE BALANCE
-async function updateBalance(newBalance){
-
-let API_TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
-
-await fetch(`https://api.baserow.io/api/database/rows/table/897341/${user.id}/?user_field_names=true`, {
-  method: "PATCH",
-  headers: {
-    "Authorization": "Token " + API_TOKEN,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    balance: newBalance
-  })
-});
-
-user.balance = newBalance;
-localStorage.setItem("user", JSON.stringify(user));
-
-}
-
-// 🔥 SUBMIT
-async function submitGame(){
-
-let inputs = document.querySelectorAll("input");
-let total = 0;
-let bets = [];
-
-inputs.forEach((input, index) => {
-
-    let value = Number(input.value) || 0;
-
-    if(value > 0){
-        bets.push({
-            number: index.toString().padStart(2,'0'),
-            amount: value
-        });
+    if(bets.length === 0){
+        alert("Kuch enter karo ❌");
+        return;
     }
 
-    total += value;
-});
+    // 🔥 HISTORY SAVE (NEW ADD)
+    let history = JSON.parse(localStorage.getItem("admin_history")) || [];
 
-if(total <= 0){
-    alert("Enter amount ❌");
-    return;
-}
+    history.push({
+        game: gameName,
+        bets: bets.join(", "),
+        date: new Date().toLocaleString()
+    });
 
-if(user.balance < total){
-    alert("Low Balance ❌");
-    return;
-}
+    localStorage.setItem("admin_history", JSON.stringify(history));
 
-// SAVE HISTORY
-saveHistory(bets, total);
+    alert("Submit Ho Gaya ✅");
 
-// UPDATE BALANCE
-let newBalance = user.balance - total;
-await updateBalance(newBalance);
-
-alert("Game Submitted ✅");
-
-// RESET
-document.querySelectorAll("input").forEach(input => input.value = "");
-document.getElementById("total").innerText = "₹ 0";
-
+    // 🔄 RESET (same tera)
+    inputs.forEach(input => input.value = "");
+    document.getElementById("total").innerText = "₹ 0";
 }
 
 </script>
