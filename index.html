@@ -2,11 +2,34 @@
 <html>
 <head>
 <title>Login</title>
+
 <style>
-body{font-family:Arial;background:#f2f2f2;display:flex;justify-content:center;align-items:center;height:100vh;}
-.box{background:white;padding:20px;border-radius:15px;width:300px;text-align:center;}
-input{width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid #ccc;}
-button{width:100%;padding:10px;background:#1565c0;color:white;border:none;border-radius:8px;}
+body{
+  font-family: Arial;
+  background:#f2f2f2;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.box{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  width:300px;
+}
+input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+button{
+  width:100%;
+  padding:10px;
+  background:green;
+  color:white;
+  border:none;
+}
 </style>
 </head>
 
@@ -21,45 +44,53 @@ button{width:100%;padding:10px;background:#1565c0;color:white;border:none;border
 <button onclick="login()">Login</button>
 
 <a href="signup.html">Create Account</a>
+
 </div>
 
-
 <script>
-async function login() {
 
-  const mobile = document.getElementById("mobile").value.trim();
-const password = document.getElementById("password").value.trim();
+async function login(){
 
-  const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true", {
-    headers: {
-      "Authorization": "Token 3S3iB1eHvIZwRS163mml32fuZhQ5heQf"
-    }
-  });
+let mobile = document.getElementById("mobile").value.trim();
+let password = document.getElementById("password").value.trim();
 
-  const data = await res.json();
+if(!mobile || !password){
+  alert("Enter details");
+  return;
+}
 
-  let found = false;
-for (let user of data.results) {
+const res = await fetch("https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true",{
+headers:{
+"Authorization":"Token 3S3iB1eHvIZwRS163mml32fuzhQ5heQf"
+}
+});
 
-    if(
-        user.mobile.toString().trim() === mobile &&
-        user.password.toString().trim() === password
-    ){
-        found = true;
-        localStorage.setItem("mobile", mobile);
-        break;
-    }
+const data = await res.json();
+
+let found = false;
+
+for(let user of data.results){
+
+if(
+user.mobile == mobile &&
+user.password == password
+){
+found = true;
+localStorage.setItem("mobile", mobile);
+break;
+}
 
 }
-  if(found){
-    alert("Login Success ✅");
-    window.location.href = "home.html";
+
+if(found){
+alert("Login Success ✅");
+window.location.href = "home.html";
+}else{
+alert("Wrong Mobile or Password ❌");
 }
-  } else {
-    alert("Wrong Mobile or Password ❌");
-  }
 
 }
+
 </script>
 
 </body>
