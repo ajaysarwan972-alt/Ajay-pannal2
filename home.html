@@ -41,11 +41,13 @@ body{
 
 <script>
 
-const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co"; // ✅ tera URL
-const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a ";
+// ✅ SUPABASE CONFIG (FIXED)
+const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"; // ❗ space hata diya
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// 🔥 LOAD BUTTONS
 async function loadButtons(){
 
   let { data, error } = await client
@@ -58,6 +60,11 @@ async function loadButtons(){
   if(error){
     container.innerText = "Error";
     console.log(error);
+    return;
+  }
+
+  if(!data || data.length === 0){
+    container.innerText = "No Data";
     return;
   }
 
