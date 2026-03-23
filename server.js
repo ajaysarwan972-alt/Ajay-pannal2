@@ -20,7 +20,7 @@ let users = {
 app.post("/update-balance", (req, res) => {
     const { user, total } = req.body;
 
-    if (!users[user]) {
+    if (users[user] === undefined) {
         return res.json({ success: false, message: "User not found" });
     }
 
@@ -37,7 +37,7 @@ app.post("/update-balance", (req, res) => {
 });
 // 🔥 GET USER (dummy)
 app.post("/get-user", (req, res) => {
-    res.json({ balance: 1000 });
+    res.json({ balance: users["ajay"] });
 });
 
 app.listen(3000, () => {
