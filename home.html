@@ -52,7 +52,7 @@ async function loadButtons(){
 
   let { data, error } = await client
   .from("Game result")
-  .select("name")
+  .select("name, number")
   .limit(2);
 
   let container = document.getElementById("container");
@@ -73,7 +73,7 @@ async function loadButtons(){
   data.forEach(item => {
     let btn = document.createElement("div");
     btn.className = "btn";
-    btn.innerText = item.name;
+    btn.innerText = item.name + " - " + item.number;
 
     btn.onclick = () => {
       window.location.href = "game.html";
