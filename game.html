@@ -1,4 +1,4 @@
-l<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -81,10 +81,10 @@ body {
 
 <script>
 
-// 🔥 USER
+// 🔥 USER CHECK
 let user = JSON.parse(localStorage.getItem("user"));
 
-if(!user){
+if (!user) {
     alert("Login first");
     window.location.href = "index.html";
 }
@@ -114,7 +114,7 @@ function calcTotal() {
         let num = i.toString().padStart(2, '0');
         let val = document.getElementById(`box-${num}`).value;
 
-        if (val) total += parseInt(val);
+        if (val) total += Number(val);
     }
 
     document.getElementById("total").innerText = "₹ " + total;
@@ -123,63 +123,68 @@ function calcTotal() {
 // 🔥 SUBMIT GAME
 async function submitGame() {
 
+    let data = [];
     let total = 0;
 
     for (let i = 0; i < 100; i++) {
         let num = i.toString().padStart(2, '0');
         let val = document.getElementById(`box-${num}`).value;
 
-        if (val) total += parseInt(val);
+        if (val && val > 0) {
+            data.push({
+                number: num,
+                amount: Number(val)
+            });
+            total += Number(val);
+        }
     }
 
-    if (total === 0) {
-        alert("Amount daal");
+    if (data.length === 0) {
+        alert("Kuch amount daal bhai 😑");
         return;
     }
-
-    if (user.balance < total) {
-        alert("Balance kam hai");
-        return;
-    }
-
-    let newBalance = user.balance - total;
 
     try {
-        const res = await fetch("https://ajay-pannal2.onrender.com/update-balance", {
+        const res = await fetch("https://ajay-pannal2.onrender.com/submit-game", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                id: user.id,
-                balance: newBalance
+                userId: user.id || user.userId,
+                game: "main",
+                data: data,
+                total: total
             })
         });
 
-        const text = await res.text();
+        const result = await res.json();
 
-        let data;
+        // 🔥 HISTORY SAVE (SAFE)
+        let history = [];
+
         try {
-            data = JSON.parse(text);
+            history = JSON.parse(localStorage.getItem("history")) || [];
         } catch {
-            alert("❌ Server error (HTML aa raha hai)");
-            console.log(text);
-            return;
+            localStorage.removeItem("history");
         }
 
-        if (data.id) {
-            user.balance = newBalance;
-            localStorage.setItem("user", JSON.stringify(user));
+        history.push({
+            game: "main",
+            data: data,
+            total: total,
+            time: new Date().toLocaleString()
+        });
 
-            alert("✅ Balance cut ho gaya");
-            document.getElementById("total").innerText = "₹ 0";
+        if (history.length > 50) history.shift();
 
-            // clear inputs
-            document.querySelectorAll("input").forEach(i => i.value = "");
+        localStorage.setItem("history", JSON.stringify(history));
 
-        } else {
-            alert("❌ Update failed");
-        }
+        alert("Game Submitted ✅");
+
+        // 🔥 RESET
+        document.querySelectorAll("input").forEach(inp => inp.value = "");
+        calcTotal();
 
     } catch (err) {
         alert("Error: " + err.message);
