@@ -20,11 +20,11 @@ let users = {
 app.post("/update-balance", (req, res) => {
     const { user, total } = req.body;
 
-    if (users[user] === undefined) {
-        return res.json({ success: false, message: "User not found" });
-    }
+ if (users[user] === undefined) {
+  users[user] = 1; // auto create user with ₹1
+}
 
-    if (users[user] <= 0) {
+    if (users[user] < total)
         return res.json({ success: false, message: "Low balance" });
     }
 
@@ -36,9 +36,13 @@ app.post("/update-balance", (req, res) => {
     });
 });
 // 🔥 GET USER (dummy)
-app.post("/get-user", (req, res) => {
-    res.json({ balance: users["ajay"] });
-});
+const { user } = req.body;
+
+if (users[user] === undefined) {
+  users[user] = 1;
+}
+
+res.json({ balance: users[user] });
 
 app.listen(3000, () => {
     console.log("Server running on port 3000");
