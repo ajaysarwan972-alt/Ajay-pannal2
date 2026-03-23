@@ -24,9 +24,9 @@ app.post("/update-balance", (req, res) => {
   users[user] = 1; // auto create user with ₹1
 }
 
-    if (users[user] < total)
-        return res.json({ success: false, message: "Low balance" });
-    }
+    if (users[user] < total) {
+    return res.json({ success: false, message: "Low balance" });
+}
 
     users[user] -= total;
 
