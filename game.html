@@ -67,7 +67,6 @@ body {
     cursor: pointer;
 }
 </style>
-
 </head>
 
 <body>
@@ -81,45 +80,17 @@ body {
 
 <script>
 
-// 🔐 CONFIG
-const API_TOKEN = "PASTE_NEW_TOKEN_HERE"; 3S3iB1eHvIZwRS163mml32fuZhQ5heQf apna NEW token daal
-const TABLE_ID = "897341";
+// 🔥 USER (login se aata hai)
+let user = JSON.parse(localStorage.getItem("user"));
 
-// 🔥 USER ID (login ke time save hona chahiye)
-const USER_ID = localStorage.getItem("user_id");
-
-if(!USER_ID){
+if(!user){
     alert("Login first");
     window.location.href = "index.html";
 }
 
-let currentBalance = 0;
-
-// 🔥 GET USER DATA
-async function getUser() {
-    let res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/${USER_ID}/`, {
-        headers: {
-            "Authorization": "Token " + API_TOKEN
-        }
-    });
-
-    let data = await res.json();
-    currentBalance = parseInt(data.balance) || 0;
-}
-
-// 🔥 UPDATE BALANCE
-async function updateBalance(newBalance) {
-    await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/${USER_ID}/`, {
-        method: "PATCH",
-        headers: {
-            "Authorization": "Token " + API_TOKEN,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            balance: newBalance
-        })
-    });
-}
+// 🔥 BASEROW CONFIG
+const TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
+const TABLE_ID = "897341"; // tera table
 
 // 🔥 CREATE BOXES
 let grid = document.getElementById("grid");
@@ -138,50 +109,76 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// 🔥 TOTAL CALC
+// 🔥 TOTAL CALCULATION
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
 
-    inputs.forEach(input => {
-        total += parseInt(input.value) || 0;
+    inputs.forEach(i => {
+        total += Number(i.value) || 0;
     });
 
     document.getElementById("total").innerText = "₹ " + total;
 }
 
 // 🔥 SUBMIT GAME
-async function submitGame() {
+async function submitGame(){
 
     let inputs = document.querySelectorAll("input");
     let total = 0;
 
-    inputs.forEach(input => {
-        total += parseInt(input.value) || 0;
+    inputs.forEach(i => {
+        total += Number(i.value) || 0;
     });
 
-    if (total === 0) {
-        alert("Amount dalo");
+    if(total <= 0){
+        alert("Enter amount");
         return;
     }
 
-    if (total > currentBalance) {
-        alert("Balance kam hai ❌");
-        return;
+    try{
+
+        // 👉 1. USER DATA FETCH
+        let res = await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/${user.id}/`, {
+            headers: {
+                "Authorization": "Token " + TOKEN
+            }
+        });
+
+        let data = await res.json();
+
+        let currentBalance = Number(data.balance);
+
+        // 👉 2. CHECK BALANCE
+        if(currentBalance < total){
+            alert("Low balance");
+            return;
+        }
+
+        let newBalance = currentBalance - total;
+
+        // 👉 3. UPDATE BALANCE
+        await fetch(`https://api.baserow.io/api/database/rows/table/${TABLE_ID}/${user.id}/`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": "Token " + TOKEN,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                balance: newBalance
+            })
+        });
+
+        alert("Game Submitted ✅ Balance Cut Ho Gaya");
+
+        // 👉 OPTIONAL: reset inputs
+        document.querySelectorAll("input").forEach(i => i.value = "");
+        calcTotal();
+
+    }catch(err){
+        alert("Error: " + err.message);
     }
-
-    let newBalance = currentBalance - total;
-
-    // 🔥 UPDATE BASEROW
-    await updateBalance(newBalance);
-
-    alert("Bet placed ✅");
-
-    location.reload();
 }
-
-// 🔥 LOAD USER DATA
-getUser();
 
 </script>
 
