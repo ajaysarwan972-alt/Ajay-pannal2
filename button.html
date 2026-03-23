@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Button</title>
+
+<style>
+.box{
+  background:#eee;
+  border:2px solid green;
+  border-radius:8px;
+  padding:30px;
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  margin:20px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box" id="btn">Loading...</div>
+
+<script>
+
+// 🔥 Baserow data load
+async function loadData(){
+
+  let res = await fetch("https://api.baserow.io/api/database/rows/table/YOUR_TABLE_ID/", {
+    headers:{
+      "Authorization": "Token YOUR_API_TOKEN"
+    }
+  });
+
+  let data = await res.json();
+
+  let item = data.results[0]; // first row
+
+  let btn = document.getElementById("btn");
+
+  // show name + number
+  btn.innerText = item.name + " - " + item.number;
+
+  // click → open link
+  btn.onclick = function(){
+    window.location.href = item.link;
+  }
+
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
