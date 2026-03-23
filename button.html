@@ -25,7 +25,7 @@
 
 <body>
 
-<div class="box" id="btn">Loading...</div>
+<div id="container"></div>
 
 <script>
 const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
@@ -50,19 +50,20 @@ async function loadData() {
     return;
   }
 
-  let item = data[0];
-  let btn = document.getElementById("btn");
+let container = document.getElementById("container");
 
-  // ✅ show data
+data.forEach(item => {
+  let btn = document.createElement("div");
+  btn.className = "box";
+
   btn.innerText = item.name + " - " + item.number;
 
-  // ✅ click → open link
-  btn.onclick = function(){
+  btn.onclick = function() {
     window.location.href = item.link;
   }
-}
 
-loadData();
+  container.appendChild(btn);
+});
 </script>
 
 </body>
