@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
 
 // 🔥 UPDATE BALANCE
 let users = {
-    "ajay": 1000
+    "ajay": 1
 };
 
 app.post("/update-balance", (req, res) => {
@@ -24,7 +24,7 @@ app.post("/update-balance", (req, res) => {
         return res.json({ success: false, message: "User not found" });
     }
 
-    if (users[user] < total) {
+    if (users[user] <= 0) {
         return res.json({ success: false, message: "Low balance" });
     }
 
