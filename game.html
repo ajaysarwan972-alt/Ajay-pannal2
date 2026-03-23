@@ -160,7 +160,12 @@ function submitGame() {
             total: total
         })
     })
-    .then(res => res.json())
+    .then(res => {
+    if (!res.ok) {
+        throw new Error("Server error");
+    }
+    return res.json();
+})
     .then(res => {
 
         // 🔥 SAVE HISTORY LOCAL
