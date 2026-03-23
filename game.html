@@ -178,7 +178,20 @@ function submitGame() {
         });
 
         localStorage.setItem("history", JSON.stringify(history));
-
+fetch("https://TERA-SERVER-URL/update-balance", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    user: userId,   // jo login user hai
+    total: 1        // bet amount
+  })
+})
+.then(res => res.json())
+.then(data => {
+  console.log(data);
+});
         alert("Game Saved ✅");
 
         // 🔥 RESET
