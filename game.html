@@ -1,50 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Game</title>
+    <title>Game 00-99</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin: 0;
+        }
+
+        h2 {
+            margin: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        input {
+            width: 80%;
+            padding: 6px;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: green;
+            color: white;
+            border: none;
+            font-size: 16px;
+        }
+    </style>
 </head>
+
 <body>
 
 <h2>Balance: ₹ <span id="balance">0</span></h2>
 
-<input type="number" placeholder="Enter Amount" id="amount">
-
-<br><br>
+<div class="grid" id="game"></div>
 
 <button onclick="submitGame()">SUBMIT</button>
 
 <script>
-const API = "https://ajay-pannal2.onrender.com";
 
-document.getElementById("balance").innerText = localStorage.getItem("balance") || 0;
+// 🔥 USER (login ke baad mobile save hona chahiye)
+const mobile = localStorage.getItem("mobile");
 
+// 🔥 00–99 numbers generate
+const numbers = [];
+for (let i = 0; i <= 99; i++) {
+    numbers.push(i.toString().padStart(2, '0'));
+}
+
+// 🔥 LOAD GAME UI
+const gameDiv = document.getElementById("game");
+
+numbers.forEach(num => {
+    gameDiv.innerHTML += `
+        <div class="box">
+            <h3>${num}</h3>
+            <input type="number" id="box-${num}" placeholder="₹">
+        </div>
+    `;
+});
+
+// 🔥 LOAD USER FROM SERVER
+async function loadUser() {
+
+    try {
+        const res = await fetch("https://ajay-pannal2.onrender.com/get-user", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ mobile: mobile })
+        });
+
+        const data = await res.json();
+
+        if (data) {
+            document.getElementById("balance").innerText = data.balance;
+            localStorage.setItem("userId", data.id);
+        } else {
+            alert("User not found");
+        }
+
+    } catch (err) {
+        alert("Load error: " + err.message);
+    }
+}
+
+loadUser();
+
+
+// 🔥 SUBMIT GAME
 async function submitGame() {
 
-    const id = localStorage.getItem("userId");
-    const amount = parseInt(document.getElementById("amount").value);
+    let total = 0;
 
-    if (!amount) {
-        alert("Amount daal bhai");
+    numbers.forEach(num => {
+        const val = document.getElementById(`box-${num}`).value;
+        if (val) total += parseInt(val);
+    });
+
+    if (total === 0) {
+        alert("Amount daal");
         return;
     }
 
-    let balance = parseInt(localStorage.getItem("balance")) || 0;
+    let balance = parseInt(document.getElementById("balance").innerText);
 
-    if (balance < amount) {
+    if (balance < total) {
         alert("Balance kam hai");
         return;
     }
 
-    const newBalance = balance - amount;
+    const newBalance = balance - total;
 
     try {
-        const res = await fetch(API + "/update-balance", {
+        const res = await fetch("https://ajay-pannal2.onrender.com/update-balance", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                id: id,
+                id: localStorage.getItem("userId"),
                 balance: newBalance
             })
         });
@@ -52,7 +143,6 @@ async function submitGame() {
         const data = await res.json();
 
         if (data.id) {
-            localStorage.setItem("balance", newBalance);
             document.getElementById("balance").innerText = newBalance;
             alert("✅ Balance cut ho gaya (REAL)");
         } else {
@@ -63,6 +153,7 @@ async function submitGame() {
         alert("❌ " + err.message);
     }
 }
+
 </script>
 
 </body>
