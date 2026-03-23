@@ -13,26 +13,56 @@
   text-align:center;
   font-size:18px;
   font-weight:bold;
-  width:100px;        
-  margin:20px 0 20px 10px; 
+  width:200px;
+  margin:20px;
 }
 </style>
+
+<!-- ✅ Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 </head>
 
 <body>
 
-<div class="box" id="btn">Go to Page</div>
+<div class="box" id="btn">Loading...</div>
 
 <script>
-let btn = document.getElementById("btn");
+const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
-btn.onclick = function(){
-  window.location.href = "1page.html";
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function loadData() {
+
+  let { data, error } = await supabaseClient
+    .from('Game')   // ⚠️ table name check (Game ya game)
+    .select('*');
+
+  if (error) {
+    console.log(error);
+    document.getElementById("btn").innerText = "Error";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    document.getElementById("btn").innerText = "No Data";
+    return;
+  }
+
+  let item = data[0];
+  let btn = document.getElementById("btn");
+
+  // ✅ show data
+  btn.innerText = item.name + " - " + item.number;
+
+  // ✅ click → open link
+  btn.onclick = function(){
+    window.location.href = item.link;
+  }
 }
-// 🔥 Baserow data load
 
-
+loadData();
 </script>
 
 </body>
