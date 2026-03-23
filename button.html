@@ -22,36 +22,16 @@
 
 <body>
 
-<div class="box" id="btn">Loading...</div>
+<div class="box" id="btn">Go to Page</div>
 
 <script>
+let btn = document.getElementById("btn");
 
-// 🔥 Baserow data load
-async function loadData(){
-
-  let res = await fetch("https://api.baserow.io/api/database/rows/table/YOUR_TABLE_ID/", {
-    headers:{
-      "Authorization": "Token YOUR_API_TOKEN"
-    }
-  });
-
-  let data = await res.json();
-
-  let item = data.results[0]; // first row
-
-  let btn = document.getElementById("btn");
-
-  // show name + number
-  btn.innerText = item.name + " - " + item.number;
-
-  // click → open link
-  btn.onclick = function(){
-    window.location.href = "1page.html";
-  }
-
+btn.onclick = function(){
+  window.location.href = "1page.html";
 }
+// 🔥 Baserow data load
 
-loadData();
 
 </script>
 
