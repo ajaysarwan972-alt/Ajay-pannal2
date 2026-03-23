@@ -13,11 +13,28 @@ app.get("/", (req, res) => {
 });
 
 // 🔥 UPDATE BALANCE
-app.post("/update-balance", (req, res) => {
-    console.log("DATA AAYA:", req.body);
-    res.json({ success: true });
-});
+let users = {
+    "ajay": 1000
+};
 
+app.post("/update-balance", (req, res) => {
+    const { user, total } = req.body;
+
+    if (!users[user]) {
+        return res.json({ success: false, message: "User not found" });
+    }
+
+    if (users[user] < total) {
+        return res.json({ success: false, message: "Low balance" });
+    }
+
+    users[user] -= total;
+
+    res.json({
+        success: true,
+        balance: users[user]
+    });
+});
 // 🔥 GET USER (dummy)
 app.post("/get-user", (req, res) => {
     res.json({ balance: 1000 });
