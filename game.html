@@ -83,7 +83,6 @@ body {
 <script>
 
 // 🔥 USER CHECK
-let user = JSON.parse(localStorage.getItem("user"));
 
 if (!user) {
     alert("Login first");
@@ -124,11 +123,24 @@ function calcTotal() {
 }
 
 // 🔥 SUBMIT GAME
-function submitGame() {
+
+async function submitGame() {
 
     let data = [];
     let total = 0;
 
+    // 👇 यहीं डाल
+    let userId;
+
+    let res = await fetch("https://api.baserow.io/api/database/rows/table/YOUR_TABLE_ID/?user_field_names=true", {
+      headers: {
+        "Authorization": "Token YOUR_API_TOKEN"
+      }
+    });
+
+    let result = await res.json();
+
+    userId = result.results[0].id;
     for (let i = 0; i < 100; i++) {
         let num = i.toString().padStart(2, '0');
         let value = document.getElementById("box-" + num).value;
