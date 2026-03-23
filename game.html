@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -89,11 +89,7 @@ if(!user){
     window.location.href = "index.html";
 }
 
-// 🔥 GAME NAME (URL se)
-let params = new URLSearchParams(window.location.search);
-let gameName = params.get("game") || "DEFAULT";
-
-// CREATE BOXES
+// 🔥 CREATE 00–99 BOXES
 let grid = document.getElementById("grid");
 
 for (let i = 0; i < 100; i++) {
@@ -104,5 +100,93 @@ for (let i = 0; i < 100; i++) {
 
     div.innerHTML = `
         <div class="number">${num}</div>
-        <input type="number" placeholder="₹" oninput="calcTotal()">
+        <input type="number" id="box-${num}" placeholder="₹" oninput="calcTotal()">
     `;
+
+    grid.appendChild(div);
+}
+
+// 🔥 TOTAL CALCULATION
+function calcTotal() {
+    let total = 0;
+
+    for (let i = 0; i < 100; i++) {
+        let num = i.toString().padStart(2, '0');
+        let val = document.getElementById(`box-${num}`).value;
+
+        if (val) total += parseInt(val);
+    }
+
+    document.getElementById("total").innerText = "₹ " + total;
+}
+
+// 🔥 SUBMIT GAME
+async function submitGame() {
+
+    let total = 0;
+
+    for (let i = 0; i < 100; i++) {
+        let num = i.toString().padStart(2, '0');
+        let val = document.getElementById(`box-${num}`).value;
+
+        if (val) total += parseInt(val);
+    }
+
+    if (total === 0) {
+        alert("Amount daal");
+        return;
+    }
+
+    if (user.balance < total) {
+        alert("Balance kam hai");
+        return;
+    }
+
+    let newBalance = user.balance - total;
+
+    try {
+        const res = await fetch("https://ajay-pannal2.onrender.com/update-balance", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: user.id,
+                balance: newBalance
+            })
+        });
+
+        const text = await res.text();
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch {
+            alert("❌ Server error (HTML aa raha hai)");
+            console.log(text);
+            return;
+        }
+
+        if (data.id) {
+            user.balance = newBalance;
+            localStorage.setItem("user", JSON.stringify(user));
+
+            alert("✅ Balance cut ho gaya");
+            document.getElementById("total").innerText = "₹ 0";
+
+            // clear inputs
+            document.querySelectorAll("input").forEach(i => i.value = "");
+
+        } else {
+            alert("❌ Update failed");
+        }
+
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+}
+
+</script>
+
+</body>
+</html>
