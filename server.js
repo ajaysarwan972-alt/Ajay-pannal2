@@ -4,16 +4,24 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Serve all static files (HTML, CSS, JS)
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Static files serve karega (HTML, CSS, JS)
 app.use(express.static(__dirname));
 
-// Default route → open index.html
+// Default route
 app.get("/", (req, res) => {
-res.sendFile(path.join(__dirname, "index.html"));
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, () => {
-console.log("Server running on port " + PORT);
+// Test route (optional)
+app.get("/test", (req, res) => {
+    res.send("Server chal raha hai 🚀");
 });
 
-Le jo add krna he kr le pr servay kharab na kario
+// Start server
+app.listen(PORT, "0.0.0.0", () => {
+    console.log("Server running on port " + PORT);
+});
