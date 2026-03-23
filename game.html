@@ -1,168 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game</title>
-
-<style>
-body { font-family: Arial; background:#f2f2f2; margin:0; }
-
-.container {
-    display:grid;
-    grid-template-columns: repeat(4,1fr);
-    gap:12px;
-    padding:12px;
-}
-
-.box {
-    background:white;
-    border-radius:12px;
-    padding:10px;
-    text-align:center;
-}
-
-.number { color:red; font-weight:bold; }
-
-.box input {
-    width:90%;
-    height:35px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    text-align:center;
-}
-
-.bottom {
-    position:fixed;
-    bottom:0;
-    width:100%;
-    display:flex;
-}
-
-.total {
-    width:50%;
-    padding:15px;
-    background:blue;
-    color:white;
-    text-align:center;
-}
-
-.submit {
-    width:50%;
-    padding:15px;
-    background:green;
-    color:white;
-    text-align:center;
-    cursor:pointer;
-}
-</style>
+    <title>Game</title>
 </head>
-
 <body>
 
-<div class="container" id="grid"></div>
+<h2>Balance: ₹ <span id="balance">0</span></h2>
 
-<div class="bottom">
-    <div class="total" id="total">₹ 0</div>
-    <div class="submit" onclick="submitGame()">SUBMIT</div>
-</div>
+<input type="number" placeholder="Enter Amount" id="amount">
+
+<br><br>
+
+<button onclick="submitGame()">SUBMIT</button>
 
 <script>
+const API = "https://ajay-pannal2.onrender.com";
 
-// USER (sirf mobile ke liye)
-let user = JSON.parse(localStorage.getItem("user"));
-if(!user){
-    alert("Login first");
-    location.href = "index.html";
-}
+document.getElementById("balance").innerText = localStorage.getItem("balance") || 0;
 
-// CREATE 00-99 BOX
-let grid = document.getElementById("grid");
+async function submitGame() {
 
-for(let i=0;i<100;i++){
-    let num = i.toString().padStart(2,'0');
+    const id = localStorage.getItem("userId");
+    const amount = parseInt(document.getElementById("amount").value);
 
-    let div = document.createElement("div");
-    div.className="box";
-
-    div.innerHTML = `
-        <div class="number">${num}</div>
-        <input type="number" oninput="calcTotal()">
-    `;
-
-    grid.appendChild(div);
-}
-
-// TOTAL CALC
-function calcTotal(){
-    let inputs = document.querySelectorAll("input");
-    let total = 0;
-
-    inputs.forEach(i=>{
-        total += Number(i.value) || 0;
-    });
-
-    document.getElementById("total").innerText = "₹ " + total;
-}
-
-// SUBMIT GAME
-async function submitGame(){
-
-    let inputs = document.querySelectorAll("input");
-    let total = 0;
-
-    inputs.forEach(i=>{
-        total += Number(i.value) || 0;
-    });
-
-    if(total === 0){
-        alert("Enter amount");
+    if (!amount) {
+        alert("Amount daal bhai");
         return;
     }
 
+    let balance = parseInt(localStorage.getItem("balance")) || 0;
+
+    if (balance < amount) {
+        alert("Balance kam hai");
+        return;
+    }
+
+    const newBalance = balance - amount;
+
     try {
-
-        // GET USER FROM SERVER
-        let res = await fetch("/get-user",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({ mobile:user.mobile })
-        });
-
-        let dbUser = await res.json();
-
-        if(!dbUser){
-            alert("User not found");
-            return;
-        }
-
-        let balance = Number(dbUser.balance);
-
-        if(balance < total){
-            alert("Low balance");
-            return;
-        }
-
-        let newBalance = balance - total;
-
-        // UPDATE BALANCE
-        await fetch("/update-balance",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
+        const res = await fetch(API + "/update-balance", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
-                id: dbUser.id,
+                id: id,
                 balance: newBalance
             })
         });
 
-        alert("✅ Balance REAL cut ho gaya");
+        const data = await res.json();
 
-        location.reload();
+        if (data.id) {
+            localStorage.setItem("balance", newBalance);
+            document.getElementById("balance").innerText = newBalance;
+            alert("✅ Balance cut ho gaya (REAL)");
+        } else {
+            alert("❌ Server error");
+        }
 
-    } catch(err) {
-        alert("Error: " + err.message);
+    } catch (err) {
+        alert("❌ " + err.message);
     }
 }
-
 </script>
 
 </body>
