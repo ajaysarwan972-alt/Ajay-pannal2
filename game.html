@@ -16,6 +16,7 @@ body {
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     padding: 12px;
+    padding-bottom: 80px;
 }
 
 .box {
@@ -89,7 +90,7 @@ if (!user) {
     window.location.href = "index.html";
 }
 
-// 🔥 CREATE 00–99 BOXES
+// 🔥 CREATE BOXES
 let grid = document.getElementById("grid");
 
 for (let i = 0; i < 100; i++) {
@@ -112,83 +113,75 @@ function calcTotal() {
 
     for (let i = 0; i < 100; i++) {
         let num = i.toString().padStart(2, '0');
-        let val = document.getElementById(`box-${num}`).value;
+        let val = document.getElementById("box-" + num).value;
 
-        if (val) total += Number(val);
+        if (val) {
+            total += parseInt(val);
+        }
     }
 
     document.getElementById("total").innerText = "₹ " + total;
 }
 
 // 🔥 SUBMIT GAME
-async function submitGame() {
+function submitGame() {
 
     let data = [];
     let total = 0;
 
     for (let i = 0; i < 100; i++) {
         let num = i.toString().padStart(2, '0');
-        let val = document.getElementById(`box-${num}`).value;
+        let value = document.getElementById("box-" + num).value;
 
-        if (val && val > 0) {
+        if (value && value > 0) {
             data.push({
                 number: num,
-                amount: Number(val)
+                amount: value
             });
-            total += Number(val);
+
+            total += parseInt(value);
         }
     }
 
     if (data.length === 0) {
-        alert("Kuch amount daal bhai 😑");
+        alert("Kuch amount daal bhai 😅");
         return;
     }
 
-    try {
-        const res = await fetch("https://ajay-pannal2.onrender.com/submit-game", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                userId: user.id || user.userId,
-                game: "main",
-                data: data,
-                total: total
-            })
-        });
+    // 🔥 BACKEND CALL (FIXED)
+    fetch("https://ajay-pannal2.onrender.com/update-balance", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            user: user,
+            data: data,
+            total: total
+        })
+    })
+    .then(res => res.json())
+    .then(res => {
 
-        const result = await res.json();
-
-        // 🔥 HISTORY SAVE (SAFE)
-        let history = [];
-
-        try {
-            history = JSON.parse(localStorage.getItem("history")) || [];
-        } catch {
-            localStorage.removeItem("history");
-        }
+        // 🔥 SAVE HISTORY LOCAL
+        let history = JSON.parse(localStorage.getItem("history")) || [];
 
         history.push({
-            game: "main",
+            time: new Date().toLocaleString(),
             data: data,
-            total: total,
-            time: new Date().toLocaleString()
+            total: total
         });
-
-        if (history.length > 50) history.shift();
 
         localStorage.setItem("history", JSON.stringify(history));
 
-        alert("Game Submitted ✅");
+        alert("Game Saved ✅");
 
         // 🔥 RESET
-        document.querySelectorAll("input").forEach(inp => inp.value = "");
-        calcTotal();
-
-    } catch (err) {
+        location.reload();
+    })
+    .catch(err => {
         alert("Error: " + err.message);
-    }
+    });
 }
 
 </script>
