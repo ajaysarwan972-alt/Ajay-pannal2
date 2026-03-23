@@ -7,11 +7,11 @@ const PORT = process.env.PORT || 10000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// ✅ BASEROW CONFIG (IMPORTANT)
+// ✅ BASEROW CONFIG
 const TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
 const TABLE_ID = "897341";
 
-// ✅ GET USER BY MOBILE
+// ✅ GET USER
 app.post("/get-user", async (req, res) => {
     try {
         const { mobile } = req.body;
@@ -26,12 +26,7 @@ app.post("/get-user", async (req, res) => {
         );
 
         const data = await response.json();
-
-        if (!data.results || data.results.length === 0) {
-            return res.json(null);
-        }
-
-        res.json(data.results[0]);
+        res.json(data.results[0] || null);
 
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -56,7 +51,6 @@ app.post("/update-balance", async (req, res) => {
         );
 
         const data = await response.json();
-
         res.json(data);
 
     } catch (err) {
@@ -64,7 +58,6 @@ app.post("/update-balance", async (req, res) => {
     }
 });
 
-// ✅ SERVER START
 app.listen(PORT, "0.0.0.0", () => {
     console.log("Server running on port " + PORT);
 });
