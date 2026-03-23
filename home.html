@@ -4,8 +4,14 @@
 <title>Home</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 <style>
-body{margin:0;font-family:Arial;background:#f2f2f2;}
+body{
+  margin:0;
+  font-family: Arial;
+  background:#f2f2f2;
+}
 
 .top{
   background:#fff;
@@ -29,11 +35,7 @@ body{margin:0;font-family:Arial;background:#f2f2f2;}
   text-align:center;
   font-size:18px;
   font-weight:bold;
-}
-
-.disabled{
-  background:#ccc;
-  border-color:red;
+  cursor:pointer;
 }
 
 .bottom{
@@ -47,8 +49,6 @@ body{margin:0;font-family:Arial;background:#f2f2f2;}
 }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
 </head>
 
 <body>
@@ -58,40 +58,27 @@ body{margin:0;font-family:Arial;background:#f2f2f2;}
   <h3>Balance: ₹<span id="balance">Loading...</span></h3>
 </div>
 
-<div class="grid" id="container">Loading...</div>
+<!-- 🔥 GAME CONTAINER -->
+<div class="grid" id="container">
+  Loading...
+</div>
 
 <div class="bottom">
   <div>🏠 Home</div>
   <div>💰 Wallet</div>
   <div>📞 Support</div>
-  <div>🚪 Logout</div>
+  <div onclick="logout()">🚪 Logout</div>
 </div>
 
 <script>
 
-// ✅ TERA PROJECT URL (already set)
+// 🔥 SUPABASE CONFIG
 const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
-
-// 🔴 SIRF YEH DALNA HAI
 const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a ";
 
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// ⏰ TIME CHECK
-function isOpen(open, close){
-  let now = new Date();
-  let current = now.getHours()*60 + now.getMinutes();
-
-  let o = open.split(":");
-  let c = close.split(":");
-
-  let openMin = parseInt(o[0])*60 + parseInt(o[1]);
-  let closeMin = parseInt(c[0])*60 + parseInt(c[1]);
-
-  return current >= openMin && current <= closeMin;
-}
-
-// 🔥 LOAD DATA
+// 🔥 LOAD GAMES
 async function loadGames(){
 
 let { data, error } = await supabase
@@ -99,11 +86,12 @@ let { data, error } = await supabase
 .select("*")
 .order("id");
 
+console.log(data, error);
+
 let container = document.getElementById("container");
 
 if(error){
-  container.innerText = "Error loading data";
-  console.log(error);
+  container.innerText = "Error aa gaya";
   return;
 }
 
@@ -119,20 +107,11 @@ data.forEach(item => {
   let box = document.createElement("div");
   box.className = "box";
 
-  let status = isOpen(item.open, item.close);
-
   box.innerText = item.name + " - " + item.number;
 
-  if(!status){
-    box.classList.add("disabled");
-  }
-
+  // 🔥 CLICK → GAME PAGE
   box.onclick = () => {
-    if(status){
-      window.location.href = "game.html";
-    }else{
-      alert("Game Closed");
-    }
+    window.location.href = "game.html";
   };
 
   container.appendChild(box);
@@ -141,6 +120,23 @@ data.forEach(item => {
 
 }
 
+// 🔥 USER LOAD (basic)
+function loadUser(){
+let user = JSON.parse(localStorage.getItem("user"));
+if(user){
+  document.getElementById("userId").innerText = user.id;
+  document.getElementById("balance").innerText = user.balance;
+}
+}
+
+// LOGOUT
+function logout(){
+localStorage.removeItem("user");
+window.location.href = "index.html";
+}
+
+// RUN
+loadUser();
 loadGames();
 
 </script>
