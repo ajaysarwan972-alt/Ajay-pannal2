@@ -5,18 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  margin:0;
-  font-family: Arial;
-  background:#f2f2f2;
-}
+body{margin:0;font-family:Arial;background:#f2f2f2;}
 
 .top{
   background:#fff;
   margin:10px;
   padding:15px;
   border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 .grid{
@@ -36,6 +31,11 @@ body{
   font-weight:bold;
 }
 
+.disabled{
+  background:#ccc;
+  border-color:red;
+}
+
 .bottom{
   position:fixed;
   bottom:0;
@@ -44,87 +44,100 @@ body{
   display:flex;
   justify-content:space-around;
   padding:10px 0;
-  box-shadow:0 -2px 10px rgba(0,0,0,0.1);
-}
-
-.btn{
-  text-align:center;
-  font-size:14px;
 }
 </style>
 
-<!-- ✅ Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 </head>
 
 <body>
 
-<!-- TOP -->
 <div class="top">
   <h3>User ID: <span id="userId">Loading...</span></h3>
   <h3>Balance: ₹<span id="balance">Loading...</span></h3>
 </div>
 
-<!-- ✅ DYNAMIC BUTTONS -->
-<div class="grid" id="container"></div>
+<div class="grid" id="container">Loading...</div>
 
-<!-- BOTTOM -->
 <div class="bottom">
-  <div class="btn">🏠<br>Home</div>
-  <div class="btn">💰<br>Wallet</div>
-  <div class="btn">📞<br>Support</div>
-  <div class="btn">🚪<br>Logout</div>
+  <div>🏠 Home</div>
+  <div>💰 Wallet</div>
+  <div>📞 Support</div>
+  <div>🚪 Logout</div>
 </div>
 
 <script>
 
-// 🔥 SUPABASE CONNECT
+// ✅ TERA PROJECT URL (already set)
 const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
-const supabaseKey = "YOUR_PUBLIC_KEY_HERE";
+
+// 🔴 SIRF YEH DALNA HAI
+const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a ";
+
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// ⏰ TIME CHECK
+function isOpen(open, close){
+  let now = new Date();
+  let current = now.getHours()*60 + now.getMinutes();
+
+  let o = open.split(":");
+  let c = close.split(":");
+
+  let openMin = parseInt(o[0])*60 + parseInt(o[1]);
+  let closeMin = parseInt(c[0])*60 + parseInt(c[1]);
+
+  return current >= openMin && current <= closeMin;
+}
 
 // 🔥 LOAD DATA
 async function loadGames(){
 
-  let { data, error } = await supabase
-    .from("Game")
-    .select("*")
-    .order("id", { ascending: true });
+let { data, error } = await supabase
+.from("Game")
+.select("*")
+.order("id");
 
-  let container = document.getElementById("container");
+let container = document.getElementById("container");
 
-  if(error){
-    container.innerHTML = "Error loading";
-    console.log(error);
-    return;
+if(error){
+  container.innerText = "Error loading data";
+  console.log(error);
+  return;
+}
+
+if(!data || data.length === 0){
+  container.innerText = "No Data";
+  return;
+}
+
+container.innerHTML = "";
+
+data.forEach(item => {
+
+  let box = document.createElement("div");
+  box.className = "box";
+
+  let status = isOpen(item.open, item.close);
+
+  box.innerText = item.name + " - " + item.number;
+
+  if(!status){
+    box.classList.add("disabled");
   }
 
-  if(!data || data.length === 0){
-    container.innerHTML = "No Data";
-    return;
-  }
-
-  container.innerHTML = "";
-
-  data.forEach(item => {
-
-    let box = document.createElement("div");
-    box.className = "box";
-
-    // 🔥 NAME + NUMBER
-    box.innerText = item.name + " - " + item.number;
-
-    // 🔥 CLICK OPEN LINK
-    box.onclick = function(){
-      if(item.link){
-        window.location.href = item.link;
-      }
+  box.onclick = () => {
+    if(status){
+      window.location.href = "game.html";
+    }else{
+      alert("Game Closed");
     }
+  };
 
-    container.appendChild(box);
+  container.appendChild(box);
 
-  });
+});
 
 }
 
