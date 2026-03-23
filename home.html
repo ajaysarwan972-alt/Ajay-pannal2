@@ -11,7 +11,6 @@ body{
   background:#f2f2f2;
 }
 
-/* TOP */
 .top{
   background:#fff;
   margin:10px;
@@ -20,7 +19,6 @@ body{
   box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-/* GRID */
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -38,12 +36,6 @@ body{
   font-weight:bold;
 }
 
-a{
-  text-decoration:none;
-  color:black;
-}
-
-/* BOTTOM NAV */
 .bottom{
   position:fixed;
   bottom:0;
@@ -61,6 +53,9 @@ a{
 }
 </style>
 
+<!-- ✅ Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 </head>
 
 <body>
@@ -71,94 +66,69 @@ a{
   <h3>Balance: ₹<span id="balance">Loading...</span></h3>
 </div>
 
-<!-- GAMES -->
-  <a href="button.html" style="width:200px; height:70px; border:none;"></iframe>
-<div class="grid">
+<!-- ✅ DYNAMIC BUTTONS -->
+<div class="grid" id="container"></div>
 
-<a href="game.html"><div class="box">Game 1</div></a>
-<a href="game.html"><div class="box">Game 2</div></a>
-<a href="game.html"><div class="box">Game 3</div></a>
-<a href="game.html"><div class="box">Game 4</div></a>
-<a href="game.html"><div class="box">Game 5</div></a>
-<a href="game.html"><div class="box">Game 6</div></a>
-<a href="game.html"><div class="box">Game 7</div></a>
-<a href="game.html"><div class="box">Game 8</div></a>
-<a href="game.html"><div class="box">Game 9</div></a>
-<a href="game.html"><div class="box">Game 10</div></a>
-
-</div>
-
-<!-- BOTTOM NAV -->
+<!-- BOTTOM -->
 <div class="bottom">
-  <div class="btn" onclick="goHome()">🏠<br>Home</div>
-  <div class="btn" onclick="wallet()">💰<br>Wallet</div>
-  <div class="btn" onclick="support()">📞<br>Support</div>
-  <div class="btn" onclick="logout()">🚪<br>Logout</div>
+  <div class="btn">🏠<br>Home</div>
+  <div class="btn">💰<br>Wallet</div>
+  <div class="btn">📞<br>Support</div>
+  <div class="btn">🚪<br>Logout</div>
 </div>
 
 <script>
 
-// 🔥 LOAD USER + WALLET (BASEROW SE)
-async function loadUser(){
+// 🔥 SUPABASE CONNECT
+const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const supabaseKey = "YOUR_PUBLIC_KEY_HERE";
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-let user = JSON.parse(localStorage.getItem("user"));
+// 🔥 LOAD DATA
+async function loadGames(){
 
-if(!user){
-  window.location.href = "index.html";
-  return;
-}
+  let { data, error } = await supabase
+    .from("Game")
+    .select("*")
+    .order("id", { ascending: true });
 
-// 🔴 TERA TOKEN
-let API_TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
+  let container = document.getElementById("container");
 
-// 🔴 BASEROW URL
-let BASEROW_URL = "https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true";
-
-let res = await fetch(BASEROW_URL, {
-  headers: {
-    "Authorization": "Token " + API_TOKEN
+  if(error){
+    container.innerHTML = "Error loading";
+    console.log(error);
+    return;
   }
-});
 
-let data = await res.json();
+  if(!data || data.length === 0){
+    container.innerHTML = "No Data";
+    return;
+  }
 
-// 🔥 SAME USER FIND
-let freshUser = data.results?.find(u => u.id == user.id);
+  container.innerHTML = "";
 
-if(freshUser){
+  data.forEach(item => {
 
-  document.getElementById("userId").innerText = freshUser.id;
-  document.getElementById("balance").innerText = freshUser.balance;
+    let box = document.createElement("div");
+    box.className = "box";
 
-  // update local
-  localStorage.setItem("user", JSON.stringify(freshUser));
+    // 🔥 NAME + NUMBER
+    box.innerText = item.name + " - " + item.number;
 
-}else{
-  alert("User not found ❌");
+    // 🔥 CLICK OPEN LINK
+    box.onclick = function(){
+      if(item.link){
+        window.location.href = item.link;
+      }
+    }
+
+    container.appendChild(box);
+
+  });
+
 }
 
-}
-
-// BUTTONS
-function goHome(){
-  location.reload();
-}
-
-function wallet(){
-  alert("Wallet page next bana denge 🔥");
-}
-
-function support(){
-  alert("Support add karenge 🔥");
-}
-
-function logout(){
-  localStorage.removeItem("user");
-  window.location.href = "index.html";
-}
-
-// LOAD
-loadUser();
+loadGames();
 
 </script>
 
