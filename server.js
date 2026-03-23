@@ -35,14 +35,15 @@ app.post("/update-balance", (req, res) => {
         balance: users[user]
     });
 });
-// 🔥 GET USER (dummy)
-const { user } = req.body;
+app.post("/get-user", (req, res) => {
+  const { user } = req.body;
 
-if (users[user] === undefined) {
-  users[user] = 1;
-}
+  if (users[user] === undefined) {
+    users[user] = 1; // new user = ₹1
+  }
 
-res.json({ balance: users[user] });
+  res.json({ balance: users[user] });
+});
 
 app.listen(3000, () => {
     console.log("Server running on port 3000");
