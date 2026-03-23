@@ -4,143 +4,80 @@
 <title>Home</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- ✅ FIXED CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{
   margin:0;
-  font-family: Arial;
+  font-family:Arial;
   background:#f2f2f2;
 }
 
-.top{
-  background:#fff;
-  margin:10px;
-  padding:15px;
-  border-radius:10px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  padding:10px;
-}
-
-.box{
-  background:#eee;
-  border:3px solid green;
-  border-radius:15px;
-  padding:30px 10px;
-  text-align:center;
-  font-size:18px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.bottom{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:white;
+.container{
   display:flex;
   justify-content:space-around;
-  padding:10px 0;
+  margin-top:100px;
+}
+
+.btn{
+  width:40%;
+  padding:30px 10px;
+  font-size:18px;
+  font-weight:bold;
+  background:#fff;
+  border:3px solid green;
+  border-radius:15px;
+  text-align:center;
+  cursor:pointer;
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="top">
-  <h3>User ID: <span id="userId">Loading...</span></h3>
-  <h3>Balance: ₹<span id="balance">Loading...</span></h3>
-</div>
-
-<!-- 🔥 GAME CONTAINER -->
-<div class="grid" id="container">
+<div class="container" id="container">
   Loading...
-</div>
-
-<div class="bottom">
-  <div>🏠 Home</div>
-  <div>💰 Wallet</div>
-  <div>📞 Support</div>
-  <div onclick="logout()">🚪 Logout</div>
 </div>
 
 <script>
 
-// 🔥 SUPABASE CONFIG
-const supabaseUrl = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co"; // ✅ tera URL
+const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a ";
 
-// ✅ FIXED (removed space)
-const supabaseKey = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+async function loadButtons(){
 
-// 🔥 LOAD GAMES
-async function loadGames(){
+  let { data, error } = await client
+  .from("Game result")
+  .select("name")
+  .limit(2);
 
-let { data, error } = await supabase
-.from("Game")
-.select("*")
-.order("id");
+  let container = document.getElementById("container");
 
-console.log(data, error);
+  if(error){
+    container.innerText = "Error";
+    console.log(error);
+    return;
+  }
 
-let container = document.getElementById("container");
+  container.innerHTML = "";
 
-if(error){
-  container.innerText = "Error aa gaya";
-  return;
-}
+  data.forEach(item => {
+    let btn = document.createElement("div");
+    btn.className = "btn";
+    btn.innerText = item.name;
 
-if(!data || data.length === 0){
-  container.innerText = "No Data";
-  return;
-}
+    btn.onclick = () => {
+      window.location.href = "game.html";
+    };
 
-container.innerHTML = "";
-
-data.forEach(item => {
-
-  let box = document.createElement("div");
-  box.className = "box";
-
-  box.innerText = item.name + " - " + item.number;
-
-  // 🔥 CLICK → GAME PAGE
-  box.onclick = () => {
-    window.location.href = "game.html";
-  };
-
-  container.appendChild(box);
-
-});
+    container.appendChild(btn);
+  });
 
 }
 
-// 🔥 USER LOAD (basic)
-function loadUser(){
-let user = JSON.parse(localStorage.getItem("user"));
-if(user){
-  document.getElementById("userId").innerText = user.id;
-  document.getElementById("balance").innerText = user.balance;
-}
-}
-
-// LOGOUT
-function logout(){
-localStorage.removeItem("user");
-window.location.href = "index.html";
-}
-
-// RUN
-loadUser();
-loadGames();
+loadButtons();
 
 </script>
 
