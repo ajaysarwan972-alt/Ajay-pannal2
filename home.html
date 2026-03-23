@@ -53,7 +53,7 @@ async function loadButtons(){
   let { data, error } = await client
   .from("Game result")
   .select("name, number")
-  .limit(2);
+  .limit(3);
 
   let container = document.getElementById("container");
 
