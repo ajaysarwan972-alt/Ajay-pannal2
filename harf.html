@@ -12,66 +12,80 @@ body{
   margin:0;
 }
 
+/* HEADER */
 .header{
   background:#fff;
-  padding:15px;
+  padding:12px 15px;
   display:flex;
   justify-content:space-between;
+  align-items:center;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
 .wallet{
   background:red;
   color:#fff;
-  padding:10px;
-  border-radius:10px;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:14px;
 }
 
+/* CONTAINER */
 .container{
   margin:15px;
   background:#fff;
   padding:15px;
-  border-radius:20px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
+/* TITLE */
 h2{
-  margin-top:20px;
+  margin:15px 0 10px;
+  font-size:16px;
 }
 
+/* GRID FIX */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:10px;
+  margin-bottom:10px;
 }
 
 .box{
-  display:flex;
-  flex-direction:column;
+  text-align:center;
 }
 
 label{
   color:red;
   font-weight:bold;
+  font-size:13px;
 }
 
 input{
-  padding:10px;
+  width:100%;
+  height:35px;
   border-radius:10px;
   border:1px solid #ccc;
+  text-align:center;
+  font-size:14px;
 }
 
-/* bottom buttons */
+/* BOTTOM BUTTONS */
 .bottom{
   display:flex;
-  justify-content:space-around;
-  margin-top:20px;
+  justify-content:space-between;
+  margin-top:15px;
 }
 
 .btn{
-  padding:12px 20px;
+  width:32%;
+  padding:12px;
   border:none;
   border-radius:15px;
   color:#fff;
-  font-size:16px;
+  font-size:14px;
 }
 
 .submit{background:#22c55e;}
@@ -105,37 +119,44 @@ input{
 
 <script>
 
-// 🔥 create boxes 0–9
+// 🔥 CREATE BOXES (andar + bahar same system)
 function createBoxes(id){
-  let container=document.getElementById(id);
-  for(let i=0;i<=9;i++){
-    container.innerHTML += `
-      <div class="box">
-        <label>${i}</label>
-        <input type="number" min="0" id="${id}_${i}">
-      </div>
+  let container = document.getElementById(id);
+
+  for(let i=0;i<10;i++){
+    let div = document.createElement("div");
+    div.className="box";
+
+    div.innerHTML = `
+      <label>${i}</label>
+      <input type="number" oninput="calcTotal()">
     `;
+
+    container.appendChild(div);
   }
 }
 
 createBoxes("andar");
 createBoxes("bahar");
 
-// 🔥 calculate total
-function calculate(){
-  let total=0;
+// 🔥 TOTAL CALC (same system)
+function calcTotal(){
+  let inputs = document.querySelectorAll("input");
+  let total = 0;
 
-  for(let i=0;i<=9;i++){
-    let a=parseInt(document.getElementById("andar_"+i).value) || 0;
-    let b=parseInt(document.getElementById("bahar_"+i).value) || 0;
+  inputs.forEach(inp=>{
+    total += Number(inp.value) || 0;
+  });
 
-    total += a + b;
-  }
-
-  document.getElementById("total").innerText="₹ " + total;
+  document.getElementById("total").innerText = "₹ " + total;
 }
 
-// back
+// 🔥 SUBMIT (same simple)
+function calculate(){
+  alert("Game Submitted");
+}
+
+// 🔥 BACK
 function goBack(){
   window.history.back();
 }
@@ -143,4 +164,4 @@ function goBack(){
 </script>
 
 </body>
-  </html>
+</html>
