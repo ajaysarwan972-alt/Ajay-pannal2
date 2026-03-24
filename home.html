@@ -43,19 +43,33 @@ body{
 </head>
 
 <body>
-
+<div id="wallet">0</div>
 <div class="container" id="container">
   Loading...
 </div>
 
 <script>
+const user = JSON.parse(localStorage.getItem("user"));
 
+if(!user){
+  window.location.href = "index.html";
+}
 // ✅ SUPABASE CONFIG (FIXED)
 const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"; // ❗ space hata diya
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function loadWallet(){
+  const { data } = await client
+    .from("login")
+    .select("balance")
+    .eq("id", user.id)
+    .single();
 
+  if(data){
+    document.getElementById("wallet").innerText = "₹ " + data.balance;
+  }
+}
 // 🔥 LOAD BUTTONS
 async function loadButtons(){
 
@@ -92,7 +106,7 @@ async function loadButtons(){
   });
 
 }
-
+loadWallet();
 loadButtons();
 
 </script>
