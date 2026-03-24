@@ -24,6 +24,30 @@ body{
   box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* 🔥 TOP BUTTONS */
+.topBtns{
+  margin-top:10px;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+.topBtn{
+  width:22%;
+  padding:10px;
+  border-radius:20px;
+  text-align:center;
+  color:white;
+  font-weight:bold;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.btn1{background:#6c5ce7;}
+.btn2{background:#00b894;}
+.btn3{background:#0984e3;}
+.btn4{background:#e17055;}
+
 .wallet{
   background:red;
   color:#fff;
@@ -94,7 +118,7 @@ input{
 .back{background:#ef4444;}
 .total{background:#f43f5e;}
 
-/* ✅ WHATSAPP FLOAT SMALL */
+/* WHATSAPP */
 .whatsapp{
   position:fixed;
   bottom:20px;
@@ -120,6 +144,14 @@ input{
   <div class="wallet" id="wallet">₹ 0</div>
 </div>
 
+<!-- ✅ ADDED 4 BUTTONS -->
+<div class="topBtns">
+  <div class="topBtn btn1" onclick="goJodi()">JODI</div>
+  <div class="topBtn btn2" onclick="goHaruf()">HARUF</div>
+  <div class="topBtn btn3" onclick="goCrossing()">CROSSING</div>
+  <div class="topBtn btn4" onclick="goCopy()">COPY PASTE</div>
+</div>
+
 <div class="container">
 
   <h2>Single Andar</h2>
@@ -136,25 +168,23 @@ input{
 
 </div>
 
-<!-- ✅ WHATSAPP BUTTON -->
 <a class="whatsapp" href="https://wa.me/91XXXXXXXXXX" target="_blank">💬</a>
 
 <script>
 
-// 🔥 USER CHECK
+// USER
 const user = JSON.parse(localStorage.getItem("user"));
-
 if(!user){
   window.location.href = "index.html";
 }
 
-// 🔥 SUPABASE
+// SUPABASE
 const client = supabase.createClient(
   "https://katbdbzoufiblnnsoxkk.supabase.co",
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 LOAD WALLET + ID
+// WALLET
 async function loadWallet(){
   const { data } = await client
     .from("login")
@@ -167,10 +197,23 @@ async function loadWallet(){
     document.getElementById("userId").innerText = "ID: " + user.id;
   }
 }
-
 loadWallet();
 
-// 🔥 CREATE BOXES
+// 🔥 BUTTON LINKS (same system)
+function goJodi(){
+  window.location.href = "game.html";
+}
+function goHaruf(){
+  window.location.href = "harf.html";
+}
+function goCrossing(){
+  window.location.href = "crossing.html";
+}
+function goCopy(){
+  window.location.href = "copy-past.html";
+}
+
+// BOXES
 function createBoxes(id){
   let container = document.getElementById(id);
 
@@ -190,7 +233,7 @@ function createBoxes(id){
 createBoxes("andar");
 createBoxes("bahar");
 
-// 🔥 TOTAL
+// TOTAL
 function calcTotal(){
   let inputs = document.querySelectorAll("input");
   let total = 0;
@@ -202,7 +245,7 @@ function calcTotal(){
   document.getElementById("total").innerText = "₹ " + total;
 }
 
-// 🔥 SUBMIT WITH BALANCE CUT
+// SUBMIT
 async function calculate(){
 
   let inputs = document.querySelectorAll("input");
@@ -233,15 +276,12 @@ async function calculate(){
     .update({ balance: data.balance - total })
     .eq("id", user.id);
 
-  inputs.forEach(inp => inp.value = "");
-
-  calcTotal();
-  loadWallet();
-
   alert("Game Submitted");
+
+  location.reload(); // ✅ refresh
 }
 
-// 🔥 BACK
+// BACK
 function goBack(){
   window.history.back();
 }
