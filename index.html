@@ -5,7 +5,9 @@
 const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ✅ FIX
+const { createClient } = supabase;
+const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function login(){
 
@@ -26,7 +28,6 @@ if(error || !data){
   return;
 }
 
-// ✅ same as tera
 let userData = {
   id: data.id,
   mobile: data.mobile,
