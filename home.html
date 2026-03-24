@@ -47,11 +47,33 @@ body{
   z-index:999;
 }
 
+/* ✅ NEW BUTTON ROW */
+.actionBar{
+  margin-top:90px;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+.actionBtn{
+  width:30%;
+  padding:12px;
+  border-radius:25px;
+  text-align:center;
+  color:white;
+  font-weight:bold;
+}
+
+.add{background:green;}
+.withdraw{background:#ff4d4d;}
+.share{background:#6c5ce7;}
+
+/* BOX GRID */
 .container{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
-  margin-top:100px;
+  margin-top:10px;
   padding:10px;
   gap:12px;
 }
@@ -101,6 +123,24 @@ body{
   color:#fff;
 }
 
+/* WHATSAPP FLOAT */
+.whatsapp{
+  position:fixed;
+  bottom:80px;
+  right:15px;
+  width:55px;
+  height:55px;
+  background:#25D366;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:28px;
+  z-index:999;
+}
+
+/* BOTTOM NAV SAME */
 #bottomNav{
   position:fixed;
   bottom:0;
@@ -130,6 +170,7 @@ body{
   color:white;
 }
 
+/* SIDE MENU SAME */
 #sideMenu{
   position:fixed;
   top:0;
@@ -164,7 +205,17 @@ body{
 <div id="sideMenu"></div>
 <div id="overlay" onclick="closeMenu()"></div>
 
+<!-- ✅ ACTION BUTTONS -->
+<div class="actionBar">
+  <div class="actionBtn add" onclick="go('add.html')">Add Money</div>
+  <div class="actionBtn withdraw" onclick="go('withdraw.html')">Withdraw</div>
+  <div class="actionBtn share">Share</div>
+</div>
+
 <div class="container" id="container"></div>
+
+<!-- ✅ WHATSAPP -->
+<a class="whatsapp" href="https://wa.me/" target="_blank">💬</a>
 
 <div id="bottomNav">
   <div class="navBtn active" onclick="go('home.html')">Home</div>
@@ -224,7 +275,6 @@ async function loadButtons(){
   .from("Game result")
   .select("name, number, open, close");
 
-  // ✅ SORTING (OPEN UP, CLOSE DOWN)
   data.sort((a, b) => {
     const aOpen = checkStatus(a.open, a.close);
     const bOpen = checkStatus(b.open, b.close);
@@ -283,6 +333,13 @@ function logout(){
 
 loadWallet();
 loadButtons();
+
+// AUTO REFRESH
+setInterval(() => {
+  loadButtons();
+  loadWallet();
+}, 60000);
+
 </script>
 
 </body>
