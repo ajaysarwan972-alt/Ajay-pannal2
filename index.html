@@ -1,113 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
-
-<style>
-body {
-  margin:0;
-  font-family: Arial;
-  background:#eee;
-  text-align:center;
-}
-
-h1{
-  color:red;
-}
-
-.input-box{
-  width:80%;
-  margin:15px auto;
-  padding:15px;
-  border-radius:15px;
-  border:none;
-  box-shadow:0 2px 8px rgba(0,0,0,0.2);
-}
-
-button{
-  width:80%;
-  padding:15px;
-  background:red;
-  color:#fff;
-  border:none;
-  border-radius:30px;
-  font-size:18px;
-}
-
-.register{
-  background:#3498db;
-}
-</style>
-
-</head>
-
-<body>
-
-<h1>Login</h1>
-
-<input type="text" id="mobile" class="input-box" placeholder="Mobile Number">
-<input type="password" id="password" class="input-box" placeholder="Password">
-
-<button onclick="login()">LOGIN</button>
-
-<p>New User?</p>
-<button class="register" onclick="window.location.href='signup.html'">REGISTER NOW</button>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+
+const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
+
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function login(){
 
 let mobile = document.getElementById("mobile").value.trim();
 let password = document.getElementById("password").value.trim();
 
-let BASEROW_URL = "https://api.baserow.io/api/database/rows/table/897341/?user_field_names=true";
-let API_TOKEN = "3S3iB1eHvIZwRS163mml32fuZhQ5heQf";
-
 try{
 
-let res = await fetch(BASEROW_URL, {
-  headers: {
-    "Authorization": "Token " + API_TOKEN
-  }
-});
+let { data, error } = await client
+.from("login")
+.select("*")
+.eq("mobile", mobile)
+.eq("password", password)
+.single();
 
-let data = await res.json();
-console.log("Baserow Data:", data);
-
-// ✅ SAFE MATCH (FIXED)
-let user = data.results?.find(
-  u => String(u.mobile).trim() === mobile &&
-       String(u.password).trim() === password
-);
-
-if(user){
-
-  // ✅ IMPORTANT: clean object save karo
-  let userData = {
-    id: user.id,
-    mobile: user.mobile,
-    balance: user.balance || 0
-  };
-
-  localStorage.setItem("user", JSON.stringify(userData));
-
-  alert("Login Success ✅");
-  window.location.href = "home.html";
-
-}else{
+if(error || !data){
   alert("Wrong Mobile or Password ❌");
+  return;
 }
 
+// ✅ same as tera
+let userData = {
+  id: data.id,
+  mobile: data.mobile,
+  balance: data.balance || 0
+};
+
+localStorage.setItem("user", JSON.stringify(userData));
+
+alert("Login Success ✅");
+window.location.href = "home.html";
+
 }catch(err){
-  console.log("Error:", err);
+  console.log(err);
   alert("Server Error ❌");
 }
 
 }
 
 </script>
-
-</body>
-</html>
