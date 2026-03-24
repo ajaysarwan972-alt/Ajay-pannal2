@@ -105,7 +105,7 @@ body{
   margin-bottom:10px;
 }
 
-/* ✅ NEW IMAGE STYLE */
+/* IMAGE */
 .status img{
   width:70px;
   margin-top:10px;
@@ -128,7 +128,7 @@ body{
   z-index:999;
 }
 
-/* BOTTOM NAV */
+/* NAV */
 #bottomNav{
   position:fixed;
   bottom:0;
@@ -228,7 +228,7 @@ async function loadWallet(){
   }
 }
 
-// ✅ FIXED TIME FUNCTION
+// TIME FIX
 function checkStatus(openTime, closeTime){
   if(!openTime || !closeTime) return false;
 
@@ -279,7 +279,9 @@ async function loadButtons(){
       <div class="gameNumber">${item.number || '**'}</div>
       <div class="gameTime">${item.open} - ${item.close}</div>
       <div class="status">
-        <img src="${isOpen ? 'https://i.imgur.com/2Q2Z6QK.png' : 'https://i.imgur.com/8zQZQ7P.png'}">
+        <img src="${isOpen 
+          ? 'https://cdn-icons-png.flaticon.com/512/190/190411.png' 
+          : 'https://cdn-icons-png.flaticon.com/512/463/463612.png'}">
       </div>
     `;
 
