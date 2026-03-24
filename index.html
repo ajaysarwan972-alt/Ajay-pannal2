@@ -94,7 +94,6 @@ if(error || !data){
 let userData = {
   id: data.id,
   mobile: data.mobile,
-  balance: data.balance || 0
 };
 
 localStorage.setItem("user", JSON.stringify(userData));
