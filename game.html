@@ -152,17 +152,14 @@ body {
 
 <body>
 
-<!-- ✅ COMMON HEADER FILE -->
 <script src="header.js"></script>
 
-<!-- ✅ HEADER -->
 <div class="header">
   <div id="menuBtn">≡</div>
   <div id="userId">ID: 0000</div>
   <div id="wallet">₹ 0</div>
 </div>
 
-<!-- ✅ TOP BUTTONS -->
 <div class="topBtns">
   <div class="topBtn btn1" onclick="goRates()">JODI</div>
   <div class="topBtn btn2" onclick="goChart()">HARUF</div>
@@ -191,6 +188,23 @@ const client = supabase.createClient(
   "https://katbdbzoufiblnnsoxkk.supabase.co",
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
+
+// ✅ MARKET AUTO (SUPABASE SE)
+let market = "";
+
+async function loadMarket(){
+  const { data } = await client
+    .from("Game result")
+    .select("name")
+    .eq("name", "Deshawar") // 👈 yaha change karega page ke hisab se
+    .single();
+
+  if(data){
+    market = data.name;
+  }
+}
+
+loadMarket();
 
 // WALLET
 async function loadWallet(){
@@ -276,10 +290,10 @@ async function submitGame(){
         .update({ balance: data.balance - total })
         .eq("id", user.id);
 
-    // ✅ HISTORY SAVE (MARKET WISE)
+    // ✅ HISTORY SAVE (AUTO MARKET)
     await client.from("history").insert([{
         user_id: user.id,
-        market: "jodi",
+        market: market,
         data: JSON.stringify(dataObj),
         total: total
     }]);
