@@ -60,12 +60,15 @@ const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"; // ❗ sp
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 async function loadWallet(){
-  const { data } = await client
+  const { data, error } = await client
     .from("login")
     .select("balance")
     .eq("id", user.id)
     .single();
-
+if(error){
+  console.log(error);
+  return;
+}
   if(data){
     document.getElementById("wallet").innerText = "₹ " + data.balance;
   }
