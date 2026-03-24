@@ -40,20 +40,23 @@ body{
   cursor:pointer;
 }
   #userId{
-  position:absolute;
+  position:fixed;
+z-index:999;
   left:60px;
   top:20px;
   font-weight:bold;
   }
   #menuBtn{
-  position:absolute;
+  position:fixed;
+z-index:999;
   left:15px;
   top:20px;
   font-size:22px;
   cursor:pointer;
   }
   #wallet{
-position:absolute;
+position:fixed;
+z-index:999;
 right:15px;
 top:15px;
 background:red;
@@ -77,19 +80,20 @@ border-radius:15px 15px 0 0;
 }
 
 .navBtn{
-width:22%;
-height:40px;
-background:#eee;
-border-radius:10px;
+  width:22%;
+  height:40px;
+  background:#eee;
+  border-radius:10px;
 }
-</style>
-</head>
 
-<body>
-<div id="wallet">₹ 0</div>
-<div id="userId">ID: 0000</div>
-  <div id="menuBtn" onclick="openMenu()">☰</div>
-<div class="container" id="container">
+#container{
+  padding-bottom: 80px;
+}
+
+.active{
+  background: green;
+  color: white;
+}
   Loading...
 </div>
 <div id="bottomNav">
