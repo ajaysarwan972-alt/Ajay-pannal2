@@ -82,7 +82,7 @@ th{
 <h2>Number Amount Auto Setter</h2>
 
 <label>Enter Numbers:</label>
-<textarea id="numbers" placeholder="12 45 78 90"></textarea>
+<textarea id="numbers" oninput="formatNumbers()" placeholder="12 45 78 90"></textarea>
 
 <label>Enter Amount:</label>
 <input type="number" id="amount" placeholder="100">
@@ -104,6 +104,19 @@ th{
 
 <script>
 
+// 🔥 AUTO FORMAT (2 digit ke baad space)
+function formatNumbers(){
+  let input = document.getElementById("numbers");
+  
+  let value = input.value.replace(/\D/g,''); // sirf number
+  let formatted = value.match(/.{1,2}/g);
+  
+  if(formatted){
+    input.value = formatted.join(" ");
+  }
+}
+
+// SET BUTTON
 function setAmount(){
   let nums=document.getElementById("numbers").value;
   let amount=parseInt(document.getElementById("amount").value);
@@ -116,8 +129,7 @@ function setAmount(){
   let arr=nums.split(/\s+|,/)
               .filter(n=>n!=="");
 
-  // remove duplicates
-  arr=[...new Set(arr)];
+  arr=[...new Set(arr)]; // remove duplicates
 
   let tbody=document.querySelector("#result tbody");
   tbody.innerHTML="";
@@ -140,7 +152,7 @@ function setAmount(){
   document.getElementById("total").innerText="Total = ₹ " + total;
 }
 
-// copy function
+// COPY BUTTON
 function copyData(){
   let rows=document.querySelectorAll("#result tbody tr");
   let text="";
