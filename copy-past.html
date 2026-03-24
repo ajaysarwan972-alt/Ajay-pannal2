@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Setter</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#e5e7eb;
+  margin:0;
+}
+
+/* HEADER */
+.header{
+  background:#fff;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-radius:0 0 20px 20px;
+}
+
+.wallet{
+  background:red;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:14px;
+}
+
+/* TOP BUTTONS */
+.topBtns{
+  display:flex;
+  justify-content:space-around;
+  margin:15px;
+}
+
+.topBtn{
+  padding:12px;
+  border-radius:15px;
+  color:#fff;
+  font-weight:bold;
+  width:22%;
+  text-align:center;
+}
+
+.btn1{background:#ef4444;}
+.btn2{background:#ef4444;}
+.btn3{background:#ef4444;}
+.btn4{background:#84cc16;}
+
+/* MAIN BOX */
+.container{
+  margin:15px;
+  background:#fff;
+  padding:15px;
+  border-radius:20px;
+}
+
+/* INPUTS */
+.label{
+  color:red;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+textarea,input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  margin-top:5px;
+}
+
+/* RADIO */
+.radioBox{
+  display:flex;
+  justify-content:space-around;
+  margin-top:15px;
+}
+
+.radio{
+  background:#065f46;
+  color:#fff;
+  padding:10px;
+  border-radius:10px;
+}
+
+/* TABLE */
+table{
+  width:100%;
+  margin-top:15px;
+  border-collapse:collapse;
+}
+
+td,th{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+}
+
+th{
+  background:#f87171;
+  color:#fff;
+}
+
+/* BOTTOM BUTTONS */
+.bottom{
+  display:flex;
+  justify-content:space-between;
+  margin-top:15px;
+}
+
+.btn{
+  width:32%;
+  padding:12px;
+  border:none;
+  border-radius:15px;
+  color:#fff;
+  font-weight:bold;
+}
+
+.total{background:#ef4444;}
+.submit{background:#84cc16;}
+.back{background:#ef4444;}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>☰ Golde n</div>
+  <div class="wallet">₹ 0.70</div>
+</div>
+
+<!-- TOP BUTTONS -->
+<div class="topBtns">
+  <div class="topBtn btn1">JODI</div>
+  <div class="topBtn btn2">HARUF</div>
+  <div class="topBtn btn3">CROSSING</div>
+  <div class="topBtn btn4">COPY PASTE</div>
+</div>
+
+<div class="container">
+
+  <div class="label">ENTER DIGIT (EVEN LENGTH)</div>
+  <textarea id="numbers" oninput="formatNumbers()"></textarea>
+
+  <div class="label">ENTER AMOUNT</div>
+  <input type="number" id="amount">
+
+  <div class="radioBox">
+    <div class="radio">
+      <input type="radio" name="type" checked> With Palti
+    </div>
+    <div class="radio">
+      <input type="radio" name="type"> Without Palti
+    </div>
+  </div>
+
+  <table id="result">
+    <thead>
+      <tr>
+        <th>Number</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="bottom">
+    <button class="btn total" id="total">₹ 0</button>
+    <button class="btn submit" onclick="setAmount()">SUBMIT</button>
+    <button class="btn back" onclick="goBack()">BACK</button>
+  </div>
+
+</div>
+
+<script>
+
+// FORMAT
+function formatNumbers(){
+  let val = document.getElementById("numbers").value;
+  val = val.replace(/[^0-9 ]/g,'');
+  document.getElementById("numbers").value = val;
+}
+
+// SET AMOUNT
+function setAmount(){
+  let nums = document.getElementById("numbers").value.trim().split(/\s+/);
+  let amount = Number(document.getElementById("amount").value);
+  let tbody = document.querySelector("#result tbody");
+
+  tbody.innerHTML="";
+  let total = 0;
+
+  nums.forEach(n=>{
+    if(n){
+      let row = `<tr><td>${n}</td><td>${amount}</td></tr>`;
+      tbody.innerHTML += row;
+      total += amount;
+    }
+  });
+
+  document.getElementById("total").innerText = "₹ " + total;
+}
+
+// COPY
+function copyData(){
+  let text="";
+  document.querySelectorAll("#result tbody tr").forEach(r=>{
+    let cols = r.querySelectorAll("td");
+    text += cols[0].innerText + " " + cols[1].innerText + "\n";
+  });
+
+  navigator.clipboard.writeText(text);
+  alert("Copied!");
+}
+
+// BACK
+function goBack(){
+  window.history.back();
+}
+
+</script>
+
+</body>
+</html>
