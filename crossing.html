@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game 4</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#e5e7eb;
+  margin:0;
+  display:flex;
+  justify-content:center;
+}
+
+/* MAIN BOX CENTER */
+.container{
+  margin-top:40px;
+  width:90%;
+  max-width:400px;
+  background:#fff;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.box{
+  display:flex;
+  flex-direction:column;
+}
+
+label{
+  color:red;
+  font-weight:bold;
+  margin-bottom:5px;
+}
+
+input{
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+.submit-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  margin-top:20px;
+}
+
+.btn{
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  color:#fff;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.submit{background:green;}
+.back{background:red;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:20px;
+}
+
+.card{
+  background:#f9fafb;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  border:1px solid #ddd;
+}
+
+.num{color:red; font-weight:bold;}
+
+.total{
+  text-align:center;
+  margin-top:15px;
+  font-size:18px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="row">
+    <div class="box">
+      <label>1ST NUMBER</label>
+      <input type="number" id="num1">
+    </div>
+
+    <div class="box">
+      <label>2ND NUMBER</label>
+      <input type="number" id="num2">
+    </div>
+  </div>
+
+  <div class="box" style="margin-top:15px;">
+    <label>POINTS</label>
+    <input type="number" id="points">
+  </div>
+
+  <div class="submit-row">
+    <button class="btn submit" onclick="submitGame()">SUBMIT</button>
+    <button class="btn back" onclick="goBack()">BACK</button>
+  </div>
+
+  <div class="grid" id="resultGrid"></div>
+
+  <div class="total" id="total">Total: ₹ 0</div>
+
+</div>
+
+<script>
+
+function submitGame(){
+  let n1 = document.getElementById("num1").value;
+  let n2 = document.getElementById("num2").value;
+  let amt = Number(document.getElementById("points").value);
+
+  if(!n1 || !n2 || !amt){
+    alert("Fill all fields");
+    return;
+  }
+
+  let grid = document.getElementById("resultGrid");
+  grid.innerHTML = "";
+
+  let total = 0;
+
+  let pair = n1 + "" + n2;
+
+  let div = document.createElement("div");
+  div.className = "card";
+  div.innerHTML = `<div class="num">${pair}</div><div>₹ ${amt}</div>`;
+
+  grid.appendChild(div);
+
+  total += amt;
+
+  document.getElementById("total").innerText = "Total: ₹ " + total;
+}
+
+function goBack(){
+  window.history.back();
+}
+
+</script>
+
+</body>
+</html>
