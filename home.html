@@ -130,10 +130,10 @@ const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 💰 WALLET LOAD
+// 💰 WALLET LOAD (login table)
 async function loadWallet(){
   const { data, error } = await client
-    .from("users")   // ✅ FIXED
+    .from("login")   // ✅ tera table
     .select("balance")
     .eq("id", user.id)
     .single();
@@ -149,10 +149,10 @@ async function loadWallet(){
   }
 }
 
-// 🔥 LOAD BUTTONS
+// 🔥 LOAD BUTTONS (Game result table)
 async function loadButtons(){
   let { data, error } = await client
-    .from("game")   // ✅ FIXED
+    .from("Game result")   // ✅ tera table
     .select("name, number")
     .limit(3);
 
