@@ -23,15 +23,10 @@ body{
   cursor:pointer;
 }
 
-/* ✅ ID DESIGN FIX */
 #userId{
   position:fixed;
   left:60px;
-  top:15px;
-  background:green;
-  color:white;
-  padding:8px 15px;
-  border-radius:20px;
+  top:20px;
   font-weight:bold;
   z-index:999;
 }
@@ -48,7 +43,7 @@ body{
   z-index:999;
 }
 
-/* GAME BOX */
+/* BUTTON GRID */
 .container{
   display:flex;
   flex-wrap:wrap;
@@ -60,55 +55,17 @@ body{
 
 .btn{
   width:calc(50% - 10px);
+  height:100px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:bold;
   background:#fff;
   border:3px solid green;
-  border-radius:20px;
-  padding:15px;
-  text-align:center;
-  box-sizing:border-box;
+  border-radius:15px;
   cursor:pointer;
-}
-
-/* TEXT STYLE */
-.gameName{
-  font-size:20px;
-  font-weight:bold;
-}
-
-.gameNumber{
-  font-size:26px;
-  color:red;
-  font-weight:bold;
-  margin:5px 0;
-}
-
-.gameTime{
-  font-size:14px;
-  color:#1e73be;
-  margin-bottom:10px;
-}
-
-.status{
-  font-weight:bold;
-  padding:5px 10px;
-  border-radius:10px;
-  display:inline-block;
-}
-
-.open{
-  background:green;
-  color:#fff;
-}
-
-.close{
-  background:red;
-  color:#fff;
-}
-
-/* DISABLED */
-.disabled{
-  opacity:0.6;
-  pointer-events:none;
+  box-sizing:border-box;
 }
 
 /* BOTTOM NAV */
@@ -140,16 +97,86 @@ body{
   background:green;
   color:white;
 }
+
+/* SIDE MENU */
+#sideMenu{
+  position:fixed;
+  top:0;
+  left:-320px;
+  width:300px;
+  height:100%;
+  background:#f8f8f8;
+  z-index:1000;
+  transition:0.3s;
+  padding:15px;
+  box-shadow:2px 0 20px rgba(0,0,0,0.2);
+  border-radius:0 25px 25px 0;
+}
+
+.menuHeader{
+  font-size:22px;
+  font-weight:bold;
+  padding:15px;
+  border-radius:20px;
+  background:linear-gradient(to right, #000, #444);
+  color:white;
+  margin-bottom:20px;
+}
+
+.menuItem{
+  display:flex;
+  align-items:center;
+  padding:15px;
+  margin:10px 0;
+  background:#fff;
+  border-radius:15px;
+  cursor:pointer;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  font-weight:500;
+}
+
+#overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  z-index:999;
+}
 </style>
 </head>
 
 <body>
 
-<div id="menuBtn">☰</div>
+<div id="menuBtn" onclick="openMenu()">☰</div>
 <div id="userId">ID: 0000</div>
 <div id="wallet">₹ 0</div>
 
+<div id="sideMenu">
+  <div class="menuHeader">Ajay</div>
+  <div class="menuItem" onclick="go('home.html')">Home</div>
+  <div class="menuItem" onclick="go('profile.html')">Profile</div>
+  <div class="menuItem">UPI Details</div>
+  <div class="menuItem">Bank Details</div>
+  <hr>
+  <div class="menuItem">Share Now</div>
+  <div class="menuItem">Game Rates</div>
+  <div class="menuItem">Terms</div>
+  <div class="menuItem" onclick="logout()">Logout</div>
+</div>
+
+<div id="overlay" onclick="closeMenu()"></div>
+
 <div class="container" id="container"></div>
+
+<div id="bottomNav">
+  <div class="navBtn active" onclick="go('home.html')">Home</div>
+  <div class="navBtn" onclick="go('game.html')">Game</div>
+  <div class="navBtn" onclick="go('wallet.html')">Wallet</div>
+  <div class="navBtn" onclick="go('profile.html')">Profile</div>
+</div>
 
 <script>
 const user = JSON.parse(localStorage.getItem("user"));
@@ -159,7 +186,7 @@ if(!user){
 }
 
 const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
-const SUPABASE_KEY = "YOUR_KEY";
+const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -177,8 +204,10 @@ async function loadWallet(){
   }
 }
 
-// ✅ TIME CHECK FUNCTION
+// ✅ TIME CHECK
 function checkStatus(openTime, closeTime){
+  if(!openTime || !closeTime) return true;
+
   const now = new Date();
 
   const [oh, om] = openTime.split(":");
@@ -190,11 +219,7 @@ function checkStatus(openTime, closeTime){
   let close = new Date();
   close.setHours(ch, cm, 0);
 
-  if(now >= open && now <= close){
-    return "open";
-  }else{
-    return "close";
-  }
+  return (now >= open && now <= close);
 }
 
 // BUTTONS
@@ -202,50 +227,55 @@ async function loadButtons(){
 
   let { data } = await client
   .from("Game result")
-  .select("name, number, open, close");
+  .select("name, number, open, close")
+  .limit(3);
 
   let container = document.getElementById("container");
   container.innerHTML = "";
 
   data.forEach(item => {
 
-    let status = "close";
-
-    if(item.open && item.close){
-      status = checkStatus(item.open, item.close);
-    }
-
     let btn = document.createElement("div");
     btn.className = "btn";
+    btn.innerText = item.name + " - " + item.number;
 
-    if(status === "close"){
-      btn.classList.add("disabled");
-    }
+    let isOpen = checkStatus(item.open, item.close);
 
-    btn.innerHTML = `
-      <div class="gameName">${item.name}</div>
-      <div class="gameNumber">${item.number ?? "**"}</div>
-      <div class="gameTime">${item.open || "--"} - ${item.close || "--"}</div>
-      <div class="status ${status}">
-        ${status === "open" ? "OPEN" : "CLOSE"}
-      </div>
-    `;
-
-    if(status === "open"){
+    if(isOpen){
       btn.onclick = () => {
         window.location.href = "game.html";
       };
+    } else {
+      btn.style.opacity = "0.5";
+      btn.onclick = null;
     }
 
     container.appendChild(btn);
   });
 }
 
+// MENU
+function openMenu(){
+  document.getElementById("sideMenu").style.left = "0";
+  document.getElementById("overlay").style.display = "block";
+}
+
+function closeMenu(){
+  document.getElementById("sideMenu").style.left = "-320px";
+  document.getElementById("overlay").style.display = "none";
+}
+
+function go(page){
+  window.location.href = page;
+}
+
+function logout(){
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+}
+
 loadWallet();
 loadButtons();
-
-// 🔥 AUTO REFRESH EVERY 30 SEC
-setInterval(loadButtons, 30000);
 </script>
 
 </body>
