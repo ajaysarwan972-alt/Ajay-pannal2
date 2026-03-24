@@ -152,6 +152,9 @@ body {
 
 <body>
 
+<!-- ✅ COMMON HEADER FILE -->
+<script src="header.js"></script>
+
 <!-- ✅ HEADER -->
 <div class="header">
   <div id="menuBtn">≡</div>
@@ -242,9 +245,14 @@ function calcTotal() {
 async function submitGame(){
     let inputs = document.querySelectorAll("input");
     let total = 0;
+    let dataObj = {};
 
-    inputs.forEach(inp => {
-        total += Number(inp.value) || 0;
+    inputs.forEach((inp, i) => {
+        let val = Number(inp.value) || 0;
+        if(val > 0){
+          dataObj[i] = val;
+        }
+        total += val;
     });
 
     if(total <= 0){
@@ -267,6 +275,14 @@ async function submitGame(){
         .from("login")
         .update({ balance: data.balance - total })
         .eq("id", user.id);
+
+    // ✅ HISTORY SAVE (MARKET WISE)
+    await client.from("history").insert([{
+        user_id: user.id,
+        market: "jodi",
+        data: JSON.stringify(dataObj),
+        total: total
+    }]);
 
     inputs.forEach(inp => inp.value = "");
 
