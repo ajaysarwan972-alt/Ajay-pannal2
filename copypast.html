@@ -10,10 +10,44 @@
 <style>
 body{font-family:Arial;background:#e5e7eb;margin:0;}
 
-#userId{position:fixed;left:10px;top:10px;background:green;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
-#wallet{position:fixed;right:10px;top:10px;background:red;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;}
+/* 🔥 HEADER */
+.header{
+  position:fixed;
+  top:10px;
+  left:10px;
+  right:10px;
+  background:#fff;
+  border-radius:20px;
+  padding:10px 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  z-index:999;
+}
 
-.topBtns{margin-top:50px;display:flex;justify-content:space-around;padding:10px;}
+#menuBtn{font-size:22px;}
+
+#userId{
+  background:green;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+#wallet{
+  background:red;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+/* TOP BUTTONS */
+.topBtns{margin-top:80px;display:flex;justify-content:space-around;padding:10px;}
 .topBtn{width:22%;padding:10px;border-radius:20px;text-align:center;color:#fff;font-size:12px;cursor:pointer;}
 .btn1{background:#6c5ce7;} .btn2{background:#00b894;} .btn3{background:#0984e3;} .btn4{background:#e17055;}
 
@@ -44,12 +78,16 @@ th{color:red;}
 
 <body>
 
-<div id="userId">ID: 0</div>
-<div id="wallet">₹ 0</div>
+<!-- ✅ HEADER -->
+<div class="header">
+  <div id="menuBtn">≡</div>
+  <div id="userId">ID: 0</div>
+  <div id="wallet">₹ 0</div>
+</div>
 
 <div class="topBtns">
   <div class="topBtn btn1" onclick="location.href='game.html'">JODI</div>
-  <div class="topBtn btn2" onclick="location.href='haruf.html'">HARUF</div>
+  <div class="topBtn btn2" onclick="location.href='harf.html'">HARUF</div>
   <div class="topBtn btn3" onclick="location.href='crossing.html'">CROSSING</div>
   <div class="topBtn btn4" onclick="location.href='copypast.html'">COPY PASTE</div>
 </div>
@@ -110,68 +148,70 @@ async function loadWallet(){
 }
 loadWallet();
 
+// GENERATE
 function generate(){
-  let d = digits.value.toString();
-  let amount = Number(amt.value);
+  let d = digits.value;
+  let a = Number(amt.value);
+  let type = document.querySelector('input[name="p"]:checked').value;
 
-  if(!d || !amount){ alert("Fill"); return; }
+  if(!d || !a){ alert("Fill all"); return; }
 
-  if(d.length % 2 !== 0) d = "0"+d;
+  let arr = d.toString().match(/.{1,2}/g);
 
-  let pairs=[];
-  for(let i=0;i<d.length;i+=2){
-    pairs.push(d[i]+d[i+1]);
-  }
+  arr.forEach(num=>{
+    if(num.length==1) num="0"+num;
 
-  let mode=document.querySelector('input[name="p"]:checked').value;
+    addRow(num,a);
 
-  pairs.forEach(p=>{
-    list.push({num:p,amt:amount});
-    if(mode==="with"){
-      list.push({num:p[1]+p[0],amt:amount});
+    if(type=="with"){
+      let rev = num.split("").reverse().join("");
+      if(rev!=num) addRow(rev,a);
     }
   });
 
-  render();
+  digits.value="";
+  amt.value="";
 }
 
-function render(){
-  let t=document.getElementById("table");
-  t.innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>ACTION</th></tr>`;
-  total=0;
+// ADD ROW
+function addRow(num,a){
+  list.push({num,a});
+  total+=a;
 
-  list.forEach((x,i)=>{
-    total+=x.amt;
-    t.innerHTML+=`
-    <tr>
-      <td>${x.num}</td>
-      <td>${x.amt}</td>
-      <td><button class="del" onclick="del(${i})">DELETE</button></td>
-    </tr>`;
-  });
+  let tr=document.createElement("tr");
+
+  tr.innerHTML=`
+  <td>${num}</td>
+  <td>${a}</td>
+  <td><button class="del" onclick="delRow(this,${a})">Delete</button></td>
+  `;
+
+  document.getElementById("table").appendChild(tr);
 
   document.getElementById("total").innerText="₹ "+total;
 }
 
-function del(i){
-  list.splice(i,1);
-  render();
+// DELETE
+function delRow(btn,a){
+  btn.parentElement.parentElement.remove();
+  total-=a;
+  document.getElementById("total").innerText="₹ "+total;
 }
 
+// SUBMIT
 async function submitData(){
-
-  if(total<=0){ alert("No Data"); return; }
+  if(total<=0){ alert("No data"); return; }
 
   const { data } = await client.from("login").select("balance").eq("id", user.id).single();
 
   if(data.balance < total){
-    alert("Low balance");
+    alert("Insufficient balance");
     return;
   }
 
   await client.from("login").update({ balance: data.balance - total }).eq("id", user.id);
 
-  alert("Submitted");
+  alert("Game Submitted");
   location.reload();
 }
 
