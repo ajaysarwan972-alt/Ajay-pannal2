@@ -79,7 +79,7 @@ async function signup() {
 
   // insert data
   let { data, error } = await client
-    .from("users")
+    .from("login")
     .insert([
       { name: name, mobile: mobile, password: password, balance: 0 }
     ]);
