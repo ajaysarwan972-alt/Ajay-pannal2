@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Single Game</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#e5e7eb;
+  margin:0;
+}
+
+.header{
+  background:#fff;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.wallet{
+  background:red;
+  color:#fff;
+  padding:10px;
+  border-radius:10px;
+}
+
+.container{
+  margin:15px;
+  background:#fff;
+  padding:15px;
+  border-radius:20px;
+}
+
+h2{
+  margin-top:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.box{
+  display:flex;
+  flex-direction:column;
+}
+
+label{
+  color:red;
+  font-weight:bold;
+}
+
+input{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+/* bottom buttons */
+.bottom{
+  display:flex;
+  justify-content:space-around;
+  margin-top:20px;
+}
+
+.btn{
+  padding:12px 20px;
+  border:none;
+  border-radius:15px;
+  color:#fff;
+  font-size:16px;
+}
+
+.submit{background:#22c55e;}
+.back{background:#ef4444;}
+.total{background:#f43f5e;}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div>☰ Golde n</div>
+  <div class="wallet">₹ 0.70</div>
+</div>
+
+<div class="container">
+
+  <h2>Single Andar</h2>
+  <div class="grid" id="andar"></div>
+
+  <h2>Single Bahar</h2>
+  <div class="grid" id="bahar"></div>
+
+  <div class="bottom">
+    <button class="btn total" id="total">₹ 0</button>
+    <button class="btn submit" onclick="calculate()">SUBMIT</button>
+    <button class="btn back" onclick="goBack()">BACK</button>
+  </div>
+
+</div>
+
+<script>
+
+// 🔥 create boxes 0–9
+function createBoxes(id){
+  let container=document.getElementById(id);
+  for(let i=0;i<=9;i++){
+    container.innerHTML += `
+      <div class="box">
+        <label>${i}</label>
+        <input type="number" min="0" id="${id}_${i}">
+      </div>
+    `;
+  }
+}
+
+createBoxes("andar");
+createBoxes("bahar");
+
+// 🔥 calculate total
+function calculate(){
+  let total=0;
+
+  for(let i=0;i<=9;i++){
+    let a=parseInt(document.getElementById("andar_"+i).value) || 0;
+    let b=parseInt(document.getElementById("bahar_"+i).value) || 0;
+
+    total += a + b;
+  }
+
+  document.getElementById("total").innerText="₹ " + total;
+}
+
+// back
+function goBack(){
+  window.history.back();
+}
+
+</script>
+
+</body>
+  </html>
