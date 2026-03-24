@@ -14,19 +14,47 @@ body{
   margin:0;
 }
 
-/* HEADER */
+/* 🔥 HEADER (FINAL STYLE) */
 .header{
+  position:fixed;
+  top:10px;
+  left:10px;
+  right:10px;
   background:#fff;
-  padding:12px 15px;
+  border-radius:20px;
+  padding:10px 15px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  z-index:999;
 }
 
-/* 🔥 TOP BUTTONS */
+#menuBtn{
+  font-size:22px;
+}
+
+#userId{
+  background:green;
+  color:white;
+  padding:6px 15px;
+  border-radius:20px;
+  font-weight:bold;
+  font-size:13px;
+}
+
+#wallet{
+  background:red;
+  color:#fff;
+  padding:6px 15px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+/* 🔘 TOP BUTTONS */
 .topBtns{
-  margin-top:10px;
+  margin-top:80px;
   display:flex;
   justify-content:space-around;
   padding:10px;
@@ -48,14 +76,6 @@ body{
 .btn3{background:#0984e3;}
 .btn4{background:#e17055;}
 
-.wallet{
-  background:red;
-  color:#fff;
-  padding:6px 12px;
-  border-radius:20px;
-  font-size:14px;
-}
-
 /* CONTAINER */
 .container{
   margin:15px;
@@ -63,12 +83,6 @@ body{
   padding:15px;
   border-radius:15px;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-
-/* TITLE */
-h2{
-  margin:15px 0 10px;
-  font-size:16px;
 }
 
 /* GRID */
@@ -139,12 +153,14 @@ input{
 
 <body>
 
+<!-- ✅ HEADER -->
 <div class="header">
+  <div id="menuBtn">≡</div>
   <div id="userId">ID: 0000</div>
-  <div class="wallet" id="wallet">₹ 0</div>
+  <div id="wallet">₹ 0</div>
 </div>
 
-<!-- ✅ ADDED 4 BUTTONS -->
+<!-- ✅ TOP BUTTONS -->
 <div class="topBtns">
   <div class="topBtn btn1" onclick="goJodi()">JODI</div>
   <div class="topBtn btn2" onclick="goHaruf()">HARUF</div>
@@ -172,7 +188,7 @@ input{
 
 <script>
 
-// USER
+// USER CHECK
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user){
   window.location.href = "index.html";
@@ -184,7 +200,7 @@ const client = supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// WALLET
+// LOAD WALLET + ID
 async function loadWallet(){
   const { data } = await client
     .from("login")
@@ -199,21 +215,13 @@ async function loadWallet(){
 }
 loadWallet();
 
-// 🔥 BUTTON LINKS (same system)
-function goJodi(){
-  window.location.href = "game.html";
-}
-function goHaruf(){
-  window.location.href = "harf.html";
-}
-function goCrossing(){
-  window.location.href = "crossing.html";
-}
-function goCopy(){
-  window.location.href = "copypast.html";
-}
+// NAVIGATION
+function goJodi(){ location.href="game.html"; }
+function goHaruf(){ location.href="harf.html"; }
+function goCrossing(){ location.href="crossing.html"; }
+function goCopy(){ location.href="copypast.html"; }
 
-// BOXES
+// CREATE BOXES
 function createBoxes(id){
   let container = document.getElementById(id);
 
@@ -277,8 +285,7 @@ async function calculate(){
     .eq("id", user.id);
 
   alert("Game Submitted");
-
-  location.reload(); // ✅ refresh
+  location.reload();
 }
 
 // BACK
