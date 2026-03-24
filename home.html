@@ -23,7 +23,6 @@ body{
   cursor:pointer;
 }
 
-/* ✅ NEW ID DESIGN */
 #userId{
   position:fixed;
   left:60px;
@@ -36,7 +35,6 @@ body{
   z-index:999;
 }
 
-/* WALLET SAME */
 #wallet{
   position:fixed;
   right:15px;
@@ -49,7 +47,6 @@ body{
   z-index:999;
 }
 
-/* BOX GRID */
 .container{
   display:flex;
   flex-wrap:wrap;
@@ -59,7 +56,6 @@ body{
   gap:12px;
 }
 
-/* ✅ NEW BOX DESIGN */
 .btn{
   width:calc(50% - 10px);
   background:#fff;
@@ -70,7 +66,6 @@ body{
   text-align:center;
 }
 
-/* TEXT */
 .gameName{
   font-size:18px;
   font-weight:bold;
@@ -89,7 +84,6 @@ body{
   margin-bottom:10px;
 }
 
-/* STATUS */
 .status{
   display:inline-block;
   padding:6px 12px;
@@ -107,7 +101,6 @@ body{
   color:#fff;
 }
 
-/* BOTTOM NAV SAME */
 #bottomNav{
   position:fixed;
   bottom:0;
@@ -137,7 +130,6 @@ body{
   color:white;
 }
 
-/* SIDE MENU SAME */
 #sideMenu{
   position:fixed;
   top:0;
@@ -232,6 +224,13 @@ async function loadButtons(){
   .from("Game result")
   .select("name, number, open, close");
 
+  // ✅ SORTING (OPEN UP, CLOSE DOWN)
+  data.sort((a, b) => {
+    const aOpen = checkStatus(a.open, a.close);
+    const bOpen = checkStatus(b.open, b.close);
+    return bOpen - aOpen;
+  });
+
   let container = document.getElementById("container");
   container.innerHTML = "";
 
@@ -263,7 +262,6 @@ async function loadButtons(){
   });
 }
 
-// MENU
 function openMenu(){
   document.getElementById("sideMenu").style.left = "0";
   document.getElementById("overlay").style.display = "block";
