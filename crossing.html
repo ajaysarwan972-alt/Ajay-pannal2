@@ -3,277 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game 4</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Number Amount Setter</title>
 
 <style>
 body{
   font-family:Arial;
-  background:#e5e7eb;
+  background:#0f172a;
+  color:#fff;
   margin:0;
-  display:flex;
-  justify-content:center;
 }
 
-/* TOP BAR */
-#userId{
-  position:fixed;
-  left:10px;
-  top:10px;
-  background:green;
-  color:white;
-  padding:6px 12px;
-  border-radius:20px;
-  font-weight:bold;
-  z-index:999;
-  font-size:12px;
-}
-
-#wallet{
-  position:fixed;
-  right:10px;
-  top:10px;
-  background:red;
-  color:white;
-  padding:6px 12px;
-  border-radius:20px;
-  font-weight:bold;
-  z-index:999;
-  font-size:12px;
-}
-
-/* MAIN BOX */
+/* MAIN CARD */
 .container{
-  margin-top:60px;
-  width:90%;
-  max-width:400px;
-  background:#fff;
+  max-width:420px;
+  margin:20px auto;
+  background:#111827;
   padding:20px;
   border-radius:20px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
 
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+/* TITLE */
+h2{
+  text-align:center;
+  color:#22c55e;
+  margin-bottom:15px;
 }
 
-.box{
-  display:flex;
-  flex-direction:column;
-}
-
+/* INPUTS */
 label{
-  color:red;
-  font-weight:bold;
-  margin-bottom:5px;
+  font-size:14px;
+  color:#cbd5f5;
 }
 
-input{
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
+textarea,input{
   width:100%;
-  box-sizing:border-box;
+  padding:12px;
+  margin-top:8px;
+  margin-bottom:15px;
+  border-radius:12px;
+  border:1px solid #334155;
+  background:#1e293b;
+  color:#fff;
+  font-size:15px;
 }
 
-.submit-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-  margin-top:20px;
+textarea{
+  height:110px;
+  resize:none;
 }
 
+/* BUTTONS */
 .btn{
+  width:100%;
   padding:12px;
   border:none;
   border-radius:12px;
-  color:#fff;
+  font-weight:bold;
+  font-size:15px;
   cursor:pointer;
-  font-size:16px;
+  margin-top:5px;
 }
 
-.open{background:green;}
-.back{background:red;}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:20px;
+.set{
+  background:#22c55e;
+  color:#000;
 }
 
-.card{
-  background:#f9fafb;
-  padding:10px;
-  border-radius:10px;
-  text-align:center;
-  border:1px solid #ddd;
+.copy{
+  background:#3b82f6;
+  color:#fff;
 }
 
-.num{color:red; font-weight:bold;}
+/* TABLE */
+.table-box{
+  margin-top:15px;
+  background:#0f172a;
+  border-radius:15px;
+  overflow:hidden;
+  border:1px solid #334155;
+}
 
-/* 🔥 BOTTOM RUNNING BAR */
-.bottom{
-  position:fixed;
-  bottom:0;
+table{
   width:100%;
-  display:flex;
+  border-collapse:collapse;
 }
 
-.totalBar{
-  width:50%;
-  padding:15px;
-  text-align:center;
-  background:linear-gradient(to right, blue, red);
-  color:white;
-  font-size:18px;
+th{
+  background:#1e293b;
+  padding:10px;
+  font-size:14px;
 }
 
-.submitBar{
-  width:50%;
-  padding:15px;
+td{
+  padding:10px;
   text-align:center;
-  background:green;
-  color:white;
+  border-top:1px solid #334155;
+}
+
+.num{
+  color:#22c55e;
+  font-weight:bold;
+}
+
+.amt{
+  color:#facc15;
+}
+
+/* TOTAL */
+.total{
+  margin-top:15px;
+  text-align:center;
   font-size:18px;
+  font-weight:bold;
+  color:#facc15;
 }
 </style>
+
 </head>
 
 <body>
 
-<div id="userId">ID: 0000</div>
-<div id="wallet">₹ 0</div>
-
 <div class="container">
 
-  <div class="row">
-    <div class="box">
-      <label>1ST NUMBER</label>
-      <input type="number" id="num1">
-    </div>
+<h2>Number Amount Auto Setter</h2>
 
-    <div class="box">
-      <label>2ND NUMBER</label>
-      <input type="number" id="num2">
-    </div>
-  </div>
+<label>Enter Numbers:</label>
+<textarea id="numbers" oninput="formatNumbers()" placeholder="12 45 78 90"></textarea>
 
-  <div class="box" style="margin-top:15px;">
-    <label>POINTS</label>
-    <input type="number" id="points" oninput="calcTotal()">
-  </div>
+<label>Enter Amount:</label>
+<input type="number" id="amount" placeholder="100">
 
-  <div class="submit-row">
-    <button class="btn open" onclick="submitGame()">OPEN</button>
-    <button class="btn back" onclick="goBack()">BACK</button>
-  </div>
+<button class="btn set" onclick="setAmount()">SET</button>
+<button class="btn copy" onclick="copyData()">COPY RESULT</button>
 
-  <div class="grid" id="resultGrid"></div>
-
+<div class="table-box">
+<table id="result">
+<thead>
+<tr>
+<th>Number</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 </div>
 
-<!-- 🔥 BOTTOM BAR -->
-<div class="bottom">
-  <div class="totalBar" id="total">₹ 0</div>
-  <div class="submitBar" onclick="finalSubmit()">SUBMIT</div>
+<div class="total" id="total"></div>
+
 </div>
 
 <script>
 
-// USER CHECK
-const user = JSON.parse(localStorage.getItem("user"));
-if(!user){
-  window.location.href = "index.html";
+// 🔥 SAME LOGIC (UNCHANGED)
+
+function formatNumbers(){
+  let val = document.getElementById("numbers").value;
+  val = val.replace(/[^0-9 ]/g,'');
+  document.getElementById("numbers").value = val;
 }
 
-// SUPABASE
-const client = supabase.createClient(
-  "https://katbdbzoufiblnnsoxkk.supabase.co",
-  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
-);
+function setAmount(){
+  let nums = document.getElementById("numbers").value.trim().split(" ");
+  let amt = Number(document.getElementById("amount").value);
 
-// LOAD WALLET
-async function loadWallet(){
-  const { data } = await client
-    .from("login")
-    .select("balance")
-    .eq("id", user.id)
-    .single();
+  let tbody = document.querySelector("#result tbody");
+  tbody.innerHTML = "";
 
-  if(data){
-    document.getElementById("wallet").innerText = "₹ " + data.balance;
-    document.getElementById("userId").innerText = "ID: " + user.id;
-  }
-}
-loadWallet();
+  let total = 0;
 
-// TOTAL
-function calcTotal(){
-  let amt = Number(document.getElementById("points").value) || 0;
-  document.getElementById("total").innerText = "₹ " + amt;
+  nums.forEach(n=>{
+    if(n){
+      let tr = document.createElement("tr");
+      tr.innerHTML = `<td class="num">${n}</td><td class="amt">₹ ${amt}</td>`;
+      tbody.appendChild(tr);
+      total += amt;
+    }
+  });
+
+  document.getElementById("total").innerText = "Total: ₹ " + total;
 }
 
-// ORIGINAL SYSTEM (same)
-function submitGame(){
-  let n1 = document.getElementById("num1").value;
-  let n2 = document.getElementById("num2").value;
-  let amt = Number(document.getElementById("points").value);
+function copyData(){
+  let text = "";
+  let rows = document.querySelectorAll("#result tbody tr");
 
-  if(!n1 || !n2 || !amt){
-    alert("Fill all fields");
-    return;
-  }
+  rows.forEach(r=>{
+    let cols = r.querySelectorAll("td");
+    text += cols[0].innerText + " - " + cols[1].innerText + "\n";
+  });
 
-  let grid = document.getElementById("resultGrid");
-  grid.innerHTML = "";
-
-  let pair = n1 + "" + n2;
-
-  let div = document.createElement("div");
-  div.className = "card";
-  div.innerHTML = `<div class="num">${pair}</div><div>₹ ${amt}</div>`;
-
-  grid.appendChild(div);
-}
-
-// 🔥 FINAL SUBMIT (balance cut + refresh)
-async function finalSubmit(){
-
-  let amt = Number(document.getElementById("points").value);
-
-  if(amt <= 0){
-    alert("Amount dalo");
-    return;
-  }
-
-  const { data } = await client
-    .from("login")
-    .select("balance")
-    .eq("id", user.id)
-    .single();
-
-  if(data.balance < amt){
-    alert("Insufficient balance");
-    return;
-  }
-
-  await client
-    .from("login")
-    .update({ balance: data.balance - amt })
-    .eq("id", user.id);
-
-  alert("Game Submitted");
-
-  location.reload(); // 🔥 refresh
-}
-
-// BACK
-function goBack(){
-  window.history.back();
+  navigator.clipboard.writeText(text);
+  alert("Copied");
 }
 
 </script>
