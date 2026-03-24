@@ -13,36 +13,47 @@ body {
     margin: 0;
 }
 
-/* TOP BAR */
-#userId{
+/* 🔥 HEADER (NEW SYSTEM) */
+.header{
   position:fixed;
-  left:10px;
   top:10px;
+  left:10px;
+  right:10px;
+  background:#fff;
+  border-radius:20px;
+  padding:10px 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  z-index:999;
+}
+
+#menuBtn{
+  font-size:22px;
+}
+
+#userId{
   background:green;
   color:white;
   padding:6px 12px;
   border-radius:20px;
   font-weight:bold;
-  z-index:999;
   font-size:12px;
 }
 
 #wallet{
-  position:fixed;
-  right:10px;
-  top:10px;
   background:red;
   color:white;
   padding:6px 12px;
   border-radius:20px;
   font-weight:bold;
-  z-index:999;
   font-size:12px;
 }
 
 /* TOP BUTTONS */
 .topBtns{
-  margin-top:50px;
+  margin-top:80px;
   display:flex;
   justify-content:space-around;
   padding:10px;
@@ -120,7 +131,7 @@ body {
     font-size: 18px;
 }
 
-/* WHATSAPP SMALL */
+/* WHATSAPP */
 .whatsapp{
   position:fixed;
   bottom:80px;
@@ -141,9 +152,14 @@ body {
 
 <body>
 
-<div id="userId">ID: 0000</div>
-<div id="wallet">₹ 0</div>
+<!-- ✅ HEADER -->
+<div class="header">
+  <div id="menuBtn">≡</div>
+  <div id="userId">ID: 0000</div>
+  <div id="wallet">₹ 0</div>
+</div>
 
+<!-- ✅ TOP BUTTONS -->
 <div class="topBtns">
   <div class="topBtn btn1" onclick="goRates()">JODI</div>
   <div class="topBtn btn2" onclick="goChart()">HARUF</div>
@@ -173,7 +189,7 @@ const client = supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// WALLET LOAD
+// WALLET
 async function loadWallet(){
   const { data } = await client
     .from("login")
@@ -187,22 +203,11 @@ async function loadWallet(){
   }
 }
 
-// ✅ ONLY LINKS CHANGED
-function goRates(){
-  window.location.href = "game.html";
-}
-
-function goChart(){
-  window.location.href = "harf.html";
-}
-
-function goHistory(){
-  window.location.href = "crossing.html";
-}
-
-function goWin(){
-  window.location.href = "copy-past.html";
-}
+// LINKS
+function goRates(){ window.location.href = "game.html"; }
+function goChart(){ window.location.href = "harf.html"; }
+function goHistory(){ window.location.href = "crossing.html"; }
+function goWin(){ window.location.href = "copypast.html"; }
 
 // CREATE BOXES
 let grid = document.getElementById("grid");
