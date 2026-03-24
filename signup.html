@@ -2,6 +2,9 @@
 <html>
 <head>
   <title>Signup</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       margin: 0;
@@ -18,12 +21,7 @@
       padding: 25px;
       border-radius: 15px;
       width: 300px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       text-align: center;
-    }
-
-    h2 {
-      color: red;
     }
 
     input {
@@ -42,17 +40,6 @@
       background: red;
       color: white;
       font-weight: bold;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      background: black;
-    }
-
-    a {
-      text-decoration: none;
-      color: red;
-      font-size: 14px;
     }
   </style>
 </head>
@@ -62,14 +49,50 @@
 <div class="card">
   <h2>Signup</h2>
 
-  <input type="text" placeholder="Full Name">
-  <input type="text" placeholder="Mobile Number">
-  <input type="password" placeholder="Password">
+  <input id="name" type="text" placeholder="Full Name">
+  <input id="mobile" type="text" placeholder="Mobile Number">
+  <input id="password" type="password" placeholder="Password">
 
-  <button>REGISTER</button>
-
-  <p>Already have account? <a href="index.html">Login</a></p>
+  <button onclick="signup()">REGISTER</button>
 </div>
+
+<script>
+
+// 🔥 SUPABASE (APNI DALNA)
+const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
+
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 🔥 SIGNUP FUNCTION
+async function signup() {
+
+  let name = document.getElementById("name").value;
+  let mobile = document.getElementById("mobile").value;
+  let password = document.getElementById("password").value;
+
+  // validation
+  if(!name || !mobile || !password){
+    alert("Sab fill kar");
+    return;
+  }
+
+  // insert data
+  let { data, error } = await client
+    .from("users")
+    .insert([
+      { name: name, mobile: mobile, password: password, balance: 0 }
+    ]);
+
+  if(error){
+    alert("Error: " + error.message);
+  } else {
+    alert("Signup Success ✅");
+    window.location.href = "index.html";
+  }
+}
+
+</script>
 
 </body>
 </html>
