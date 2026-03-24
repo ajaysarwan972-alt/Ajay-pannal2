@@ -68,6 +68,7 @@ body{
 .withdraw{background:#ff4d4d;}
 .share{background:#6c5ce7;}
 
+/* BOX */
 .container{
   display:flex;
   flex-wrap:wrap;
@@ -105,7 +106,6 @@ body{
   margin-bottom:10px;
 }
 
-/* IMAGE */
 .status img{
   width:70px;
   margin-top:10px;
@@ -125,7 +125,6 @@ body{
   justify-content:center;
   color:white;
   font-size:28px;
-  z-index:999;
 }
 
 /* NAV */
@@ -156,6 +155,7 @@ body{
   color:white;
 }
 
+/* SIDE MENU */
 #sideMenu{
   position:fixed;
   top:0;
@@ -163,6 +163,26 @@ body{
   width:300px;
   height:100%;
   background:#f8f8f8;
+  z-index:1000;
+  transition:0.3s;
+  border-radius:0 20px 20px 0;
+  overflow:auto;
+}
+
+.menuHeader{
+  padding:20px;
+  background:linear-gradient(#eee,#000);
+  font-size:20px;
+  font-weight:bold;
+}
+
+.menuItem{
+  padding:15px;
+  margin:8px 10px;
+  background:#fff;
+  border-radius:15px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  font-weight:bold;
 }
 
 #overlay{
@@ -171,7 +191,9 @@ body{
   left:0;
   width:100%;
   height:100%;
+  background:rgba(0,0,0,0.4);
   display:none;
+  z-index:999;
 }
 </style>
 </head>
@@ -182,9 +204,26 @@ body{
 <div id="userId">ID: 0000</div>
 <div id="wallet">₹ 0</div>
 
-<div id="sideMenu"></div>
+<!-- SIDE MENU -->
+<div id="sideMenu">
+  <div class="menuHeader">Ajay</div>
+
+  <div class="menuItem">🏠 Home</div>
+  <div class="menuItem">👤 Profile</div>
+  <div class="menuItem">💳 UPI Details</div>
+  <div class="menuItem">🏦 Bank Details</div>
+
+  <hr>
+
+  <div class="menuItem">🔗 Share Now</div>
+  <div class="menuItem">📊 Game Rates</div>
+  <div class="menuItem">📄 Terms</div>
+  <div class="menuItem" onclick="logout()">🚪 Logout</div>
+</div>
+
 <div id="overlay" onclick="closeMenu()"></div>
 
+<!-- ACTION -->
 <div class="actionBar">
   <div class="actionBtn add">Add Money</div>
   <div class="actionBtn withdraw">Withdraw</div>
@@ -293,6 +332,22 @@ async function loadButtons(){
 
     container.appendChild(btn);
   });
+}
+
+// MENU
+function openMenu(){
+  document.getElementById("sideMenu").style.left = "0";
+  document.getElementById("overlay").style.display = "block";
+}
+
+function closeMenu(){
+  document.getElementById("sideMenu").style.left = "-320px";
+  document.getElementById("overlay").style.display = "none";
+}
+
+function logout(){
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
 }
 
 loadWallet();
