@@ -71,17 +71,13 @@ body{
   gap:8px;  
 }  
 
-.row input{
-  padding:8px;
-  font-size:14px;
-}
-
 .box{  
   display:flex;  
   flex-direction:column;  
+  width:100%;  
 }  
 
-/* ✅ LABEL = BOX STYLE */
+/* LABEL BOX STYLE */
 label{  
   background:#f1f5f9;
   padding:6px 10px;
@@ -93,7 +89,11 @@ label{
   font-size:12px;
 }
 
+/* ✅ FIXED INPUT (NO OVERFLOW) */
 input{  
+  width:100%;
+  box-sizing:border-box;   /* 🔥 main fix */
+  padding:10px;
   border-radius:10px;  
   border:1px solid #ccc;  
 }  
