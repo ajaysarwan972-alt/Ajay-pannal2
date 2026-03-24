@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Single Game</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 body{
   font-family:Arial;
@@ -45,7 +47,7 @@ h2{
   font-size:16px;
 }
 
-/* GRID FIX */
+/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -72,7 +74,7 @@ input{
   font-size:14px;
 }
 
-/* BOTTOM BUTTONS */
+/* BUTTONS */
 .bottom{
   display:flex;
   justify-content:space-between;
@@ -91,14 +93,31 @@ input{
 .submit{background:#22c55e;}
 .back{background:#ef4444;}
 .total{background:#f43f5e;}
+
+/* ✅ WHATSAPP FLOAT SMALL */
+.whatsapp{
+  position:fixed;
+  bottom:20px;
+  right:15px;
+  width:45px;
+  height:45px;
+  background:#25D366;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:22px;
+  z-index:999;
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <div>☰ Golde n</div>
-  <div class="wallet">₹ 0.70</div>
+  <div id="userId">ID: 0000</div>
+  <div class="wallet" id="wallet">₹ 0</div>
 </div>
 
 <div class="container">
@@ -117,9 +136,41 @@ input{
 
 </div>
 
+<!-- ✅ WHATSAPP BUTTON -->
+<a class="whatsapp" href="https://wa.me/91XXXXXXXXXX" target="_blank">💬</a>
+
 <script>
 
-// 🔥 CREATE BOXES (andar + bahar same system)
+// 🔥 USER CHECK
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+  window.location.href = "index.html";
+}
+
+// 🔥 SUPABASE
+const client = supabase.createClient(
+  "https://katbdbzoufiblnnsoxkk.supabase.co",
+  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// 🔥 LOAD WALLET + ID
+async function loadWallet(){
+  const { data } = await client
+    .from("login")
+    .select("balance")
+    .eq("id", user.id)
+    .single();
+
+  if(data){
+    document.getElementById("wallet").innerText = "₹ " + data.balance;
+    document.getElementById("userId").innerText = "ID: " + user.id;
+  }
+}
+
+loadWallet();
+
+// 🔥 CREATE BOXES
 function createBoxes(id){
   let container = document.getElementById(id);
 
@@ -139,7 +190,7 @@ function createBoxes(id){
 createBoxes("andar");
 createBoxes("bahar");
 
-// 🔥 TOTAL CALC (same system)
+// 🔥 TOTAL
 function calcTotal(){
   let inputs = document.querySelectorAll("input");
   let total = 0;
@@ -151,8 +202,42 @@ function calcTotal(){
   document.getElementById("total").innerText = "₹ " + total;
 }
 
-// 🔥 SUBMIT (same simple)
-function calculate(){
+// 🔥 SUBMIT WITH BALANCE CUT
+async function calculate(){
+
+  let inputs = document.querySelectorAll("input");
+  let total = 0;
+
+  inputs.forEach(inp=>{
+    total += Number(inp.value) || 0;
+  });
+
+  if(total <= 0){
+    alert("Amount dalo");
+    return;
+  }
+
+  const { data } = await client
+    .from("login")
+    .select("balance")
+    .eq("id", user.id)
+    .single();
+
+  if(data.balance < total){
+    alert("Insufficient balance");
+    return;
+  }
+
+  await client
+    .from("login")
+    .update({ balance: data.balance - total })
+    .eq("id", user.id);
+
+  inputs.forEach(inp => inp.value = "");
+
+  calcTotal();
+  loadWallet();
+
   alert("Game Submitted");
 }
 
