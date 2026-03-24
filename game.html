@@ -56,6 +56,7 @@ body {
   color:white;
   font-weight:bold;
   font-size:12px;
+  cursor:pointer;
 }
 
 .btn1{background:#6c5ce7;}
@@ -143,11 +144,12 @@ body {
 <div id="userId">ID: 0000</div>
 <div id="wallet">₹ 0</div>
 
+<!-- ✅ ONLY NAME CHANGED -->
 <div class="topBtns">
-  <div class="topBtn btn1">Game Rates</div>
-  <div class="topBtn btn2">Chart</div>
-  <div class="topBtn btn3">Bid History</div>
-  <div class="topBtn btn4">Win History</div>
+  <div class="topBtn btn1" onclick="goRates()">JODI</div>
+  <div class="topBtn btn2" onclick="goChart()">HARUF</div>
+  <div class="topBtn btn3" onclick="goHistory()">CROSSING</div>
+  <div class="topBtn btn4" onclick="goWin()">COPY PASTE</div>
 </div>
 
 <div class="container" id="grid"></div>
@@ -186,6 +188,23 @@ async function loadWallet(){
   }
 }
 
+// BUTTON WORKING
+function goRates(){
+  window.location.href = "rates.html";
+}
+
+function goChart(){
+  window.location.href = "chart.html";
+}
+
+function goHistory(){
+  window.location.href = "history.html";
+}
+
+function goWin(){
+  window.location.href = "win.html";
+}
+
 // CREATE BOXES
 let grid = document.getElementById("grid");
 
@@ -215,7 +234,7 @@ function calcTotal() {
     document.getElementById("total").innerText = "₹ " + total;
 }
 
-// ✅ SUBMIT FUNCTION (ADDED ONLY THIS)
+// SUBMIT
 async function submitGame(){
     let inputs = document.querySelectorAll("input");
     let total = 0;
@@ -229,7 +248,6 @@ async function submitGame(){
         return;
     }
 
-    // wallet fetch
     const { data } = await client
         .from("login")
         .select("balance")
@@ -241,13 +259,11 @@ async function submitGame(){
         return;
     }
 
-    // update balance
     await client
         .from("login")
         .update({ balance: data.balance - total })
         .eq("id", user.id);
 
-    // clear inputs
     inputs.forEach(inp => inp.value = "");
 
     calcTotal();
