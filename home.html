@@ -208,16 +208,16 @@ body{
 <div id="sideMenu">
   <div class="menuHeader">Ajay</div>
 
-  <div class="menuItem">🏠 Home</div>
-  <div class="menuItem">👤 Profile</div>
-  <div class="menuItem">💳 UPI Details</div>
-  <div class="menuItem">🏦 Bank Details</div>
+  <div class="menuItem" onclick="go('home.html')">🏠 Home</div>
+  <div class="menuItem" onclick="go('profile.html')">👤 Profile</div>
+  <div class="menuItem" onclick="go('upi.html')">💳 UPI Details</div>
+  <div class="menuItem" onclick="go('bank.html')">🏦 Bank Details</div>
 
   <hr>
 
-  <div class="menuItem">🔗 Share Now</div>
-  <div class="menuItem">📊 Game Rates</div>
-  <div class="menuItem">📄 Terms</div>
+  <div class="menuItem" onclick="shareApp()">🔗 Share Now</div>
+  <div class="menuItem" onclick="go('rates.html')">📊 Game Rates</div>
+  <div class="menuItem" onclick="go('terms.html')">📄 Terms</div>
   <div class="menuItem" onclick="logout()">🚪 Logout</div>
 </div>
 
@@ -343,6 +343,18 @@ function openMenu(){
 function closeMenu(){
   document.getElementById("sideMenu").style.left = "-320px";
   document.getElementById("overlay").style.display = "none";
+}
+
+function go(page){
+  window.location.href = page;
+}
+
+function shareApp(){
+  navigator.share({
+    title: "My App",
+    text: "Join now",
+    url: window.location.href
+  });
 }
 
 function logout(){
