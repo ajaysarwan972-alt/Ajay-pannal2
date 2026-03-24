@@ -6,6 +6,7 @@
 <title>Single Game</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="menu.js"></script> <!-- ✅ ADD -->
 
 <style>
 body{
@@ -14,7 +15,7 @@ body{
   margin:0;
 }
 
-/* 🔥 HEADER (FINAL STYLE) */
+/* 🔥 HEADER */
 .header{
   position:fixed;
   top:10px;
@@ -30,9 +31,7 @@ body{
   z-index:999;
 }
 
-#menuBtn{
-  font-size:22px;
-}
+#menuBtn{ font-size:22px; }
 
 #userId{
   background:green;
@@ -76,7 +75,6 @@ body{
 .btn3{background:#0984e3;}
 .btn4{background:#e17055;}
 
-/* CONTAINER */
 .container{
   margin:15px;
   background:#fff;
@@ -85,7 +83,6 @@ body{
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -93,9 +90,7 @@ body{
   margin-bottom:10px;
 }
 
-.box{
-  text-align:center;
-}
+.box{ text-align:center; }
 
 label{
   color:red;
@@ -112,7 +107,6 @@ input{
   font-size:14px;
 }
 
-/* BUTTONS */
 .bottom{
   display:flex;
   justify-content:space-between;
@@ -132,7 +126,6 @@ input{
 .back{background:#ef4444;}
 .total{background:#f43f5e;}
 
-/* WHATSAPP */
 .whatsapp{
   position:fixed;
   bottom:20px;
@@ -146,7 +139,6 @@ input{
   justify-content:center;
   color:white;
   font-size:22px;
-  z-index:999;
 }
 </style>
 </head>
@@ -155,7 +147,7 @@ input{
 
 <!-- ✅ HEADER -->
 <div class="header">
-  <div id="menuBtn">≡</div>
+  <div id="menuBtn" onclick="openMenu()">≡</div> <!-- ✅ FIX -->
   <div id="userId">ID: 0000</div>
   <div id="wallet">₹ 0</div>
 </div>
@@ -169,7 +161,6 @@ input{
 </div>
 
 <div class="container">
-
   <h2>Single Andar</h2>
   <div class="grid" id="andar"></div>
 
@@ -181,7 +172,6 @@ input{
     <button class="btn submit" onclick="calculate()">SUBMIT</button>
     <button class="btn back" onclick="goBack()">BACK</button>
   </div>
-
 </div>
 
 <a class="whatsapp" href="https://wa.me/91XXXXXXXXXX" target="_blank">💬</a>
@@ -200,7 +190,10 @@ const client = supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// LOAD WALLET + ID
+// ✅ MARKET
+const market = "SINGLE";
+
+// WALLET
 async function loadWallet(){
   const { data } = await client
     .from("login")
@@ -253,14 +246,23 @@ function calcTotal(){
   document.getElementById("total").innerText = "₹ " + total;
 }
 
-// SUBMIT
+// ✅ SUBMIT + HISTORY ADD
 async function calculate(){
 
   let inputs = document.querySelectorAll("input");
   let total = 0;
+  let dataArr = [];
 
-  inputs.forEach(inp=>{
-    total += Number(inp.value) || 0;
+  inputs.forEach((inp,i)=>{
+    let val = Number(inp.value) || 0;
+    total += val;
+
+    if(val > 0){
+      dataArr.push({
+        number: i,
+        amount: val
+      });
+    }
   });
 
   if(total <= 0){
@@ -279,10 +281,21 @@ async function calculate(){
     return;
   }
 
+  // balance cut
   await client
     .from("login")
     .update({ balance: data.balance - total })
     .eq("id", user.id);
+
+  // ✅ history save
+  await client
+    .from("history")
+    .insert([{
+      user_id: user.id,
+      market: market,
+      data: JSON.stringify(dataArr),
+      total: total
+    }]);
 
   alert("Game Submitted");
   location.reload();
