@@ -97,33 +97,51 @@ body{
   color:white;
 }
 
-/* SIDE MENU */
+/* ✅ UPGRADED SIDE MENU */
 #sideMenu{
   position:fixed;
   top:0;
-  left:-260px;
-  width:260px;
+  left:-320px;
+  width:300px;
   height:100%;
-  background:#fff;
+  background:#f8f8f8;
   z-index:1000;
   transition:0.3s;
   padding:15px;
-  box-shadow:2px 0 10px rgba(0,0,0,0.2);
-  border-radius:0 15px 15px 0;
+  box-shadow:2px 0 20px rgba(0,0,0,0.2);
+  border-radius:0 25px 25px 0;
 }
 
 .menuHeader{
-  font-size:20px;
+  font-size:22px;
   font-weight:bold;
+  padding:15px;
+  border-radius:20px;
+  background:linear-gradient(to right, #000, #444);
+  color:white;
   margin-bottom:20px;
 }
 
 .menuItem{
-  padding:12px;
-  margin:8px 0;
-  background:#f2f2f2;
-  border-radius:10px;
+  display:flex;
+  align-items:center;
+  padding:15px;
+  margin:10px 0;
+  background:#fff;
+  border-radius:15px;
   cursor:pointer;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  font-weight:500;
+}
+
+.menuItem:hover{
+  transform:scale(1.03);
+}
+
+hr{
+  margin:15px 0;
+  border:none;
+  border-top:1px solid #ddd;
 }
 
 #overlay{
@@ -251,7 +269,7 @@ function openMenu(){
 }
 
 function closeMenu(){
-  document.getElementById("sideMenu").style.left = "-260px";
+  document.getElementById("sideMenu").style.left = "-320px";
   document.getElementById("overlay").style.display = "none";
 }
 
