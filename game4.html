@@ -12,25 +12,21 @@ body{
   margin:0;
 }
 
-/* header */
 .header{
   background:#fff;
   padding:15px;
   border-radius:0 0 20px 20px;
   display:flex;
   justify-content:space-between;
-  align-items:center;
 }
 
 .wallet{
   background:red;
   color:#fff;
-  padding:10px 15px;
+  padding:10px;
   border-radius:10px;
-  font-weight:bold;
 }
 
-/* container */
 .container{
   margin:15px;
   background:#fff;
@@ -38,12 +34,10 @@ body{
   border-radius:20px;
 }
 
-/* 2 column layout */
 .row{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:15px;
-  margin-top:10px;
 }
 
 .box{
@@ -59,12 +53,10 @@ label{
 
 input{
   padding:12px;
-  border-radius:12px;
+  border-radius:10px;
   border:1px solid #ccc;
-  font-size:16px;
 }
 
-/* submit section */
 .submit-row{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -73,37 +65,50 @@ input{
 }
 
 .btn{
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:15px;
-  font-size:16px;
+  border-radius:12px;
   color:#fff;
   cursor:pointer;
-  box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
-.submit{
-  background:linear-gradient(to right,#84cc16,#22c55e);
+.submit{background:green;}
+.back{background:red; margin-top:10px;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:20px;
 }
 
-.back{
-  background:linear-gradient(to right,#f43f5e,#ef4444);
-  margin-top:10px;
+.card{
+  background:#f9fafb;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  border:1px solid #ddd;
+}
+
+.num{color:red; font-weight:bold;}
+
+.total{
+  text-align:center;
+  margin-top:15px;
+  font-size:18px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- header -->
 <div class="header">
-  <div>☰ &nbsp; Golde n</div>
+  <div>☰ Golde n</div>
   <div class="wallet">₹ 0.70</div>
 </div>
 
 <div class="container">
 
-  <!-- row 1 -->
   <div class="row">
     <div class="box">
       <label>1ST NUMBER</label>
@@ -116,7 +121,6 @@ input{
     </div>
   </div>
 
-  <!-- row 2 -->
   <div class="submit-row">
     <div class="box">
       <label>POINTS</label>
@@ -124,30 +128,59 @@ input{
     </div>
 
     <div>
-      <button class="btn submit" onclick="submitGame()">SUBMIT</button>
+      <button class="btn submit" onclick="generate()">SUBMIT</button>
       <button class="btn back" onclick="goBack()">BACK</button>
     </div>
   </div>
+
+  <!-- RESULT -->
+  <div class="grid" id="grid"></div>
+  <div class="total" id="total"></div>
 
 </div>
 
 <script>
 
-// submit (abhi simple alert, baad me logic laga denge)
-function submitGame(){
-  let f=document.getElementById("first").value;
-  let s=document.getElementById("second").value;
-  let p=document.getElementById("points").value;
+function generate(){
+  let f=document.getElementById("first").value.replace(/\D/g,'');
+  let s=document.getElementById("second").value.replace(/\D/g,'');
+  let p=parseInt(document.getElementById("points").value);
 
   if(!f || !s || !p){
     alert("Fill all fields");
     return;
   }
 
-  alert("Game Submitted");
+  if(p < 1){
+    alert("Minimum ₹1 required");
+    return;
+  }
+
+  let grid=document.getElementById("grid");
+  grid.innerHTML="";
+
+  let total=0;
+
+  // 🔥 pair calculation
+  for(let i=0;i<f.length;i++){
+    for(let j=0;j<s.length;j++){
+
+      let num = f[i] + s[j];
+
+      total += p;
+
+      grid.innerHTML += `
+        <div class="card">
+          <div class="num">${num}</div>
+          <div>₹ ${p}</div>
+        </div>
+      `;
+    }
+  }
+
+  document.getElementById("total").innerText="Total: ₹ " + total;
 }
 
-// back button
 function goBack(){
   window.history.back();
 }
