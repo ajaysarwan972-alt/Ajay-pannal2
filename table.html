@@ -2,25 +2,24 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Edit</title>
+<title>Admin Panel</title>
 
 <style>
 body { font-family: Arial; padding: 20px; }
 
-/* 🔥 FRAME */
 .frame {
     width: 100%;
     height: 300px;
     overflow: auto;
     background: #fff;
     border-radius: 10px;
+    margin-bottom: 20px;
 }
 
-/* TABLE */
 table {
     border-collapse: collapse;
     width: 100%;
-    min-width: 600px;
+    min-width: 700px;
 }
 
 td, th {
@@ -39,8 +38,7 @@ input {
 
 <body>
 
-<h2>login (editable)</h2>
-
+<h2>login</h2>
 <div class="frame">
 <table>
 <thead>
@@ -52,7 +50,40 @@ input {
 <th>balance</th>
 </tr>
 </thead>
-<tbody id="data"></tbody>
+<tbody id="userData"></tbody>
+</table>
+</div>
+
+<h2>game_result</h2>
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+<th>number</th>
+<th>open</th>
+<th>close</th>
+</tr>
+</thead>
+<tbody id="gameData"></tbody>
+</table>
+</div>
+
+<h2>history</h2>
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>user_id</th>
+<th>game</th>
+<th>number</th>
+<th>amount</th>
+<th>status</th>
+</tr>
+</thead>
+<tbody id="historyData"></tbody>
 </table>
 </div>
 
@@ -64,46 +95,79 @@ const supabase = createClient(
     "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// LOAD DATA
-async function load(){
-    const { data, error } = await supabase
-        .from("login")
-        .select("*")
-
-    if(error){
-        alert(error.message)
-        return
-    }
+// 🔥 LOGIN
+async function loadUsers(){
+    const { data } = await supabase.from("login").select("*")
 
     let html = ""
-
     data.forEach(row => {
         html += `
         <tr>
             <td>${row.id}</td>
-            <td><input value="${row.name}" onchange="updateData('${row.id}','name',this.value)"></td>
-            <td><input value="${row.mobile}" onchange="updateData('${row.id}','mobile',this.value)"></td>
-            <td><input value="${row.password}" onchange="updateData('${row.id}','password',this.value)"></td>
-            <td><input value="${row.balance}" onchange="updateData('${row.id}','balance',this.value)"></td>
+            <td><input value="${row.name || ""}" onchange="updateUser('${row.id}','name',this.value)"></td>
+            <td><input value="${row.mobile || ""}" onchange="updateUser('${row.id}','mobile',this.value)"></td>
+            <td><input value="${row.password || ""}" onchange="updateUser('${row.id}','password',this.value)"></td>
+            <td><input value="${row.balance || ""}" onchange="updateUser('${row.id}','balance',this.value)"></td>
         </tr>`
     })
 
-    document.getElementById("data").innerHTML = html
+    document.getElementById("userData").innerHTML = html
 }
 
-// UPDATE
-window.updateData = async (id, column, value) => {
-    const { error } = await supabase
-        .from("login")
-        .update({ [column]: value })
-        .eq("id", id)
-
-    if(error){
-        alert("Update failed")
-    }
+window.updateUser = async (id, col, val) => {
+    await supabase.from("login").update({ [col]: val }).eq("id", id)
 }
 
-load()
+
+// 🔥 GAME RESULT
+async function loadGames(){
+    const { data } = await supabase.from("game_result").select("*")
+
+    let html = ""
+    data.forEach(row => {
+        html += `
+        <tr>
+            <td>${row.id}</td>
+            <td><input value="${row.name || ""}" onchange="updateGame('${row.id}','name',this.value)"></td>
+            <td><input value="${row.number || ""}" onchange="updateGame('${row.id}','number',this.value)"></td>
+            <td><input value="${row.open || ""}" onchange="updateGame('${row.id}','open',this.value)"></td>
+            <td><input value="${row.close || ""}" onchange="updateGame('${row.id}','close',this.value)"></td>
+        </tr>`
+    })
+
+    document.getElementById("gameData").innerHTML = html
+}
+
+window.updateGame = async (id, col, val) => {
+    await supabase.from("game_result").update({ [col]: val }).eq("id", id)
+}
+
+
+// 🔥 HISTORY (VIEW ONLY)
+async function loadHistory(){
+    const { data } = await supabase.from("history").select("*")
+
+    let html = ""
+    data.forEach(row => {
+        html += `
+        <tr>
+            <td>${row.id}</td>
+            <td>${row.user_id || ""}</td>
+            <td>${row.game || ""}</td>
+            <td>${row.number || ""}</td>
+            <td>${row.amount || ""}</td>
+            <td>${row.status || ""}</td>
+        </tr>`
+    })
+
+    document.getElementById("historyData").innerHTML = html
+}
+
+
+// LOAD ALL
+loadUsers()
+loadGames()
+loadHistory()
 </script>
 
 </body>
