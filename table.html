@@ -84,6 +84,19 @@ td, th {
 </table>
 </div>
 
+<!-- 🔥 HISTORY TABLE (NEW) -->
+<h2>history</h2>
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>id</th><th>user_id</th><th>market</th><th>data</th><th>total</th><th>created_at</th>
+</tr>
+</thead>
+<tbody id="historyData"></tbody>
+</table>
+</div>
+
 <!-- FILTER -->
 <div class="filter-box">
 <select id="userFilter">
@@ -97,7 +110,7 @@ td, th {
 <button onclick="loadFiltered()">Load</button>
 </div>
 
-<!-- OUTPUT -->
+<!-- OUTPUT (same system niche) -->
 <div class="frame" id="outputBox"></div>
 
 <script type="module">
@@ -108,7 +121,7 @@ const supabase = createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// 🔥 LOAD USERS
+// USERS
 async function loadUsers(){
     const { data } = await supabase.from("login").select("*")
     let html="", opt=""
@@ -126,7 +139,7 @@ async function loadUsers(){
     userFilter.innerHTML += opt
 }
 
-// 🔥 LOAD MARKET
+// MARKETS
 async function loadMarkets(){
     const { data } = await supabase.from("Game result").select("name")
     let opt=""
@@ -137,7 +150,7 @@ async function loadMarkets(){
     marketFilter.innerHTML=opt
 }
 
-// 🔥 UPDATE MARKET NUMBER (2 digit + clear)
+// UPDATE NUMBER
 window.updateMarketNumber = async () => {
     let value = marketValue.value
     const market = marketSelect.value
@@ -154,7 +167,7 @@ window.updateMarketNumber = async () => {
     loadGames()
 }
 
-// 🔥 LOAD GAME
+// LOAD GAME
 async function loadGames(){
     const { data } = await supabase.from("Game result").select("*")
     let html=""
@@ -170,7 +183,24 @@ async function loadGames(){
     gameData.innerHTML=html
 }
 
-// 🔥 MAIN FILTER + CONVERT
+// 🔥 LOAD HISTORY TABLE
+async function loadHistory(){
+    const { data } = await supabase.from("history").select("*")
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.user_id}</td>
+        <td>${r.market}</td>
+        <td>${r.data}</td>
+        <td>${r.total}</td>
+        <td>${r.created_at}</td>
+        </tr>`
+    })
+    historyData.innerHTML=html
+}
+
+// FILTER + CONVERT (same)
 window.loadFiltered = async ()=>{
     const uid = userFilter.value
     const market = marketFilter.value
@@ -189,17 +219,14 @@ window.loadFiltered = async ()=>{
     data.forEach(row=>{
         let raw = row.data || ""
 
-        // FORMAT 1
         raw.replace(/"num":"(\\d+)","a":(\\d+)/g,(m,n,a)=>{
             output+=makeLine(n,a,row.id)
         })
 
-        // FORMAT 2
         raw.replace(/"number":"(\\d+)","amount":(\\d+)/g,(m,n,a)=>{
             output+=makeLine(n,a,row.id)
         })
 
-        // FORMAT 3
         raw.replace(/"type":"(A|B)","number":(\\d+),"amount":(\\d+)/g,(m,t,n,a)=>{
             n = String(n).padStart(2,"0")
             if(t==="A") output+=`<div>${"×"+n+"-"+a} ${btn(row.id,n,a)}</div>`
@@ -210,27 +237,25 @@ window.loadFiltered = async ()=>{
     outputBox.innerHTML = output || "No Data"
 }
 
-// 🔥 LINE BUILDER
 function makeLine(n,a,id){
     n = String(n).padStart(2,"0")
     return `<div>${n}-${a} ${btn(id,n,a)}</div>`
 }
 
-// 🔥 DELETE BUTTON
 function btn(id,n,a){
     return `<button class="delete-btn" onclick="deleteItem('${id}','${n}','${a}')">X</button>`
 }
 
-// 🔥 DELETE SYSTEM
-window.deleteItem = async (id,n,a)=>{
+window.deleteItem = async (id)=>{
     let action = prompt("1 = Detail delete\n2 = Table delete\n3 = Cancel")
 
     if(action==="1"){
-        loadFiltered() // refresh only
+        loadFiltered()
     }
     else if(action==="2"){
         await supabase.from("history").delete().eq("id",id)
         loadFiltered()
+        loadHistory()
     }
 }
 
@@ -238,6 +263,7 @@ window.deleteItem = async (id,n,a)=>{
 loadUsers()
 loadMarkets()
 loadGames()
+loadHistory()
 </script>
 
 </body>
