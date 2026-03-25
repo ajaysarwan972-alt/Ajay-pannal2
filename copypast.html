@@ -10,7 +10,6 @@
 <style>
 body{font-family:Arial;background:#e5e7eb;margin:0;}
 
-/* 🔥 HEADER */
 .header{
   position:fixed;
   top:10px;
@@ -46,7 +45,6 @@ body{font-family:Arial;background:#e5e7eb;margin:0;}
   font-weight:bold;
 }
 
-/* TOP BUTTONS */
 .topBtns{margin-top:80px;display:flex;justify-content:space-around;padding:10px;}
 .topBtn{width:22%;padding:10px;border-radius:20px;text-align:center;color:#fff;font-size:12px;cursor:pointer;}
 .btn1{background:#6c5ce7;} .btn2{background:#00b894;} .btn3{background:#0984e3;} .btn4{background:#e17055;}
@@ -78,7 +76,6 @@ th{color:red;}
 
 <body>
 
-<!-- ✅ HEADER -->
 <div class="header">
   <div id="menuBtn">≡</div>
   <div id="userId">ID: 0</div>
@@ -139,6 +136,9 @@ const client = supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
+// ✅ MARKET FROM HOME
+const market = localStorage.getItem("market") || "UNKNOWN";
+
 async function loadWallet(){
   const { data } = await client.from("login").select("balance").eq("id", user.id).single();
   if(data){
@@ -198,7 +198,7 @@ function delRow(btn,a){
   document.getElementById("total").innerText="₹ "+total;
 }
 
-// SUBMIT
+// ✅ SUBMIT + HISTORY
 async function submitData(){
   if(total<=0){ alert("No data"); return; }
 
@@ -210,6 +210,14 @@ async function submitData(){
   }
 
   await client.from("login").update({ balance: data.balance - total }).eq("id", user.id);
+
+  // ✅ HISTORY SAVE
+  await client.from("history").insert([{
+    user_id: user.id,
+    market: market,
+    data: JSON.stringify(list),
+    total: total
+  }]);
 
   alert("Game Submitted");
   location.reload();
