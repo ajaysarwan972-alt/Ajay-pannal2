@@ -187,7 +187,6 @@ const client = supabase.createClient(
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// ✅ MARKET FIX (FINAL)
 const market = localStorage.getItem("market");
 
 if(!market){
@@ -195,7 +194,6 @@ if(!market){
   window.location.href = "home.html";
 }
 
-// WALLET
 async function loadWallet(){
   const { data } = await client
     .from("login")
@@ -209,13 +207,11 @@ async function loadWallet(){
   }
 }
 
-// LINKS
 function goRates(){ window.location.href = "game.html"; }
 function goChart(){ window.location.href = "harf.html"; }
 function goHistory(){ window.location.href = "crossing.html"; }
 function goWin(){ window.location.href = "copypast.html"; }
 
-// CREATE BOXES
 let grid = document.getElementById("grid");
 
 for (let i = 0; i < 100; i++) {
@@ -232,7 +228,6 @@ for (let i = 0; i < 100; i++) {
     grid.appendChild(div);
 }
 
-// TOTAL
 function calcTotal() {
     let inputs = document.querySelectorAll("input");
     let total = 0;
@@ -244,17 +239,25 @@ function calcTotal() {
     document.getElementById("total").innerText = "₹ " + total;
 }
 
-// SUBMIT
+// 🔥 FIXED SUBMIT (ONLY CHANGE)
 async function submitGame(){
     let inputs = document.querySelectorAll("input");
     let total = 0;
-    let dataObj = {};
+    let dataArr = [];
 
     inputs.forEach((inp, i) => {
         let val = Number(inp.value) || 0;
+
         if(val > 0){
-          dataObj[i] = val;
+
+            let num = i.toString().padStart(2, '0'); // ✅ 2 digit fix
+
+            dataArr.push({
+                number: num,
+                amount: val
+            });
         }
+
         total += val;
     });
 
@@ -282,7 +285,7 @@ async function submitGame(){
     await client.from("history").insert([{
         user_id: user.id,
         market: market,
-        data: JSON.stringify(dataObj),
+        data: JSON.stringify(dataArr), // ✅ fixed
         total: total
     }]);
 
