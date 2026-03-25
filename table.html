@@ -152,12 +152,15 @@ async function loadUsers(){
 
 async function loadMarkets(){
     const { data } = await supabase.from("Game result").select("name")
-    let opt=""
+    
+    let opt = '<option value="all">All Market</option>'
+
     data.forEach(r=>{
         opt+=`<option value="${r.name}">${r.name}</option>`
     })
-    marketSelect.innerHTML=opt
-    marketFilter.innerHTML += opt
+
+    marketSelect.innerHTML = opt
+    marketFilter.innerHTML = opt
 }
 
 window.updateMarketNumber = async () => {
@@ -208,15 +211,17 @@ async function loadHistory(){
 }
 
 window.loadFiltered = async ()=>{
-    const uid = userFilter.value
-    const market = marketFilter.value
+    const uid = userFilter.value.trim()
+    const market = marketFilter.value.trim()
 
     let query = supabase.from("history").select("*")
 
-    if(uid !== "all") query = query.eq("user_id", uid)
+    if(uid !== "all"){
+        query = query.eq("user_id", uid)
+    }
 
-    if(market !== "all" && market){
-        query = query.eq("market", market.trim())
+    if(market !== "all" && market !== ""){
+        query = query.eq("market", market)
     }
 
     const { data } = await query
