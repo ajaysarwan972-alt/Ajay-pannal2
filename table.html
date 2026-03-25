@@ -54,7 +54,7 @@ input {
 </table>
 </div>
 
-<h2>game_result</h2>
+<h2>Game result</h2>
 <div class="frame">
 <table>
 <thead>
@@ -95,7 +95,7 @@ const supabase = createClient(
     "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// 🔥 LOGIN
+// LOGIN
 async function loadUsers(){
     const { data } = await supabase.from("login").select("*")
 
@@ -119,9 +119,9 @@ window.updateUser = async (id, col, val) => {
 }
 
 
-// 🔥 GAME RESULT
+// GAME RESULT ✅ (FIXED NAME)
 async function loadGames(){
-    const { data } = await supabase.from("game_result").select("*")
+    const { data } = await supabase.from("Game result").select("*")
 
     let html = ""
     data.forEach(row => {
@@ -139,11 +139,11 @@ async function loadGames(){
 }
 
 window.updateGame = async (id, col, val) => {
-    await supabase.from("game_result").update({ [col]: val }).eq("id", id)
+    await supabase.from("Game result").update({ [col]: val }).eq("id", id)
 }
 
 
-// 🔥 HISTORY (VIEW ONLY)
+// HISTORY ✅ (NOW EDITABLE)
 async function loadHistory(){
     const { data } = await supabase.from("history").select("*")
 
@@ -152,19 +152,23 @@ async function loadHistory(){
         html += `
         <tr>
             <td>${row.id}</td>
-            <td>${row.user_id || ""}</td>
-            <td>${row.game || ""}</td>
-            <td>${row.number || ""}</td>
-            <td>${row.amount || ""}</td>
-            <td>${row.status || ""}</td>
+            <td><input value="${row.user_id || ""}" onchange="updateHistory('${row.id}','user_id',this.value)"></td>
+            <td><input value="${row.game || ""}" onchange="updateHistory('${row.id}','game',this.value)"></td>
+            <td><input value="${row.number || ""}" onchange="updateHistory('${row.id}','number',this.value)"></td>
+            <td><input value="${row.amount || ""}" onchange="updateHistory('${row.id}','amount',this.value)"></td>
+            <td><input value="${row.status || ""}" onchange="updateHistory('${row.id}','status',this.value)"></td>
         </tr>`
     })
 
     document.getElementById("historyData").innerHTML = html
 }
 
+window.updateHistory = async (id, col, val) => {
+    await supabase.from("history").update({ [col]: val }).eq("id", id)
+}
 
-// LOAD ALL
+
+// LOAD
 loadUsers()
 loadGames()
 loadHistory()
