@@ -29,30 +29,7 @@ td, th {
     text-align: center;
 }
 
-textarea {
-    width: 100%;
-    height: 120px;
-    border: none;
-    resize: vertical;
-}
-
-.copy-btn {
-    margin-top: 5px;
-    padding: 4px 8px;
-    cursor: pointer;
-}
-
-.filter-box {
-    background: #fff;
-    padding: 10px;
-    border-radius: 10px;
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.update-box{
+.filter-box, .update-box {
     background:#fff;
     padding:10px;
     border-radius:10px;
@@ -61,12 +38,20 @@ textarea {
     gap:10px;
     flex-wrap:wrap;
 }
+
+.delete-btn{
+    background:red;
+    color:#fff;
+    border:none;
+    padding:4px 6px;
+    cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
-<!-- 🔥 LOGIN TABLE -->
+<!-- LOGIN -->
 <h2>login</h2>
 <div class="frame">
 <table>
@@ -79,6 +64,7 @@ textarea {
 </table>
 </div>
 
+<!-- GAME -->
 <h2>Game result</h2>
 <div class="frame">
 
@@ -98,41 +84,21 @@ textarea {
 </table>
 </div>
 
-<h2>history</h2>
-<div class="frame">
-
-<button onclick="copyFilteredData()">Copy Filtered Data</button>
-
-<table>
-<thead>
-<tr>
-<th>id</th><th>user_id</th><th>market</th><th>data</th><th>total</th><th>created_at</th>
-</tr>
-</thead>
-<tbody id="historyData"></tbody>
-</table>
-</div>
-
 <!-- FILTER -->
 <div class="filter-box">
-<select id="tableSelect">
-<option value="gameData">Game result</option>
-<option value="historyData">history</option>
+<select id="userFilter">
+<option value="all">All Users</option>
 </select>
 
-<select id="columnSelect">
-<option value="2">number / market</option>
-<option value="3">data</option>
-<option value="4">total</option>
-<option value="5">date</option>
-</select>
+<select id="marketFilter"></select>
 
-<input type="text" id="filterValue" placeholder="Enter value">
 <input type="date" id="dateFilter">
 
-<button onclick="applyFilter()">Filter</button>
-<button onclick="resetFilter()">Reset</button>
+<button onclick="loadFiltered()">Load</button>
 </div>
+
+<!-- OUTPUT -->
+<div class="frame" id="outputBox"></div>
 
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
@@ -142,149 +108,136 @@ const supabase = createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// LOGIN LOAD
+// 🔥 LOAD USERS
 async function loadUsers(){
     const { data } = await supabase.from("login").select("*")
-    let html=""
+    let html="", opt=""
     data.forEach(r=>{
         html+=`<tr>
-        <td>${r.id||""}</td>
-        <td>${r.name||""}</td>
-        <td>${r.mobile||""}</td>
-        <td>${r.password||""}</td>
-        <td>${r.balance||""}</td>
+        <td>${r.id}</td>
+        <td>${r.name}</td>
+        <td>${r.mobile}</td>
+        <td>${r.password}</td>
+        <td>${r.balance}</td>
         </tr>`
+        opt+=`<option value="${r.id}">${r.id}</option>`
     })
     userData.innerHTML=html
+    userFilter.innerHTML += opt
 }
 
-// LOAD MARKET
+// 🔥 LOAD MARKET
 async function loadMarkets(){
     const { data } = await supabase.from("Game result").select("name")
-    let options=""
+    let opt=""
     data.forEach(r=>{
-        options += `<option value="${r.name}">${r.name}</option>`
+        opt+=`<option value="${r.name}">${r.name}</option>`
     })
-    marketSelect.innerHTML = options
+    marketSelect.innerHTML=opt
+    marketFilter.innerHTML=opt
 }
 
-// UPDATE MARKET
+// 🔥 UPDATE MARKET NUMBER (2 digit + clear)
 window.updateMarketNumber = async () => {
-    const market = document.getElementById("marketSelect").value
-    let value = document.getElementById("marketValue").value
+    let value = marketValue.value
+    const market = marketSelect.value
 
-    if(!market || value === "") return alert("Fill all")
+    if(value==="") return
 
-    value = value.padStart(2, '0')
+    value = value.padStart(2,"0")
 
-    await supabase
-        .from("Game result")
-        .update({ number: value })
-        .eq("name", market)
+    await supabase.from("Game result")
+    .update({ number:value })
+    .eq("name",market)
 
-    alert("Updated ✅")
-
-    document.getElementById("marketValue").value = ""
-
+    marketValue.value=""
     loadGames()
 }
 
-// FILTER
-window.applyFilter = () => {
-    const tableId = tableSelect.value
-    const colIndex = parseInt(columnSelect.value)
-    const value = document.getElementById("filterValue").value.trim()
-    const dateVal = document.getElementById("dateFilter").value
-
-    document.querySelectorAll(`#${tableId} tr`).forEach(row=>{
-        const cells = row.querySelectorAll("td")
-
-        let colMatch = true
-        let dateMatch = true
-
-        if(value){
-            let text = (cells[colIndex]?.innerText || "").trim()
-            colMatch = text.includes(value)
-        }
-
-        if(dateVal){
-            let dateText = (cells[cells.length-1]?.innerText || "")
-            dateMatch = dateText.includes(dateVal)
-        }
-
-        row.style.display = (colMatch && dateMatch) ? "" : "none"
-    })
-}
-
-window.resetFilter = () => {
-    document.querySelectorAll("tr").forEach(r=>r.style.display="")
-}
-
-// COPY
-window.copyText = (text) => {
-    const temp = document.createElement("textarea")
-    temp.value = text
-    document.body.appendChild(temp)
-    temp.select()
-    document.execCommand("copy")
-    document.body.removeChild(temp)
-}
-
-// COPY FILTERED
-window.copyFilteredData = () => {
-    let rows = document.querySelectorAll("#historyData tr")
-    let allData = ""
-
-    rows.forEach(row=>{
-        if(row.style.display !== "none"){
-            let textarea = row.querySelector("textarea")
-            if(textarea){
-                allData += textarea.value + "\n\n"
-            }
-        }
-    })
-
-    copyText(allData.trim())
-}
-
-// LOAD GAME
+// 🔥 LOAD GAME
 async function loadGames(){
     const { data } = await supabase.from("Game result").select("*")
     let html=""
     data.forEach(r=>{
         html+=`<tr>
-        <td>${r.id||""}</td>
-        <td>${r.name||""}</td>
-        <td><input value="${r.number||""}" readonly></td>
-        <td>${r.open||""}</td>
-        <td>${r.close||""}</td>
+        <td>${r.id}</td>
+        <td>${r.name}</td>
+        <td>${r.number}</td>
+        <td>${r.open}</td>
+        <td>${r.close}</td>
         </tr>`
     })
     gameData.innerHTML=html
 }
 
-// LOAD HISTORY
-async function loadHistory(){
-    const { data } = await supabase.from("history").select("*")
-    let html=""
-    data.forEach(r=>{
-        html+=`<tr>
-        <td>${r.id}</td>
-        <td>${r.user_id}</td>
-        <td>${r.market}</td>
-        <td><textarea>${r.data||""}</textarea></td>
-        <td>${r.total}</td>
-        <td>${r.created_at}</td>
-        </tr>`
+// 🔥 MAIN FILTER + CONVERT
+window.loadFiltered = async ()=>{
+    const uid = userFilter.value
+    const market = marketFilter.value
+    const date = dateFilter.value
+
+    let query = supabase.from("history").select("*")
+
+    if(uid !== "all") query = query.eq("user_id", uid)
+    if(market) query = query.eq("market", market)
+    if(date) query = query.gte("created_at", date)
+
+    const { data } = await query
+
+    let output=""
+
+    data.forEach(row=>{
+        let raw = row.data || ""
+
+        // FORMAT 1
+        raw.replace(/"num":"(\\d+)","a":(\\d+)/g,(m,n,a)=>{
+            output+=makeLine(n,a,row.id)
+        })
+
+        // FORMAT 2
+        raw.replace(/"number":"(\\d+)","amount":(\\d+)/g,(m,n,a)=>{
+            output+=makeLine(n,a,row.id)
+        })
+
+        // FORMAT 3
+        raw.replace(/"type":"(A|B)","number":(\\d+),"amount":(\\d+)/g,(m,t,n,a)=>{
+            n = String(n).padStart(2,"0")
+            if(t==="A") output+=`<div>${"×"+n+"-"+a} ${btn(row.id,n,a)}</div>`
+            if(t==="B") output+=`<div>${n+"×-"+a} ${btn(row.id,n,a)}</div>`
+        })
     })
-    historyData.innerHTML=html
+
+    outputBox.innerHTML = output || "No Data"
+}
+
+// 🔥 LINE BUILDER
+function makeLine(n,a,id){
+    n = String(n).padStart(2,"0")
+    return `<div>${n}-${a} ${btn(id,n,a)}</div>`
+}
+
+// 🔥 DELETE BUTTON
+function btn(id,n,a){
+    return `<button class="delete-btn" onclick="deleteItem('${id}','${n}','${a}')">X</button>`
+}
+
+// 🔥 DELETE SYSTEM
+window.deleteItem = async (id,n,a)=>{
+    let action = prompt("1 = Detail delete\n2 = Table delete\n3 = Cancel")
+
+    if(action==="1"){
+        loadFiltered() // refresh only
+    }
+    else if(action==="2"){
+        await supabase.from("history").delete().eq("id",id)
+        loadFiltered()
+    }
 }
 
 // INIT
 loadUsers()
-loadGames()
-loadHistory()
 loadMarkets()
+loadGames()
 </script>
 
 </body>
