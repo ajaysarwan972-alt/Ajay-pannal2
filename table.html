@@ -46,12 +46,26 @@ td, th {
     padding:4px 6px;
     cursor:pointer;
 }
+
+/* 🔥 NEW LIST SYSTEM */
+#outputBox{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+}
+
+.item{
+    background:#f2f2f2;
+    padding:6px;
+    display:flex;
+    justify-content:space-between;
+    border-radius:5px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <h2>login</h2>
 <div class="frame">
 <table>
@@ -64,7 +78,6 @@ td, th {
 </table>
 </div>
 
-<!-- GAME -->
 <h2>Game result</h2>
 <div class="frame">
 
@@ -84,7 +97,6 @@ td, th {
 </table>
 </div>
 
-<!-- HISTORY TABLE -->
 <h2>history</h2>
 <div class="frame">
 <table>
@@ -97,7 +109,6 @@ td, th {
 </table>
 </div>
 
-<!-- FILTER -->
 <div class="filter-box">
 <select id="userFilter">
 <option value="all">All Users</option>
@@ -108,10 +119,11 @@ td, th {
 <input type="date" id="dateFilter">
 
 <button onclick="loadFiltered()">Load</button>
+<button onclick="copyAll()">Copy All</button>
 </div>
 
-<!-- OUTPUT -->
-<div class="frame" id="outputBox"></div>
+<!-- 🔥 LIST OUTPUT -->
+<div id="outputBox"></div>
 
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
@@ -121,7 +133,8 @@ const supabase = createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// USERS
+let currentList = []
+
 async function loadUsers(){
     const { data } = await supabase.from("login").select("*")
     let html="", opt=""
@@ -139,7 +152,6 @@ async function loadUsers(){
     userFilter.innerHTML += opt
 }
 
-// MARKETS
 async function loadMarkets(){
     const { data } = await supabase.from("Game result").select("name")
     let opt=""
@@ -150,7 +162,6 @@ async function loadMarkets(){
     marketFilter.innerHTML=opt
 }
 
-// UPDATE NUMBER
 window.updateMarketNumber = async () => {
     let value = marketValue.value
     const market = marketSelect.value
@@ -167,7 +178,6 @@ window.updateMarketNumber = async () => {
     loadGames()
 }
 
-// LOAD GAME
 async function loadGames(){
     const { data } = await supabase.from("Game result").select("*")
     let html=""
@@ -183,7 +193,6 @@ async function loadGames(){
     gameData.innerHTML=html
 }
 
-// LOAD HISTORY
 async function loadHistory(){
     const { data } = await supabase.from("history").select("*")
     let html=""
@@ -200,7 +209,7 @@ async function loadHistory(){
     historyData.innerHTML=html
 }
 
-// FILTER + CONVERT
+// 🔥 FILTER + LIST SYSTEM
 window.loadFiltered = async ()=>{
     const uid = userFilter.value
     const market = marketFilter.value
@@ -211,7 +220,6 @@ window.loadFiltered = async ()=>{
     if(uid !== "all") query = query.eq("user_id", uid)
     if(market) query = query.eq("market", market)
 
-    // ✅ DATE FIX
     if(date){
         const start = date + "T00:00:00"
         const end = date + "T23:59:59"
@@ -220,57 +228,35 @@ window.loadFiltered = async ()=>{
 
     const { data } = await query
 
-    let output=""
+    currentList = []
 
     data.forEach(row=>{
         let raw = row.data || ""
 
         raw.replace(/"num":"(\\d+)","a":(\\d+)/g,(m,n,a)=>{
-            output+=makeLine(n,a,row.id)
+            addItem(n,a,row.id)
         })
 
         raw.replace(/"number":"(\\d+)","amount":(\\d+)/g,(m,n,a)=>{
-            output+=makeLine(n,a,row.id)
+            addItem(n,a,row.id)
         })
 
         raw.replace(/"type":"(A|B)","number":(\\d+),"amount":(\\d+)/g,(m,t,n,a)=>{
             n = String(n).padStart(2,"0")
-            if(t==="A") output+=`<div>${"×"+n+"-"+a} ${btn(row.id)}</div>`
-            if(t==="B") output+=`<div>${n+"×-"+a} ${btn(row.id)}</div>`
+            if(t==="A") currentList.push({text:"×"+n+"-"+a,id:row.id})
+            if(t==="B") currentList.push({text:n+"×-"+a,id:row.id})
         })
     })
 
-    outputBox.innerHTML = output || "No Data"
+    render()
 }
 
-// LINE
-function makeLine(n,a,id){
+function addItem(n,a,id){
     n = String(n).padStart(2,"0")
-    return `<div>${n}-${a} ${btn(id)}</div>`
+    currentList.push({text:n+"-"+a,id})
 }
 
-// DELETE BUTTON
-function btn(id){
-    return `<button class="delete-btn" onclick="deleteItem('${id}')">X</button>`
-}
-
-// DELETE SYSTEM
-window.deleteItem = async (id)=>{
-    let action = prompt("1 = Detail delete\n2 = Table delete\n3 = Cancel")
-
-    if(action==="2"){
-        await supabase.from("history").delete().eq("id",id)
-        loadFiltered()
-        loadHistory()
-    }
-}
-
-// INIT
-loadUsers()
-loadMarkets()
-loadGames()
-loadHistory()
-</script>
-
-</body>
-</html>
+function render(){
+    let html=""
+    currentList.forEach((d,i)=>{
+        html+=`
