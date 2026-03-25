@@ -2,18 +2,33 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test</title>
+<title>Admin Edit</title>
 
 <style>
 body { font-family: Arial; padding: 20px; }
-table { border-collapse: collapse; width: 100%; }
-td, th { border: 1px solid #ccc; padding: 8px; text-align: center; }
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    border: none;
+    text-align: center;
+}
 </style>
 </head>
 
 <body>
 
-<h2>login</h2>
+<h2>login (editable)</h2>
 
 <table>
 <thead>
@@ -36,12 +51,11 @@ const supabase = createClient(
     "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
+// LOAD DATA
 async function load(){
     const { data, error } = await supabase
         .from("login")
         .select("*")
-
-    console.log(data, error)
 
     if(error){
         alert(error.message)
@@ -54,14 +68,29 @@ async function load(){
         html += `
         <tr>
             <td>${row.id}</td>
-            <td>${row.name}</td>
-            <td>${row.mobile}</td>
-            <td>${row.password}</td>
-            <td>${row.balance}</td>
+            <td><input value="${row.name}" onchange="updateData('${row.id}','name',this.value)"></td>
+            <td><input value="${row.mobile}" onchange="updateData('${row.id}','mobile',this.value)"></td>
+            <td><input value="${row.password}" onchange="updateData('${row.id}','password',this.value)"></td>
+            <td><input value="${row.balance}" onchange="updateData('${row.id}','balance',this.value)"></td>
         </tr>`
     })
 
     document.getElementById("data").innerHTML = html
+}
+
+// UPDATE FUNCTION (🔥 MAIN PART)
+window.updateData = async (id, column, value) => {
+    const { error } = await supabase
+        .from("login")
+        .update({ [column]: value })
+        .eq("id", id)
+
+    if(error){
+        alert("Update failed")
+        console.log(error)
+    } else {
+        console.log("Updated:", column, value)
+    }
 }
 
 load()
