@@ -113,7 +113,9 @@ td, th {
 <option value="all">All Users</option>
 </select>
 
-<select id="marketFilter"></select>
+<select id="marketFilter">
+<option value="all">All Market</option>
+</select>
 
 <button onclick="loadFiltered()">Load</button>
 <button onclick="copyAll()">Copy All</button>
@@ -150,22 +152,77 @@ async function loadUsers(){
 
 async function loadMarkets(){
     const { data } = await supabase.from("Game result").select("name")
-    let opt=""
+    
+    let opt = '<option value="all">All Market</option>'
+
     data.forEach(r=>{
         opt+=`<option value="${r.name}">${r.name}</option>`
     })
-    marketSelect.innerHTML=opt
-    marketFilter.innerHTML=opt
+
+    marketSelect.innerHTML = opt
+    marketFilter.innerHTML = opt
+}
+
+window.updateMarketNumber = async () => {
+    let value = marketValue.value
+    const market = marketSelect.value
+
+    if(value==="") return
+
+    value = value.padStart(2,"0")
+
+    await supabase.from("Game result")
+    .update({ number:value })
+    .eq("name",market)
+
+    marketValue.value=""
+    loadGames()
+}
+
+async function loadGames(){
+    const { data } = await supabase.from("Game result").select("*")
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.name}</td>
+        <td>${r.number}</td>
+        <td>${r.open}</td>
+        <td>${r.close}</td>
+        </tr>`
+    })
+    gameData.innerHTML=html
+}
+
+async function loadHistory(){
+    const { data } = await supabase.from("history").select("*")
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.user_id}</td>
+        <td>${r.market}</td>
+        <td>${r.data}</td>
+        <td>${r.total}</td>
+        <td>${r.created_at}</td>
+        </tr>`
+    })
+    historyData.innerHTML=html
 }
 
 window.loadFiltered = async ()=>{
-    const uid = userFilter.value
-    const market = marketFilter.value
+    const uid = userFilter.value.trim()
+    const market = marketFilter.value.trim()
 
     let query = supabase.from("history").select("*")
 
-    if(uid !== "all") query = query.eq("user_id", uid)
-    if(market) query = query.eq("market", market)
+    if(uid !== "all"){
+        query = query.eq("user_id", uid)
+    }
+
+    if(market !== "all" && market !== ""){
+        query = query.eq("market", market)
+    }
 
     const { data } = await query
 
@@ -174,15 +231,15 @@ window.loadFiltered = async ()=>{
     data.forEach(row=>{
         let raw = row.data || ""
 
-        raw.replace(/"num":"(\d+)","a":(\d+)/g,(m,n,a)=>{
+        raw.replace(/"num":"(\\d+)","a":(\\d+)/g,(m,n,a)=>{
             addItem(n,a,row.id)
         })
 
-        raw.replace(/"number":"(\d+)","amount":(\d+)/g,(m,n,a)=>{
+        raw.replace(/"number":"(\\d+)","amount":(\\d+)/g,(m,n,a)=>{
             addItem(n,a,row.id)
         })
 
-        raw.replace(/"type":"(A|B)","number":(\d+),"amount":(\d+)/g,(m,t,n,a)=>{
+        raw.replace(/"type":"(A|B)","number":(\\d+),"amount":(\\d+)/g,(m,t,n,a)=>{
             n = String(n).padStart(2,"0")
             if(t==="A") currentList.push({text:"×"+n+"-"+a,id:row.id})
             if(t==="B") currentList.push({text:n+"×-"+a,id:row.id})
@@ -227,37 +284,6 @@ window.copyAll = ()=>{
     let text = currentList.map(x=>x.text).join("\n")
     navigator.clipboard.writeText(text)
     alert("Copied")
-}
-
-async function loadGames(){
-    const { data } = await supabase.from("Game result").select("*")
-    let html=""
-    data.forEach(r=>{
-        html+=`<tr>
-        <td>${r.id}</td>
-        <td>${r.name}</td>
-        <td>${r.number}</td>
-        <td>${r.open}</td>
-        <td>${r.close}</td>
-        </tr>`
-    })
-    gameData.innerHTML=html
-}
-
-async function loadHistory(){
-    const { data } = await supabase.from("history").select("*")
-    let html=""
-    data.forEach(r=>{
-        html+=`<tr>
-        <td>${r.id}</td>
-        <td>${r.user_id}</td>
-        <td>${r.market}</td>
-        <td>${r.data}</td>
-        <td>${r.total}</td>
-        <td>${r.created_at}</td>
-        </tr>`
-    })
-    historyData.innerHTML=html
 }
 
 loadUsers()
