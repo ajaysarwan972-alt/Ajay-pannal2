@@ -59,20 +59,20 @@ button{
 <input type="number" id="result" placeholder="Enter Result Number">
 
 <button class="save" onclick="saveResult()">Save Result</button>
-<button class="run" onclick="runWinning()">Run Winning</button>
+<button class="run" onclick="runWinners()">Run Winning</button>
 
-<h3>Today Bets</h3>
+<h3>History Bets</h3>
 <div id="bets"></div>
 
 <script>
 
-// ✅ SUPABASE CONNECT
+// ✅ TERA SUPABASE
 const supabase = window.supabase.createClient(
   "https://katbdbzoufiblnnsoxkk.supabase.co",
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔹 LOAD BETS (history table)
+// 🔹 LOAD HISTORY
 async function loadBets(){
     let market = document.getElementById("market").value;
 
@@ -86,8 +86,8 @@ async function loadBets(){
     data.forEach(item=>{
         html += `
         <div class="box">
-            User: ${item.user_id}<br>
-            Total: ₹${item.total}<br>
+            User: ${item.user_id} <br>
+            Total: ${item.total} <br>
             Data: ${item.data}
         </div>`;
     });
@@ -98,16 +98,11 @@ async function loadBets(){
 loadBets();
 
 
-// 🔹 SAVE RESULT (Game result table)
+// 🔹 SAVE RESULT (Game result table me)
 async function saveResult(){
 
     let market = document.getElementById("market").value;
     let result = document.getElementById("result").value;
-
-    if(!result){
-        alert("Enter Result");
-        return;
-    }
 
     await supabase
         .from("Game result")
@@ -118,8 +113,8 @@ async function saveResult(){
 }
 
 
-// 🔥 RUN WINNING (95 RATE)
-async function runWinning(){
+// 🔥 AUTO WINNING SYSTEM
+async function runWinners(){
 
     let market = document.getElementById("market").value;
 
@@ -157,7 +152,7 @@ async function runWinning(){
 
                 let newBalance = user.balance + winning;
 
-                // update balance
+                // balance update
                 await supabase
                     .from("users")
                     .update({ balance: newBalance })
@@ -173,4 +168,4 @@ async function runWinning(){
 </script>
 
 </body>
-  </html>
+</html>
