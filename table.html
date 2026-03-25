@@ -113,7 +113,9 @@ td, th {
 <option value="all">All Users</option>
 </select>
 
-<select id="marketFilter"></select>
+<select id="marketFilter">
+<option value="all">All Market</option>
+</select>
 
 <button onclick="loadFiltered()">Load</button>
 <button onclick="copyAll()">Copy All</button>
@@ -155,7 +157,7 @@ async function loadMarkets(){
         opt+=`<option value="${r.name}">${r.name}</option>`
     })
     marketSelect.innerHTML=opt
-    marketFilter.innerHTML=opt
+    marketFilter.innerHTML += opt
 }
 
 window.updateMarketNumber = async () => {
@@ -212,7 +214,10 @@ window.loadFiltered = async ()=>{
     let query = supabase.from("history").select("*")
 
     if(uid !== "all") query = query.eq("user_id", uid)
-    if(market) query = query.eq("market", market)
+
+    if(market !== "all" && market){
+        query = query.eq("market", market.trim())
+    }
 
     const { data } = await query
 
