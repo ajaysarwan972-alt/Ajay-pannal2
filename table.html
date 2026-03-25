@@ -29,15 +29,12 @@ td, th {
     text-align: center;
 }
 
-/* 🔥 COPY ENABLE */
 td, input, textarea {
     user-select: text;
 }
 
-input {
-    width: 100%;
-    border: none;
-    text-align: center;
+input, select {
+    padding: 6px;
 }
 
 textarea {
@@ -45,24 +42,28 @@ textarea {
     height: 70px;
     border: none;
     resize: vertical;
-    text-align: left;
-    white-space: pre-wrap;
-    word-break: break-word;
 }
 
 .search {
     width: 100%;
-    padding: 8px;
     margin-bottom: 10px;
-    border: 1px solid #ccc;
 }
 
-/* COPY BUTTON */
 .copy-btn {
     margin-top: 5px;
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: 4px;
     cursor: pointer;
+}
+
+/* 🔥 FILTER PANEL */
+.filter-box {
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 </style>
 </head>
@@ -75,11 +76,7 @@ textarea {
 <table>
 <thead>
 <tr>
-<th>id</th>
-<th>name</th>
-<th>mobile</th>
-<th>password</th>
-<th>balance</th>
+<th>id</th><th>name</th><th>mobile</th><th>password</th><th>balance</th>
 </tr>
 </thead>
 <tbody id="userData"></tbody>
@@ -92,11 +89,7 @@ textarea {
 <table>
 <thead>
 <tr>
-<th>id</th>
-<th>name</th>
-<th>number</th>
-<th>open</th>
-<th>close</th>
+<th>id</th><th>name</th><th>number</th><th>open</th><th>close</th>
 </tr>
 </thead>
 <tbody id="gameData"></tbody>
@@ -109,27 +102,45 @@ textarea {
 <table>
 <thead>
 <tr>
-<th>id</th>
-<th>user_id</th>
-<th>market</th>
-<th>data</th>
-<th>total</th>
-<th>created_at</th>
+<th>id</th><th>user_id</th><th>market</th><th>data</th><th>total</th><th>created_at</th>
 </tr>
 </thead>
 <tbody id="historyData"></tbody>
 </table>
 </div>
 
+<!-- 🔥 NEW FILTER SYSTEM -->
+<div class="filter-box">
+<select id="tableSelect">
+<option value="userData">login</option>
+<option value="gameData">Game result</option>
+<option value="historyData">history</option>
+</select>
+
+<select id="columnSelect">
+<option value="0">id</option>
+<option value="1">col1</option>
+<option value="2">col2</option>
+<option value="3">col3</option>
+<option value="4">col4</option>
+<option value="5">col5</option>
+</select>
+
+<input type="text" id="filterValue" placeholder="Enter value">
+
+<button onclick="applyAdvancedFilter()">Filter</button>
+<button onclick="resetFilter()">Reset</button>
+</div>
+
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 
 const supabase = createClient(
-    "https://katbdbzoufiblnnsoxkk.supabase.co",
-    "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// FILTER
+// NORMAL FILTER
 window.filterTable = (tableId, value) => {
     const filter = value.toLowerCase()
     const rows = document.querySelectorAll(`#${tableId} tr`)
@@ -140,90 +151,91 @@ window.filterTable = (tableId, value) => {
     })
 }
 
-// 🔥 COPY FUNCTION
+// 🔥 ADVANCED FILTER
+window.applyAdvancedFilter = () => {
+    const tableId = document.getElementById("tableSelect").value
+    const colIndex = document.getElementById("columnSelect").value
+    const value = document.getElementById("filterValue").value.toLowerCase()
+
+    const rows = document.querySelectorAll(`#${tableId} tr`)
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td")
+        if(cells[colIndex]){
+            let text = cells[colIndex].innerText.toLowerCase()
+            row.style.display = text.includes(value) ? "" : "none"
+        }
+    })
+}
+
+// RESET
+window.resetFilter = () => {
+    ["userData","gameData","historyData"].forEach(id=>{
+        document.querySelectorAll(`#${id} tr`).forEach(r=>r.style.display="")
+    })
+}
+
+// COPY
 window.copyText = (text) => {
     navigator.clipboard.writeText(text)
-    alert("Copied!")
 }
 
-
-// LOGIN
+// LOAD LOGIN
 async function loadUsers(){
     const { data } = await supabase.from("login").select("*")
-
-    let html = ""
-    data.forEach(row => {
-        html += `
-        <tr>
-            <td onclick="copyText('${row.id}')">${row.id}</td>
-            <td><input value="${row.name || ""}" onchange="updateUser('${row.id}','name',this.value)"></td>
-            <td><input value="${row.mobile || ""}" onchange="updateUser('${row.id}','mobile',this.value)"></td>
-            <td><input value="${row.password || ""}" onchange="updateUser('${row.id}','password',this.value)"></td>
-            <td><input value="${row.balance || ""}" onchange="updateUser('${row.id}','balance',this.value)"></td>
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td onclick="copyText('${r.id}')">${r.id}</td>
+        <td><input value="${r.name||""}" onchange="updateUser('${r.id}','name',this.value)"></td>
+        <td><input value="${r.mobile||""}" onchange="updateUser('${r.id}','mobile',this.value)"></td>
+        <td><input value="${r.password||""}" onchange="updateUser('${r.id}','password',this.value)"></td>
+        <td><input value="${r.balance||""}" onchange="updateUser('${r.id}','balance',this.value)"></td>
         </tr>`
     })
-
-    document.getElementById("userData").innerHTML = html
+    document.getElementById("userData").innerHTML=html
 }
+window.updateUser=(id,c,v)=>supabase.from("login").update({[c]:v}).eq("id",id)
 
-window.updateUser = async (id, col, val) => {
-    await supabase.from("login").update({ [col]: val }).eq("id", id)
-}
-
-
-// GAME RESULT
+// LOAD GAME
 async function loadGames(){
     const { data } = await supabase.from("Game result").select("*")
-
-    let html = ""
-    data.forEach(row => {
-        html += `
-        <tr>
-            <td onclick="copyText('${row.id}')">${row.id}</td>
-            <td><input value="${row.name || ""}" onchange="updateGame('${row.id}','name',this.value)"></td>
-            <td><input value="${row.number || ""}" onchange="updateGame('${row.id}','number',this.value)"></td>
-            <td><input value="${row.open || ""}" onchange="updateGame('${row.id}','open',this.value)"></td>
-            <td><input value="${row.close || ""}" onchange="updateGame('${row.id}','close',this.value)"></td>
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td onclick="copyText('${r.id}')">${r.id}</td>
+        <td><input value="${r.name||""}" onchange="updateGame('${r.id}','name',this.value)"></td>
+        <td><input value="${r.number||""}" onchange="updateGame('${r.id}','number',this.value)"></td>
+        <td><input value="${r.open||""}" onchange="updateGame('${r.id}','open',this.value)"></td>
+        <td><input value="${r.close||""}" onchange="updateGame('${r.id}','close',this.value)"></td>
         </tr>`
     })
-
-    document.getElementById("gameData").innerHTML = html
+    document.getElementById("gameData").innerHTML=html
 }
+window.updateGame=(id,c,v)=>supabase.from("Game result").update({[c]:v}).eq("id",id)
 
-window.updateGame = async (id, col, val) => {
-    await supabase.from("Game result").update({ [col]: val }).eq("id", id)
-}
-
-
-// HISTORY
+// LOAD HISTORY
 async function loadHistory(){
     const { data } = await supabase.from("history").select("*")
-
-    let html = ""
-    data.forEach(row => {
-        html += `
-        <tr>
-            <td onclick="copyText('${row.id}')">${row.id}</td>
-            <td><input value="${row.user_id || ""}" onchange="updateHistory('${row.id}','user_id',this.value)"></td>
-            <td><input value="${row.market || ""}" onchange="updateHistory('${row.id}','market',this.value)"></td>
-            <td>
-                <textarea onchange="updateHistory('${row.id}','data',this.value)">${row.data || ""}</textarea>
-                <button class="copy-btn" onclick="copyText(\`${row.data || ""}\`)">Copy</button>
-            </td>
-            <td><input value="${row.total || ""}" onchange="updateHistory('${row.id}','total',this.value)"></td>
-            <td><input value="${row.created_at || ""}" onchange="updateHistory('${row.id}','created_at',this.value)"></td>
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td onclick="copyText('${r.id}')">${r.id}</td>
+        <td><input value="${r.user_id||""}" onchange="updateHistory('${r.id}','user_id',this.value)"></td>
+        <td><input value="${r.market||""}" onchange="updateHistory('${r.id}','market',this.value)"></td>
+        <td>
+        <textarea onchange="updateHistory('${r.id}','data',this.value)">${r.data||""}</textarea>
+        <button class="copy-btn" onclick="copyText(\`${r.data||""}\`)">Copy</button>
+        </td>
+        <td><input value="${r.total||""}" onchange="updateHistory('${r.id}','total',this.value)"></td>
+        <td><input value="${r.created_at||""}" onchange="updateHistory('${r.id}','created_at',this.value)"></td>
         </tr>`
     })
-
-    document.getElementById("historyData").innerHTML = html
+    document.getElementById("historyData").innerHTML=html
 }
+window.updateHistory=(id,c,v)=>supabase.from("history").update({[c]:v}).eq("id",id)
 
-window.updateHistory = async (id, col, val) => {
-    await supabase.from("history").update({ [col]: val }).eq("id", id)
-}
-
-
-// LOAD
+// LOAD ALL
 loadUsers()
 loadGames()
 loadHistory()
