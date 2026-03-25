@@ -84,7 +84,7 @@ td, th {
 </table>
 </div>
 
-<!-- 🔥 HISTORY TABLE (NEW) -->
+<!-- HISTORY TABLE -->
 <h2>history</h2>
 <div class="frame">
 <table>
@@ -110,7 +110,7 @@ td, th {
 <button onclick="loadFiltered()">Load</button>
 </div>
 
-<!-- OUTPUT (same system niche) -->
+<!-- OUTPUT -->
 <div class="frame" id="outputBox"></div>
 
 <script type="module">
@@ -183,7 +183,7 @@ async function loadGames(){
     gameData.innerHTML=html
 }
 
-// 🔥 LOAD HISTORY TABLE
+// LOAD HISTORY
 async function loadHistory(){
     const { data } = await supabase.from("history").select("*")
     let html=""
@@ -200,7 +200,7 @@ async function loadHistory(){
     historyData.innerHTML=html
 }
 
-// FILTER + CONVERT (same)
+// FILTER + CONVERT
 window.loadFiltered = async ()=>{
     const uid = userFilter.value
     const market = marketFilter.value
@@ -210,7 +210,13 @@ window.loadFiltered = async ()=>{
 
     if(uid !== "all") query = query.eq("user_id", uid)
     if(market) query = query.eq("market", market)
-    if(date) query = query.gte("created_at", date)
+
+    // ✅ DATE FIX
+    if(date){
+        const start = date + "T00:00:00"
+        const end = date + "T23:59:59"
+        query = query.gte("created_at", start).lte("created_at", end)
+    }
 
     const { data } = await query
 
@@ -229,30 +235,30 @@ window.loadFiltered = async ()=>{
 
         raw.replace(/"type":"(A|B)","number":(\\d+),"amount":(\\d+)/g,(m,t,n,a)=>{
             n = String(n).padStart(2,"0")
-            if(t==="A") output+=`<div>${"×"+n+"-"+a} ${btn(row.id,n,a)}</div>`
-            if(t==="B") output+=`<div>${n+"×-"+a} ${btn(row.id,n,a)}</div>`
+            if(t==="A") output+=`<div>${"×"+n+"-"+a} ${btn(row.id)}</div>`
+            if(t==="B") output+=`<div>${n+"×-"+a} ${btn(row.id)}</div>`
         })
     })
 
     outputBox.innerHTML = output || "No Data"
 }
 
+// LINE
 function makeLine(n,a,id){
     n = String(n).padStart(2,"0")
-    return `<div>${n}-${a} ${btn(id,n,a)}</div>`
+    return `<div>${n}-${a} ${btn(id)}</div>`
 }
 
-function btn(id,n,a){
-    return `<button class="delete-btn" onclick="deleteItem('${id}','${n}','${a}')">X</button>`
+// DELETE BUTTON
+function btn(id){
+    return `<button class="delete-btn" onclick="deleteItem('${id}')">X</button>`
 }
 
+// DELETE SYSTEM
 window.deleteItem = async (id)=>{
     let action = prompt("1 = Detail delete\n2 = Table delete\n3 = Cancel")
 
-    if(action==="1"){
-        loadFiltered()
-    }
-    else if(action==="2"){
+    if(action==="2"){
         await supabase.from("history").delete().eq("id",id)
         loadFiltered()
         loadHistory()
