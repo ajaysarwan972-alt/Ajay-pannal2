@@ -66,10 +66,22 @@ textarea {
 
 <body>
 
+<!-- 🔥 LOGIN TABLE -->
+<h2>login</h2>
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>id</th><th>name</th><th>mobile</th><th>password</th><th>balance</th>
+</tr>
+</thead>
+<tbody id="userData"></tbody>
+</table>
+</div>
+
 <h2>Game result</h2>
 <div class="frame">
 
-<!-- UPDATE BOX -->
 <div class="update-box">
 <select id="marketSelect"></select>
 <input type="text" id="marketValue" placeholder="Enter value">
@@ -130,6 +142,22 @@ const supabase = createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
+// LOGIN LOAD
+async function loadUsers(){
+    const { data } = await supabase.from("login").select("*")
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td>${r.id||""}</td>
+        <td>${r.name||""}</td>
+        <td>${r.mobile||""}</td>
+        <td>${r.password||""}</td>
+        <td>${r.balance||""}</td>
+        </tr>`
+    })
+    userData.innerHTML=html
+}
+
 // LOAD MARKET
 async function loadMarkets(){
     const { data } = await supabase.from("Game result").select("name")
@@ -140,14 +168,13 @@ async function loadMarkets(){
     marketSelect.innerHTML = options
 }
 
-// UPDATE MARKET NUMBER (2 digit + clear)
+// UPDATE MARKET
 window.updateMarketNumber = async () => {
     const market = document.getElementById("marketSelect").value
     let value = document.getElementById("marketValue").value
 
     if(!market || value === "") return alert("Fill all")
 
-    // 🔥 2 digit fix
     value = value.padStart(2, '0')
 
     await supabase
@@ -157,7 +184,6 @@ window.updateMarketNumber = async () => {
 
     alert("Updated ✅")
 
-    // 🔥 clear input
     document.getElementById("marketValue").value = ""
 
     loadGames()
@@ -221,7 +247,7 @@ window.copyFilteredData = () => {
     copyText(allData.trim())
 }
 
-// LOAD GAME (READONLY NUMBER)
+// LOAD GAME
 async function loadGames(){
     const { data } = await supabase.from("Game result").select("*")
     let html=""
@@ -255,6 +281,7 @@ async function loadHistory(){
 }
 
 // INIT
+loadUsers()
 loadGames()
 loadHistory()
 loadMarkets()
