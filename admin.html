@@ -59,79 +59,115 @@ button{
 <input type="number" id="result" placeholder="Enter Result Number">
 
 <button class="save" onclick="saveResult()">Save Result</button>
-<button class="run" onclick="runWinners()">Run Winning</button>
+<button class="run" onclick="runWinning()">Run Winning</button>
 
-<h3>History Bets</h3>
+<h3 id="totalAmount">Total Collection: ₹0</h3>
+
+<h3>Today Bets</h3>
 <div id="bets"></div>
 
 <script>
 
-// ✅ TERA SUPABASE
+// ✅ SUPABASE CONNECT
 const supabase = window.supabase.createClient(
   "https://katbdbzoufiblnnsoxkk.supabase.co",
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔹 LOAD HISTORY
+// 🔹 LOAD BETS + TOTAL
 async function loadBets(){
+
     let market = document.getElementById("market").value;
 
-    let {data} = await supabase
+    let {data, error} = await supabase
         .from("history")
         .select("*")
         .eq("market", market);
 
+    if(error){
+        console.log(error);
+        return;
+    }
+
     let html = "";
+    let total = 0;
 
     data.forEach(item=>{
+        total += item.total || 0;
+
         html += `
         <div class="box">
-            User: ${item.user_id} <br>
-            Total: ${item.total} <br>
+            User: ${item.user_id}<br>
+            Total: ₹${item.total}<br>
             Data: ${item.data}
         </div>`;
     });
 
     document.getElementById("bets").innerHTML = html;
+    document.getElementById("totalAmount").innerText = "Total Collection: ₹" + total;
 }
+
+// 🔥 Market change pe reload
+document.getElementById("market").addEventListener("change", loadBets);
 
 loadBets();
 
 
-// 🔹 SAVE RESULT (Game result table me)
+// 🔹 SAVE RESULT + REFRESH
 async function saveResult(){
 
     let market = document.getElementById("market").value;
     let result = document.getElementById("result").value;
 
-    await supabase
+    if(!result){
+        alert("Enter Result");
+        return;
+    }
+
+    let {error} = await supabase
         .from("Game result")
         .update({ number: result })
         .eq("name", market);
 
+    if(error){
+        alert("Error saving result");
+        return;
+    }
+
     alert("Result Saved ✅");
+
+    // 🔥 AUTO REFRESH
+    location.reload();
 }
 
 
-// 🔥 AUTO WINNING SYSTEM
-async function runWinners(){
+// 🔥 RUN WINNING (95 RATE) + REFRESH
+async function runWinning(){
 
     let market = document.getElementById("market").value;
 
-    // result uthao
-    let {data: resData} = await supabase
+    let {data: resData, error: resError} = await supabase
         .from("Game result")
         .select("*")
         .eq("name", market)
         .single();
 
+    if(resError){
+        alert("Result not found");
+        return;
+    }
+
     let winNumber = resData.number;
 
-    // history lao
-    let {data: history} = await supabase
+    let {data: history, error: hisError} = await supabase
         .from("history")
         .select("*")
         .eq("market", market);
+
+    if(hisError){
+        alert("Error loading bets");
+        return;
+    }
 
     for(let bet of history){
 
@@ -143,26 +179,26 @@ async function runWinners(){
 
                 let winning = item.amount * 95;
 
-                // user lao
                 let {data:user} = await supabase
                     .from("users")
                     .select("*")
                     .eq("id", bet.user_id)
                     .single();
 
-                let newBalance = user.balance + winning;
+                let newBalance = (user.balance || 0) + winning;
 
-                // balance update
                 await supabase
                     .from("users")
                     .update({ balance: newBalance })
                     .eq("id", bet.user_id);
-
             }
         }
     }
 
     alert("Winning Done ✅");
+
+    // 🔥 AUTO REFRESH
+    location.reload();
 }
 
 </script>
