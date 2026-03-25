@@ -260,3 +260,42 @@ function render(){
     let html=""
     currentList.forEach((d,i)=>{
         html+=`
+        <div class="item">
+            <span>${d.text}</span>
+            <button class="delete-btn" onclick="deleteItem(${i},'${d.id}')">X</button>
+        </div>`
+    })
+    outputBox.innerHTML = html || "No Data"
+}
+
+// DELETE
+window.deleteItem = async (index,id)=>{
+    let action = prompt("1 = Delete item\n2 = Delete row\n3 = Cancel")
+
+    if(action==="1"){
+        currentList.splice(index,1)
+        render()
+    }
+    else if(action==="2"){
+        await supabase.from("history").delete().eq("id",id)
+        loadFiltered()
+        loadHistory()
+    }
+}
+
+// COPY
+window.copyAll = ()=>{
+    let text = currentList.map(x=>x.text).join("\n")
+    navigator.clipboard.writeText(text)
+    alert("Copied")
+}
+
+// INIT
+loadUsers()
+loadMarkets()
+loadGames()
+loadHistory()
+</script>
+
+</body>
+</html>
