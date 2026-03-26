@@ -114,8 +114,16 @@ STOP ALARM
 </table>
 </div>
 
+<!-- ✅ GAME RESULT FIXED -->
 <h2>Game result</h2>
 <div class="frame">
+
+<div class="update-box">
+<select id="marketSelect"></select>
+<input type="text" id="marketValue" placeholder="Enter number">
+<button onclick="updateMarketNumber()">Update</button>
+</div>
+
 <table>
 <thead>
 <tr>
@@ -124,6 +132,7 @@ STOP ALARM
 </thead>
 <tbody id="gameData"></tbody>
 </table>
+
 </div>
 
 <h2>history</h2>
@@ -256,10 +265,13 @@ async function loadWithdraw(){
     withdrawData.innerHTML = html
 }
 
-// GAME
+// ✅ GAME FIX
 async function loadGame(){
     let { data } = await client.from("game").select("*")
+
     let html=""
+    let opt=""
+
     data.forEach(r=>{
         html+=`<tr>
         <td>${r.id}</td>
@@ -268,8 +280,24 @@ async function loadGame(){
         <td>${r.open}</td>
         <td>${r.close}</td>
         </tr>`
+
+        opt+=`<option value="${r.id}">${r.name}</option>`
     })
+
     gameData.innerHTML = html
+    document.getElementById("marketSelect").innerHTML = opt
+}
+
+async function updateMarketNumber(){
+    let id = document.getElementById("marketSelect").value
+    let val = document.getElementById("marketValue").value
+
+    if(!val) return alert("Number daal")
+
+    await client.from("game").update({number: val}).eq("id", id)
+
+    alert("Updated")
+    loadGame()
 }
 
 // HISTORY
@@ -287,34 +315,6 @@ async function loadHistory(){
         </tr>`
     })
     historyData.innerHTML = html
-}
-
-// APPROVE/CANCEL
-async function approveDeposit(id,userId,amount){
-    let { data } = await client.from("login").select("balance").eq("id",userId).single()
-    await client.from("login").update({balance:data.balance+amount}).eq("id",userId)
-    await client.from("deposit_requests").update({status:"approved"}).eq("id",id)
-    loadDeposits()
-}
-
-async function cancelDeposit(id){
-    await client.from("deposit_requests").update({status:"cancelled"}).eq("id",id)
-    loadDeposits()
-}
-
-async function approveWithdraw(id,userId,amount){
-    let { data } = await client.from("login").select("balance").eq("id",userId).single()
-    if(data.balance < amount){ alert("Balance kam hai"); return }
-    await client.from("login").update({balance:data.balance-amount}).eq("id",userId)
-    await client.from("withdraw_requests").update({status:"approved"}).eq("id",id)
-    loadWithdraw()
-}
-
-async function cancelWithdraw(id,userId,amount){
-    let { data } = await client.from("login").select("balance").eq("id",userId).single()
-    await client.from("login").update({balance:data.balance+amount}).eq("id",userId)
-    await client.from("withdraw_requests").update({status:"cancelled"}).eq("id",id)
-    loadWithdraw()
 }
 
 // QR
