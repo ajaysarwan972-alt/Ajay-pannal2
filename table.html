@@ -62,7 +62,7 @@ button{
 STOP ALARM
 </button>
 
-<!-- LOGIN TABLE -->
+<!-- LOGIN -->
 <h2>login</h2>
 
 <div class="update-box">
@@ -86,6 +86,7 @@ STOP ALARM
 </table>
 </div>
 
+<!-- DEPOSIT -->
 <h2>Deposit Requests</h2>
 <div class="frame">
 <table>
@@ -98,6 +99,7 @@ STOP ALARM
 </table>
 </div>
 
+<!-- WITHDRAW -->
 <h2>Withdraw Requests</h2>
 <div class="frame">
 <table>
@@ -110,6 +112,7 @@ STOP ALARM
 </table>
 </div>
 
+<!-- GAME -->
 <h2>Game result</h2>
 <div class="frame">
 <div class="update-box">
@@ -128,6 +131,7 @@ STOP ALARM
 </table>
 </div>
 
+<!-- HISTORY -->
 <h2>history</h2>
 
 <div class="update-box">
@@ -147,6 +151,22 @@ STOP ALARM
 </thead>
 <tbody id="historyData"></tbody>
 </table>
+</div>
+
+<!-- 🔥 QR SYSTEM -->
+<h2>QR Code Setup</h2>
+<div class="frame">
+
+<div class="update-box">
+<input type="file" id="qrFile">
+<button onclick="uploadQR()" class="approve">Update QR</button>
+<button onclick="deleteQR()" class="cancel">Delete QR</button>
+</div>
+
+<div style="text-align:center;">
+<img id="qrPreview" style="max-width:250px;border-radius:10px;">
+</div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -170,6 +190,7 @@ function stopAlarm(){
     a.currentTime = 0
 }
 
+// USERS
 async function loadUsers(){
     const { data } = await client.from("login").select("*")
     let html="", opt=""
@@ -185,9 +206,9 @@ async function loadUsers(){
     })
     userData.innerHTML=html
     userId.innerHTML = opt
-    historyUser.innerHTML = '<option value="all">Select ID</option>'+opt
 }
 
+// BALANCE
 async function updateBalance(){
     let id = userId.value
     let amount = parseInt(document.getElementById("amount").value)
@@ -200,15 +221,11 @@ async function updateBalance(){
     loadUsers()
 }
 
-// 🔥 LOAD DEPOSIT
+// DEPOSIT
 async function loadDeposits(){
-    let { data } = await client
-    .from("deposit_requests")
-    .select(`*, login:user_id (id,name,mobile,balance)`)
+    let { data } = await client.from("deposit_requests").select(`*, login:user_id (id,name,mobile)`)
 
-    if(data.length > lastDepositCount){
-        playAlarm()
-    }
+    if(data.length > lastDepositCount){ playAlarm() }
     lastDepositCount = data.length
 
     let html=""
@@ -230,15 +247,11 @@ async function loadDeposits(){
     depositData.innerHTML = html
 }
 
-// 🔥 LOAD WITHDRAW
+// WITHDRAW
 async function loadWithdraw(){
-    let { data } = await client
-    .from("withdraw_requests")
-    .select(`*, login:user_id (id,name,mobile,balance)`)
+    let { data } = await client.from("withdraw_requests").select(`*, login:user_id (id,name,mobile)`)
 
-    if(data.length > lastWithdrawCount){
-        playAlarm()
-    }
+    if(data.length > lastWithdrawCount){ playAlarm() }
     lastWithdrawCount = data.length
 
     let html=""
@@ -260,7 +273,7 @@ async function loadWithdraw(){
     withdrawData.innerHTML = html
 }
 
-// बाकी same...
+// APPROVE/CANCEL
 async function approveDeposit(id,userId,amount){
     let { data } = await client.from("login").select("balance").eq("id",userId).single()
     await client.from("login").update({balance:data.balance+amount}).eq("id",userId)
@@ -288,9 +301,41 @@ async function cancelWithdraw(id,userId,amount){
     loadWithdraw()
 }
 
+// 🔥 QR FUNCTIONS
+async function loadQR(){
+    let { data } = await client.from("settings").select("qr").eq("id",1).single()
+    if(data && data.qr){
+        document.getElementById("qrPreview").src = data.qr
+    }
+}
+
+async function uploadQR(){
+    let file = document.getElementById("qrFile").files[0]
+    if(!file) return alert("File select kar")
+
+    let fileName = "qr_"+Date.now()
+
+    await client.storage.from("screenshots").upload(fileName, file)
+
+    let { data } = client.storage.from("screenshots").getPublicUrl(fileName)
+
+    await client.from("settings").upsert({id:1, qr:data.publicUrl})
+
+    alert("QR Updated")
+    loadQR()
+}
+
+async function deleteQR(){
+    await client.from("settings").update({qr:null}).eq("id",1)
+    document.getElementById("qrPreview").src=""
+    alert("QR Deleted")
+}
+
+// LOAD
 loadUsers()
 loadDeposits()
 loadWithdraw()
+loadQR()
 
 setInterval(()=>{
     loadDeposits()
