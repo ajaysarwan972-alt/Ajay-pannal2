@@ -59,7 +59,6 @@ button{
 
 <body>
 
-<!-- 🔔 ALARM -->
 <audio id="alarm" loop>
   <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
 </audio>
@@ -68,7 +67,6 @@ button{
 STOP ALARM
 </button>
 
-<!-- LOGIN -->
 <h2>login</h2>
 
 <div class="update-box">
@@ -92,7 +90,6 @@ STOP ALARM
 </table>
 </div>
 
-<!-- DEPOSIT -->
 <h2>Deposit Requests</h2>
 <div class="frame">
 <table>
@@ -105,7 +102,6 @@ STOP ALARM
 </table>
 </div>
 
-<!-- WITHDRAW -->
 <h2>Withdraw Requests</h2>
 <div class="frame">
 <table>
@@ -118,7 +114,6 @@ STOP ALARM
 </table>
 </div>
 
-<!-- GAME -->
 <h2>Game result</h2>
 <div class="frame">
 <div class="update-box">
@@ -137,7 +132,6 @@ STOP ALARM
 </table>
 </div>
 
-<!-- HISTORY -->
 <h2>history</h2>
 
 <div class="update-box">
@@ -159,7 +153,6 @@ STOP ALARM
 </table>
 </div>
 
-<!-- 🔥 QR SYSTEM -->
 <h2>QR Code Setup</h2>
 <div class="frame">
 
@@ -194,7 +187,6 @@ function stopAlarm(){
     a.currentTime = 0
 }
 
-// USERS
 async function loadUsers(){
     const { data } = await client.from("login").select("*")
     let html="", opt=""
@@ -212,7 +204,6 @@ async function loadUsers(){
     userId.innerHTML = opt
 }
 
-// BALANCE
 async function updateBalance(){
     let id = userId.value
     let amount = parseInt(document.getElementById("amount").value)
@@ -225,9 +216,9 @@ async function updateBalance(){
     loadUsers()
 }
 
-// DEPOSIT
+// ✅ FIXED DEPOSIT
 async function loadDeposits(){
-    let { data } = await client.from("deposit_requests").select(`*, login:user_id (id,name,mobile)`)
+    let { data } = await client.from("deposit_requests").select("*")
 
     if(data.length > lastDepositCount){ playAlarm() }
     lastDepositCount = data.length
@@ -236,14 +227,14 @@ async function loadDeposits(){
     data.reverse().forEach(r=>{
         html+=`<tr>
         <td>${r.id}</td>
-        <td>${r.login?.id}</td>
-        <td>${r.login?.name}</td>
-        <td>${r.login?.mobile}</td>
+        <td>${r.user_id}</td>
+        <td>-</td>
+        <td>-</td>
         <td>${r.amount}</td>
         <td><img src="${r.screenshot}" width="60"></td>
         <td>${r.status}</td>
         <td>
-        <button class="approve" onclick="approveDeposit(${r.id},${r.login?.id},${r.amount});stopAlarm()">Approve</button>
+        <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount});stopAlarm()">Approve</button>
         <button class="cancel" onclick="cancelDeposit(${r.id});stopAlarm()">Cancel</button>
         </td>
         </tr>`
@@ -251,9 +242,9 @@ async function loadDeposits(){
     depositData.innerHTML = html
 }
 
-// WITHDRAW
+// ✅ FIXED WITHDRAW
 async function loadWithdraw(){
-    let { data } = await client.from("withdraw_requests").select(`*, login:user_id (id,name,mobile)`)
+    let { data } = await client.from("withdraw_requests").select("*")
 
     if(data.length > lastWithdrawCount){ playAlarm() }
     lastWithdrawCount = data.length
@@ -262,22 +253,21 @@ async function loadWithdraw(){
     data.reverse().forEach(r=>{
         html+=`<tr>
         <td>${r.id}</td>
-        <td>${r.login?.id}</td>
-        <td>${r.login?.name}</td>
-        <td>${r.login?.mobile}</td>
+        <td>${r.user_id}</td>
+        <td>-</td>
+        <td>-</td>
         <td>${r.amount}</td>
         <td>${r.upi}</td>
         <td>${r.status}</td>
         <td>
-        <button class="approve" onclick="approveWithdraw(${r.id},${r.login?.id},${r.amount});stopAlarm()">Approve</button>
-        <button class="cancel" onclick="cancelWithdraw(${r.id},${r.login?.id},${r.amount});stopAlarm()">Cancel</button>
+        <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount});stopAlarm()">Approve</button>
+        <button class="cancel" onclick="cancelWithdraw(${r.id},${r.user_id},${r.amount});stopAlarm()">Cancel</button>
         </td>
         </tr>`
     })
     withdrawData.innerHTML = html
 }
 
-// APPROVE/CANCEL
 async function approveDeposit(id,userId,amount){
     let { data } = await client.from("login").select("balance").eq("id",userId).single()
     await client.from("login").update({balance:data.balance+amount}).eq("id",userId)
@@ -305,14 +295,9 @@ async function cancelWithdraw(id,userId,amount){
     loadWithdraw()
 }
 
-// ✅ QR FUNCTIONS (FIXED)
+// QR
 async function loadQR(){
-    let { data } = await client
-    .from("settings")
-    .select("qr")
-    .eq("name","payment")
-    .single()
-
+    let { data } = await client.from("settings").select("qr").eq("name","payment").single()
     if(data?.qr){
         document.getElementById("qrPreview").src = data.qr
     }
@@ -323,29 +308,22 @@ async function uploadQR(){
     if(!file) return alert("File select kar")
 
     let fileName = "qr_"+Date.now()
-
     await client.storage.from("screenshots").upload(fileName, file)
 
     let { data } = client.storage.from("screenshots").getPublicUrl(fileName)
 
-    await client.from("settings")
-    .update({qr:data.publicUrl})
-    .eq("name","payment")
+    await client.from("settings").update({qr:data.publicUrl}).eq("name","payment")
 
     alert("QR Updated")
     loadQR()
 }
 
 async function deleteQR(){
-    await client.from("settings")
-    .update({qr:null})
-    .eq("name","payment")
-
+    await client.from("settings").update({qr:null}).eq("name","payment")
     document.getElementById("qrPreview").src=""
     alert("QR Deleted")
 }
 
-// LOAD
 loadUsers()
 loadDeposits()
 loadWithdraw()
