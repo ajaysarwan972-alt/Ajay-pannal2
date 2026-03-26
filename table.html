@@ -116,12 +116,6 @@ STOP ALARM
 
 <h2>Game result</h2>
 <div class="frame">
-<div class="update-box">
-<select id="marketSelect"></select>
-<input type="text" id="marketValue">
-<button onclick="updateMarketNumber()">Update</button>
-</div>
-
 <table>
 <thead>
 <tr>
@@ -133,14 +127,6 @@ STOP ALARM
 </div>
 
 <h2>history</h2>
-
-<div class="update-box">
-<select id="historyUser"><option value="all">Select ID</option></select>
-<select id="historyMarket"><option value="all">Select Market</option></select>
-<input type="date" id="historyDate">
-<button onclick="filterHistory()">Filter</button>
-<button onclick="copyAll()">Copy All</button>
-</div>
 
 <div class="frame">
 <table>
@@ -187,6 +173,7 @@ function stopAlarm(){
     a.currentTime = 0
 }
 
+// USERS
 async function loadUsers(){
     const { data } = await client.from("login").select("*")
     let html="", opt=""
@@ -204,6 +191,7 @@ async function loadUsers(){
     userId.innerHTML = opt
 }
 
+// BALANCE
 async function updateBalance(){
     let id = userId.value
     let amount = parseInt(document.getElementById("amount").value)
@@ -216,7 +204,7 @@ async function updateBalance(){
     loadUsers()
 }
 
-// ✅ FIXED DEPOSIT
+// DEPOSIT
 async function loadDeposits(){
     let { data } = await client.from("deposit_requests").select("*")
 
@@ -234,15 +222,15 @@ async function loadDeposits(){
         <td><img src="${r.screenshot}" width="60"></td>
         <td>${r.status}</td>
         <td>
-        <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount});stopAlarm()">Approve</button>
-        <button class="cancel" onclick="cancelDeposit(${r.id});stopAlarm()">Cancel</button>
+        <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
+        <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
         </td>
         </tr>`
     })
     depositData.innerHTML = html
 }
 
-// ✅ FIXED WITHDRAW
+// WITHDRAW
 async function loadWithdraw(){
     let { data } = await client.from("withdraw_requests").select("*")
 
@@ -260,14 +248,48 @@ async function loadWithdraw(){
         <td>${r.upi}</td>
         <td>${r.status}</td>
         <td>
-        <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount});stopAlarm()">Approve</button>
-        <button class="cancel" onclick="cancelWithdraw(${r.id},${r.user_id},${r.amount});stopAlarm()">Cancel</button>
+        <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount})">Approve</button>
+        <button class="cancel" onclick="cancelWithdraw(${r.id},${r.user_id},${r.amount})">Cancel</button>
         </td>
         </tr>`
     })
     withdrawData.innerHTML = html
 }
 
+// GAME
+async function loadGame(){
+    let { data } = await client.from("game").select("*")
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.name}</td>
+        <td>${r.number}</td>
+        <td>${r.open}</td>
+        <td>${r.close}</td>
+        </tr>`
+    })
+    gameData.innerHTML = html
+}
+
+// HISTORY
+async function loadHistory(){
+    let { data } = await client.from("history").select("*")
+    let html=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.user_id}</td>
+        <td>${r.market}</td>
+        <td>${r.data}</td>
+        <td>${r.total}</td>
+        <td>${r.created_at}</td>
+        </tr>`
+    })
+    historyData.innerHTML = html
+}
+
+// APPROVE/CANCEL
 async function approveDeposit(id,userId,amount){
     let { data } = await client.from("login").select("balance").eq("id",userId).single()
     await client.from("login").update({balance:data.balance+amount}).eq("id",userId)
@@ -324,9 +346,12 @@ async function deleteQR(){
     alert("QR Deleted")
 }
 
+// LOAD
 loadUsers()
 loadDeposits()
 loadWithdraw()
+loadGame()
+loadHistory()
 loadQR()
 
 setInterval(()=>{
