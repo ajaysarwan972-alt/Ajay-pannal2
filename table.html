@@ -48,6 +48,12 @@ button{
 
 .approve{background:green;color:#fff;}
 .cancel{background:red;color:#fff;}
+
+#qrPreview{
+    width:100%;
+    height:auto;
+    border-radius:10px;
+}
 </style>
 </head>
 
@@ -163,9 +169,7 @@ STOP ALARM
 <button onclick="deleteQR()" class="cancel">Delete QR</button>
 </div>
 
-<div style="text-align:center;">
-<img id="qrPreview" style="max-width:250px;border-radius:10px;">
-</div>
+<img id="qrPreview">
 
 </div>
 
@@ -301,10 +305,15 @@ async function cancelWithdraw(id,userId,amount){
     loadWithdraw()
 }
 
-// 🔥 QR FUNCTIONS
+// ✅ QR FUNCTIONS (FIXED)
 async function loadQR(){
-    let { data } = await client.from("settings").select("qr").eq("id",1).single()
-    if(data && data.qr){
+    let { data } = await client
+    .from("settings")
+    .select("qr")
+    .eq("name","payment")
+    .single()
+
+    if(data?.qr){
         document.getElementById("qrPreview").src = data.qr
     }
 }
@@ -319,14 +328,19 @@ async function uploadQR(){
 
     let { data } = client.storage.from("screenshots").getPublicUrl(fileName)
 
-    await client.from("settings").upsert({id:1, qr:data.publicUrl})
+    await client.from("settings")
+    .update({qr:data.publicUrl})
+    .eq("name","payment")
 
     alert("QR Updated")
     loadQR()
 }
 
 async function deleteQR(){
-    await client.from("settings").update({qr:null}).eq("id",1)
+    await client.from("settings")
+    .update({qr:null})
+    .eq("name","payment")
+
     document.getElementById("qrPreview").src=""
     alert("QR Deleted")
 }
