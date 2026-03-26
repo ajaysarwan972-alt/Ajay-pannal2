@@ -66,6 +66,21 @@ td, th {
 <body>
 
 <h2>login</h2>
+
+<!-- ✅ NEW BALANCE UPDATE BOX -->
+<div class="update-box">
+    <select id="userId"></select>
+
+    <input type="number" id="amount" placeholder="Enter amount">
+
+    <select id="action">
+        <option value="deposit">Deposit</option>
+        <option value="withdraw">Withdraw</option>
+    </select>
+
+    <button onclick="updateBalance()">Update</button>
+</div>
+
 <div class="frame">
 <table>
 <thead>
@@ -144,10 +159,52 @@ async function loadUsers(){
         <td>${r.password}</td>
         <td>${r.balance}</td>
         </tr>`
-        opt+=`<option value="${r.id}">${r.id}</option>`
+
+        opt+=`<option value="${r.id}">ID: ${r.id}</option>`
     })
     userData.innerHTML=html
     userFilter.innerHTML += opt
+
+    // ✅ dropdown fill
+    document.getElementById("userId").innerHTML = opt
+}
+
+
+// ✅ NEW FUNCTION (Deposit / Withdraw)
+window.updateBalance = async () => {
+
+    let id = document.getElementById("userId").value
+    let amount = parseInt(document.getElementById("amount").value)
+    let action = document.getElementById("action").value
+
+    if(!amount){
+        alert("Amount daal")
+        return
+    }
+
+    const { data } = await supabase
+        .from("login")
+        .select("balance")
+        .eq("id", id)
+        .single()
+
+    let current = data.balance
+
+    let newBalance = action === "deposit"
+        ? current + amount
+        : current - amount
+
+    await supabase
+        .from("login")
+        .update({ balance: newBalance })
+        .eq("id", id)
+
+    alert("Balance updated")
+
+    // ✅ input clear
+    document.getElementById("amount").value = ""
+
+    loadUsers()
 }
 
 async function loadMarkets(){
