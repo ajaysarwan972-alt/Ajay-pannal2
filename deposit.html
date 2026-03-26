@@ -7,14 +7,119 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{font-family:Arial;background:#f2f2f2;padding:20px;}
-.card{background:#fff;padding:20px;border-radius:15px;margin-bottom:20px;}
-.amount-btns{display:flex;gap:10px;margin-bottom:15px;}
-.amount-btns button{flex:1;padding:15px;border:none;border-radius:15px;background:linear-gradient(45deg,blue,red);color:#fff;}
-.main-btn{width:100%;padding:15px;border:none;border-radius:15px;background:green;color:#fff;margin-top:10px;}
-.copy-box{display:flex;justify-content:space-between;background:orange;padding:10px;border-radius:10px;margin-bottom:10px;}
-.copy-btn{background:linear-gradient(45deg,blue,red);color:#fff;border:none;padding:10px;border-radius:10px;}
-button{cursor:pointer;}
+body{
+    font-family: Arial;
+    background:#f2f2f2;
+    padding:15px;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:20px;
+    margin-bottom:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.amount-btns{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.amount-btns button{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:15px;
+    background:linear-gradient(45deg,blue,red);
+    color:#fff;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:12px;
+    border:1px solid #ccc;
+}
+
+.main-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:15px;
+    background:green;
+    color:#fff;
+    font-weight:bold;
+    margin-top:15px;
+}
+
+.copy-box{
+    display:flex;
+    justify-content:space-between;
+    background:linear-gradient(45deg,orange,yellow);
+    padding:12px;
+    border-radius:15px;
+    margin-bottom:15px;
+}
+
+.copy-btn{
+    background:linear-gradient(45deg,blue,red);
+    color:#fff;
+    border:none;
+    padding:8px 12px;
+    border-radius:10px;
+}
+
+.row{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+.choice-btn{
+    width:50%;
+    padding:14px;
+    border:none;
+    border-radius:15px;
+    color:#fff;
+    font-weight:bold;
+}
+
+.utr-btn{ background:#6cc04a; }
+.ss-btn{ background:linear-gradient(45deg,blue,red); }
+
+.preview{
+    width:100%;
+    margin-top:15px;
+    border-radius:10px;
+}
+
+.btn-group{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+.back-btn{
+    flex:1;
+    background:#ff5a5a;
+    color:#fff;
+    border:none;
+    padding:12px;
+    border-radius:12px;
+}
+
+.confirm-btn{
+    flex:1;
+    background:#7bdc5c;
+    color:#fff;
+    border:none;
+    padding:12px;
+    border-radius:12px;
+}
 </style>
 </head>
 
@@ -30,148 +135,167 @@ button{cursor:pointer;}
 </div>
 
 <input type="number" id="amount" placeholder="Enter Amount">
+
 <button class="main-btn" onclick="goStep2()">SUBMIT</button>
 </div>
 
 <!-- STEP 2 -->
 <div class="card" id="step2" style="display:none;">
+
 <div class="copy-box">
 <span id="upi">paynearby.0000547174@indus</span>
 <button class="copy-btn" onclick="copyUpi()">Copy</button>
 </div>
 
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay" width="100%">
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay" width="100%">
 
-<button class="main-btn" onclick="goStep3()">I HAVE PAID</button>
+<div class="row">
+<button class="choice-btn utr-btn" onclick="goStep3('utr')">ENTER UTR</button>
+<button class="choice-btn ss-btn" onclick="goStep3('ss')">UPLOAD SCREENSHOT</button>
 </div>
 
-<!-- STEP 3 -->
-<div class="card" id="step3" style="display:none;text-align:center;">
-<h3>Select Option</h3>
-<button class="main-btn" onclick="goUTR()">ENTER UTR</button>
-<button class="main-btn" onclick="goSS()">UPLOAD SCREENSHOT</button>
+<button class="main-btn" onclick="backTo1()">BACK</button>
+
 </div>
 
-<!-- STEP 4A UTR -->
-<div class="card" id="step4utr" style="display:none;">
-<input type="text" id="utr" placeholder="Enter UTR">
-<button class="main-btn" onclick="submitUTR()">CONFIRM</button>
+<!-- STEP 3 UTR -->
+<div class="card" id="step3_utr" style="display:none;">
+
+<input type="text" id="utr" placeholder="Enter UTR Number">
+
+<div class="btn-group">
+<button class="back-btn" onclick="backTo2()">BACK</button>
+<button class="confirm-btn" onclick="submitDeposit()">CONFIRM</button>
 </div>
 
-<!-- STEP 4B SCREENSHOT -->
-<div class="card" id="step4ss" style="display:none;">
-<input type="file" id="file">
-<button class="main-btn" onclick="submitSS()">CONFIRM</button>
+</div>
+
+<!-- STEP 3 SCREENSHOT -->
+<div class="card" id="step3_ss" style="display:none;">
+
+<input type="file" id="file" onchange="previewImage()">
+
+<img id="preview" class="preview" style="display:none;">
+
+<div class="btn-group">
+<button class="back-btn" onclick="backTo2()">BACK</button>
+<button class="confirm-btn" onclick="submitDeposit()">CONFIRM</button>
+</div>
+
 </div>
 
 <script>
-const client = supabase.createClient(
+const { createClient } = supabase
+
+const client = createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
-"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+"YOUR_KEY"
 )
 
 // test user
 if(!localStorage.getItem("user_id")){
-localStorage.setItem("user_id","1")
-localStorage.setItem("mobile","9999999999")
+    localStorage.setItem("user_id", "1")
+    localStorage.setItem("mobile", "9999999999")
 }
 
 function setAmount(val){
-document.getElementById("amount").value = val
-}
-
-function hideAll(){
-document.getElementById("step1").style.display="none"
-document.getElementById("step2").style.display="none"
-document.getElementById("step3").style.display="none"
-document.getElementById("step4utr").style.display="none"
-document.getElementById("step4ss").style.display="none"
+    document.getElementById("amount").value = val
 }
 
 function goStep2(){
-let amt = document.getElementById("amount").value
-if(!amt){ alert("Amount daal"); return }
-hideAll()
-document.getElementById("step2").style.display="block"
+    let amt = document.getElementById("amount").value
+    if(!amt){
+        alert("Amount daal")
+        return
+    }
+    document.getElementById("step1").style.display="none"
+    document.getElementById("step2").style.display="block"
 }
 
-function goStep3(){
-hideAll()
-document.getElementById("step3").style.display="block"
+function goStep3(type){
+    document.getElementById("step2").style.display="none"
+
+    if(type==="utr"){
+        document.getElementById("step3_utr").style.display="block"
+    }else{
+        document.getElementById("step3_ss").style.display="block"
+    }
 }
 
-function goUTR(){
-hideAll()
-document.getElementById("step4utr").style.display="block"
+function backTo1(){
+    document.getElementById("step2").style.display="none"
+    document.getElementById("step1").style.display="block"
 }
 
-function goSS(){
-hideAll()
-document.getElementById("step4ss").style.display="block"
+function backTo2(){
+    document.getElementById("step3_utr").style.display="none"
+    document.getElementById("step3_ss").style.display="none"
+    document.getElementById("step2").style.display="block"
 }
 
 function copyUpi(){
-let text = document.getElementById("upi").innerText
-navigator.clipboard.writeText(text)
-alert("Copied")
+    let text = document.getElementById("upi").innerText
+    navigator.clipboard.writeText(text)
+    alert("Copied")
 }
 
-// UTR submit
-async function submitUTR(){
-let amount = document.getElementById("amount").value
-let utr = document.getElementById("utr").value
+// IMAGE PREVIEW
+function previewImage(){
+    let file = document.getElementById("file").files[0]
+    let preview = document.getElementById("preview")
 
-if(!utr){
-alert("UTR daal")
-return
+    if(file){
+        preview.src = URL.createObjectURL(file)
+        preview.style.display = "block"
+    }
 }
 
-let userId = localStorage.getItem("user_id")
-let mobile = localStorage.getItem("mobile")
+async function submitDeposit(){
 
-await client.from("deposit_requests").insert({
-user_id:userId,
-mobile:mobile,
-amount:amount,
-utr:utr,
-screenshot:null,
-status:"pending"
-})
+    let amount = document.getElementById("amount").value
+    let utr = document.getElementById("utr")?.value || ""
+    let file = document.getElementById("file")?.files[0]
 
-alert("Request Sent ✅")
-location.reload()
-}
+    if(!utr && !file){
+        alert("UTR ya Screenshot daal")
+        return
+    }
 
-// Screenshot submit
-async function submitSS(){
-let amount = document.getElementById("amount").value
-let file = document.getElementById("file").files[0]
+    let imageUrl = ""
 
-if(!file){
-alert("Screenshot daal")
-return
-}
+    if(file){
+        let fileName = Date.now()+"_"+file.name
 
-let fileName = Date.now()+"_"+file.name
+        let { error } = await client.storage
+        .from("screenshots")
+        .upload(fileName, file)
 
-await client.storage.from("screenshots").upload(fileName,file)
+        if(error){
+            alert("Upload error")
+            return
+        }
 
-let { data } = client.storage.from("screenshots").getPublicUrl(fileName)
+        let { data } = client.storage
+        .from("screenshots")
+        .getPublicUrl(fileName)
 
-let userId = localStorage.getItem("user_id")
-let mobile = localStorage.getItem("mobile")
+        imageUrl = data.publicUrl
+    }
 
-await client.from("deposit_requests").insert({
-user_id:userId,
-mobile:mobile,
-amount:amount,
-utr:null,
-screenshot:data.publicUrl,
-status:"pending"
-})
+    let userId = localStorage.getItem("user_id")
+    let mobile = localStorage.getItem("mobile")
 
-alert("Request Sent ✅")
-location.reload()
+    await client.from("deposit_requests").insert({
+        user_id: userId,
+        mobile: mobile,
+        amount: amount,
+        utr: utr,
+        screenshot: imageUrl,
+        status: "pending"
+    })
+
+    alert("Request sent ✅")
+    location.reload()
 }
 </script>
 
