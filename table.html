@@ -267,7 +267,7 @@ async function loadWithdraw(){
 
 // ✅ GAME FIX
 async function loadGame(){
-    let { data } = await client.from("game").select("*")
+    let { data } = await client.from("Game result").select("*")
 
     let html=""
     let opt=""
@@ -294,7 +294,7 @@ async function updateMarketNumber(){
 
     if(!val) return alert("Number daal")
 
-    await client.from("game").update({number: val}).eq("id", id)
+    await client.from("Game result").update({number: val}).eq("id", id)
 
     alert("Updated")
     loadGame()
