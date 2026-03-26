@@ -4,6 +4,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 body { font-family: Arial; padding: 20px; }
 
@@ -29,46 +31,26 @@ td, th {
     text-align: center;
 }
 
-.update-box {
-    background:#fff;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:10px;
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-img{ width:80px; }
-
 button{
-  padding:5px 10px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
+    padding:5px 10px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
 }
+
 .approve{background:green;color:#fff;}
-.reject{background:red;color:#fff;}
+.cancel{background:red;color:#fff;}
 </style>
 </head>
 
 <body>
-
-<audio id="alarm" loop>
-  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
-</audio>
-
-<button onclick="stopAlarm()" style="background:red;color:#fff;padding:10px;border:none;border-radius:10px;margin-bottom:15px;">
-STOP ALARM
-</button>
 
 <h2>Deposit Requests</h2>
 <div class="frame">
 <table>
 <thead>
 <tr>
-<th>ID</th><th>User ID</th><th>Name</th><th>Mobile</th>
-<th>Amount</th><th>UTR</th><th>Screenshot</th><th>Status</th><th>Action</th>
+<th>ID</th><th>User ID</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Screenshot</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="depositData"></tbody>
@@ -80,135 +62,145 @@ STOP ALARM
 <table>
 <thead>
 <tr>
-<th>ID</th><th>User ID</th><th>Name</th><th>Mobile</th>
-<th>Amount</th><th>QR</th><th>Status</th><th>Action</th>
+<th>ID</th><th>User ID</th><th>Name</th><th>Mobile</th><th>Amount</th><th>QR</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="withdrawData"></tbody>
 </table>
 </div>
 
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
-
-const supabase = createClient(
+<script>
+const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// 🔔 ALARM
-let lastDeposit = 0
-let lastWithdraw = 0
-
-function playAlarm(){ document.getElementById("alarm").play() }
-window.stopAlarm = ()=>{ let a=document.getElementById("alarm"); a.pause(); a.currentTime=0 }
-
 // 🔥 LOAD DEPOSIT
 async function loadDeposits(){
-const { data } = await supabase
-.from("deposit_requests")
-.select("*, login(id,name,mobile)")
-.order("id",{ascending:false})
+    let { data } = await client
+    .from("deposit_requests")
+    .select(`
+        *,
+        login:user_id (id,name,mobile,balance)
+    `)
 
-if(data.length > lastDeposit){ playAlarm() }
-lastDeposit = data.length
+    let html=""
 
-let html=""
-data.forEach(r=>{
-html+=`<tr>
-<td>${r.id}</td>
-<td>${r.login?.id || '-'}</td>
-<td>${r.login?.name || '-'}</td>
-<td>${r.login?.mobile || '-'}</td>
-<td>${r.amount}</td>
-<td>${r.utr || "-"}</td>
-<td>${r.screenshot ? `<a href="${r.screenshot}" target="_blank"><img src="${r.screenshot}"></a>` : "-"}</td>
-<td>${r.status}</td>
-<td>
-<button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
-<button class="reject" onclick="rejectDeposit(${r.id})">Cancel</button>
-</td>
-</tr>`
-})
-depositData.innerHTML=html
+    data.reverse().forEach(r=>{
+        html+=`
+        <tr>
+        <td>${r.id}</td>
+        <td>${r.login?.id}</td>
+        <td>${r.login?.name}</td>
+        <td>${r.login?.mobile}</td>
+        <td>${r.amount}</td>
+        <td><img src="${r.screenshot}" width="60"></td>
+        <td>${r.status}</td>
+        <td>
+            <button class="approve" onclick="approveDeposit(${r.id},${r.login?.id},${r.amount})">Approve</button>
+            <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
+        </td>
+        </tr>`
+    })
+
+    depositData.innerHTML = html
+}
+
+// ✅ APPROVE DEPOSIT
+async function approveDeposit(id,userId,amount){
+
+    let { data } = await client.from("login").select("balance").eq("id",userId).single()
+
+    let newBal = data.balance + amount
+
+    await client.from("login").update({balance:newBal}).eq("id",userId)
+
+    await client.from("deposit_requests").update({status:"approved"}).eq("id",id)
+
+    alert("Deposit Approved ✅")
+    loadDeposits()
+}
+
+// ❌ CANCEL
+async function cancelDeposit(id){
+    await client.from("deposit_requests").update({status:"cancelled"}).eq("id",id)
+    loadDeposits()
 }
 
 // 🔥 LOAD WITHDRAW
 async function loadWithdraw(){
-const { data } = await supabase
-.from("withdraw_requests")
-.select("*, login(id,name,mobile)")
-.order("id",{ascending:false})
+    let { data } = await client
+    .from("withdraw_requests")
+    .select(`
+        *,
+        login:user_id (id,name,mobile,balance)
+    `)
 
-if(data.length > lastWithdraw){ playAlarm() }
-lastWithdraw = data.length
+    let html=""
 
-let html=""
-data.forEach(r=>{
-html+=`<tr>
-<td>${r.id}</td>
-<td>${r.login?.id || '-'}</td>
-<td>${r.login?.name || '-'}</td>
-<td>${r.login?.mobile || '-'}</td>
-<td>${r.amount}</td>
-<td>${r.upi}</td>
-<td>${r.status}</td>
-<td>
-<button class="approve" onclick="approveWithdraw(${r.id})">Approve</button>
-<button class="reject" onclick="rejectWithdraw(${r.id},${r.user_id},${r.amount})">Cancel</button>
-</td>
-</tr>`
-})
-withdrawData.innerHTML=html
-}
+    data.reverse().forEach(r=>{
+        html+=`
+        <tr>
+        <td>${r.id}</td>
+        <td>${r.login?.id}</td>
+        <td>${r.login?.name}</td>
+        <td>${r.login?.mobile}</td>
+        <td>${r.amount}</td>
+        <td>${r.upi}</td>
+        <td>${r.status}</td>
+        <td>
+            <button class="approve" onclick="approveWithdraw(${r.id},${r.login?.id},${r.amount})">Approve</button>
+            <button class="cancel" onclick="cancelWithdraw(${r.id},${r.login?.id},${r.amount})">Cancel</button>
+        </td>
+        </tr>`
+    })
 
-// ✅ APPROVE DEPOSIT
-window.approveDeposit = async (id,user_id,amount)=>{
-const { data } = await supabase.from("login").select("balance").eq("id",user_id).single()
-let newBalance = (data.balance||0)+amount
-
-await supabase.from("login").update({balance:newBalance}).eq("id",user_id)
-await supabase.from("deposit_requests").update({status:"approved"}).eq("id",id)
-
-alert("Deposit Approved")
-loadDeposits()
-}
-
-// ❌ REJECT DEPOSIT
-window.rejectDeposit = async (id)=>{
-await supabase.from("deposit_requests").update({status:"rejected"}).eq("id",id)
-alert("Deposit Cancelled")
-loadDeposits()
+    withdrawData.innerHTML = html
 }
 
 // ✅ APPROVE WITHDRAW
-window.approveWithdraw = async (id)=>{
-await supabase.from("withdraw_requests").update({status:"approved"}).eq("id",id)
-alert("Withdraw Approved")
-loadWithdraw()
+async function approveWithdraw(id,userId,amount){
+
+    let { data } = await client.from("login").select("balance").eq("id",userId).single()
+
+    if(data.balance < amount){
+        alert("Balance kam hai ❌")
+        return
+    }
+
+    let newBal = data.balance - amount
+
+    await client.from("login").update({balance:newBal}).eq("id",userId)
+
+    await client.from("withdraw_requests").update({status:"approved"}).eq("id",id)
+
+    alert("Withdraw Approved ✅")
+    loadWithdraw()
 }
 
-// ❌ REJECT WITHDRAW (refund)
-window.rejectWithdraw = async (id,user_id,amount)=>{
-const { data } = await supabase.from("login").select("balance").eq("id",user_id).single()
-let newBalance = (data.balance||0)+amount
+// ❌ CANCEL WITH REFUND
+async function cancelWithdraw(id,userId,amount){
 
-await supabase.from("login").update({balance:newBalance}).eq("id",user_id)
-await supabase.from("withdraw_requests").update({status:"rejected"}).eq("id",id)
+    let { data } = await client.from("login").select("balance").eq("id",userId).single()
 
-alert("Refund Done")
-loadWithdraw()
+    let newBal = data.balance + amount
+
+    await client.from("login").update({balance:newBal}).eq("id",userId)
+
+    await client.from("withdraw_requests").update({status:"cancelled"}).eq("id",id)
+
+    alert("Cancelled + Refund ✅")
+    loadWithdraw()
 }
 
-// AUTO REFRESH
+// AUTO LOAD
+loadDeposits()
+loadWithdraw()
+
 setInterval(()=>{
-loadDeposits()
-loadWithdraw()
+    loadDeposits()
+    loadWithdraw()
 },5000)
-
-// LOAD
-loadDeposits()
-loadWithdraw()
 
 </script>
 
