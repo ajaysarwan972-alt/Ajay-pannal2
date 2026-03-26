@@ -4,8 +4,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 body { font-family: Arial; padding: 20px; }
 
@@ -31,6 +29,16 @@ td, th {
     text-align: center;
 }
 
+.update-box {
+    background:#fff;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:10px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
 button{
     padding:5px 10px;
     border:none;
@@ -44,6 +52,39 @@ button{
 </head>
 
 <body>
+
+<!-- 🔔 ALARM -->
+<audio id="alarm" loop>
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
+</audio>
+
+<button onclick="stopAlarm()" style="background:red;color:#fff;padding:8px;border:none;border-radius:8px;margin-bottom:10px;">
+STOP ALARM
+</button>
+
+<!-- LOGIN TABLE -->
+<h2>login</h2>
+
+<div class="update-box">
+    <select id="userId"></select>
+    <input type="number" id="amount" placeholder="Enter amount">
+    <select id="action">
+        <option value="deposit">Deposit</option>
+        <option value="withdraw">Withdraw</option>
+    </select>
+    <button onclick="updateBalance()">Update</button>
+</div>
+
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>id</th><th>name</th><th>mobile</th><th>password</th><th>balance</th>
+</tr>
+</thead>
+<tbody id="userData"></tbody>
+</table>
+</div>
 
 <h2>Deposit Requests</h2>
 <div class="frame">
@@ -69,26 +110,110 @@ button{
 </table>
 </div>
 
+<h2>Game result</h2>
+<div class="frame">
+<div class="update-box">
+<select id="marketSelect"></select>
+<input type="text" id="marketValue">
+<button onclick="updateMarketNumber()">Update</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>id</th><th>name</th><th>number</th><th>open</th><th>close</th>
+</tr>
+</thead>
+<tbody id="gameData"></tbody>
+</table>
+</div>
+
+<h2>history</h2>
+
+<div class="update-box">
+<select id="historyUser"><option value="all">Select ID</option></select>
+<select id="historyMarket"><option value="all">Select Market</option></select>
+<input type="date" id="historyDate">
+<button onclick="filterHistory()">Filter</button>
+<button onclick="copyAll()">Copy All</button>
+</div>
+
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>id</th><th>user_id</th><th>market</th><th>data</th><th>total</th><th>created_at</th>
+</tr>
+</thead>
+<tbody id="historyData"></tbody>
+</table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
+let lastDepositCount = 0
+let lastWithdrawCount = 0
+
+function playAlarm(){
+    document.getElementById("alarm").play().catch(()=>{})
+}
+
+function stopAlarm(){
+    let a = document.getElementById("alarm")
+    a.pause()
+    a.currentTime = 0
+}
+
+async function loadUsers(){
+    const { data } = await client.from("login").select("*")
+    let html="", opt=""
+    data.forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.name}</td>
+        <td>${r.mobile}</td>
+        <td>${r.password}</td>
+        <td>${r.balance}</td>
+        </tr>`
+        opt+=`<option value="${r.id}">${r.id}</option>`
+    })
+    userData.innerHTML=html
+    userId.innerHTML = opt
+    historyUser.innerHTML = '<option value="all">Select ID</option>'+opt
+}
+
+async function updateBalance(){
+    let id = userId.value
+    let amount = parseInt(document.getElementById("amount").value)
+    let act = document.getElementById("action").value
+
+    const { data } = await client.from("login").select("balance").eq("id",id).single()
+    let newBalance = act==="deposit" ? data.balance+amount : data.balance-amount
+
+    await client.from("login").update({balance:newBalance}).eq("id",id)
+    loadUsers()
+}
+
 // 🔥 LOAD DEPOSIT
 async function loadDeposits(){
     let { data } = await client
     .from("deposit_requests")
-    .select(`
-        *,
-        login:user_id (id,name,mobile,balance)
-    `)
+    .select(`*, login:user_id (id,name,mobile,balance)`)
+
+    if(data.length > lastDepositCount){
+        playAlarm()
+    }
+    lastDepositCount = data.length
 
     let html=""
-
     data.reverse().forEach(r=>{
-        html+=`
-        <tr>
+        html+=`<tr>
         <td>${r.id}</td>
         <td>${r.login?.id}</td>
         <td>${r.login?.name}</td>
@@ -97,50 +222,28 @@ async function loadDeposits(){
         <td><img src="${r.screenshot}" width="60"></td>
         <td>${r.status}</td>
         <td>
-            <button class="approve" onclick="approveDeposit(${r.id},${r.login?.id},${r.amount})">Approve</button>
-            <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
+        <button class="approve" onclick="approveDeposit(${r.id},${r.login?.id},${r.amount});stopAlarm()">Approve</button>
+        <button class="cancel" onclick="cancelDeposit(${r.id});stopAlarm()">Cancel</button>
         </td>
         </tr>`
     })
-
     depositData.innerHTML = html
-}
-
-// ✅ APPROVE DEPOSIT
-async function approveDeposit(id,userId,amount){
-
-    let { data } = await client.from("login").select("balance").eq("id",userId).single()
-
-    let newBal = data.balance + amount
-
-    await client.from("login").update({balance:newBal}).eq("id",userId)
-
-    await client.from("deposit_requests").update({status:"approved"}).eq("id",id)
-
-    alert("Deposit Approved ✅")
-    loadDeposits()
-}
-
-// ❌ CANCEL
-async function cancelDeposit(id){
-    await client.from("deposit_requests").update({status:"cancelled"}).eq("id",id)
-    loadDeposits()
 }
 
 // 🔥 LOAD WITHDRAW
 async function loadWithdraw(){
     let { data } = await client
     .from("withdraw_requests")
-    .select(`
-        *,
-        login:user_id (id,name,mobile,balance)
-    `)
+    .select(`*, login:user_id (id,name,mobile,balance)`)
+
+    if(data.length > lastWithdrawCount){
+        playAlarm()
+    }
+    lastWithdrawCount = data.length
 
     let html=""
-
     data.reverse().forEach(r=>{
-        html+=`
-        <tr>
+        html+=`<tr>
         <td>${r.id}</td>
         <td>${r.login?.id}</td>
         <td>${r.login?.name}</td>
@@ -149,51 +252,43 @@ async function loadWithdraw(){
         <td>${r.upi}</td>
         <td>${r.status}</td>
         <td>
-            <button class="approve" onclick="approveWithdraw(${r.id},${r.login?.id},${r.amount})">Approve</button>
-            <button class="cancel" onclick="cancelWithdraw(${r.id},${r.login?.id},${r.amount})">Cancel</button>
+        <button class="approve" onclick="approveWithdraw(${r.id},${r.login?.id},${r.amount});stopAlarm()">Approve</button>
+        <button class="cancel" onclick="cancelWithdraw(${r.id},${r.login?.id},${r.amount});stopAlarm()">Cancel</button>
         </td>
         </tr>`
     })
-
     withdrawData.innerHTML = html
 }
 
-// ✅ APPROVE WITHDRAW
+// बाकी same...
+async function approveDeposit(id,userId,amount){
+    let { data } = await client.from("login").select("balance").eq("id",userId).single()
+    await client.from("login").update({balance:data.balance+amount}).eq("id",userId)
+    await client.from("deposit_requests").update({status:"approved"}).eq("id",id)
+    loadDeposits()
+}
+
+async function cancelDeposit(id){
+    await client.from("deposit_requests").update({status:"cancelled"}).eq("id",id)
+    loadDeposits()
+}
+
 async function approveWithdraw(id,userId,amount){
-
     let { data } = await client.from("login").select("balance").eq("id",userId).single()
-
-    if(data.balance < amount){
-        alert("Balance kam hai ❌")
-        return
-    }
-
-    let newBal = data.balance - amount
-
-    await client.from("login").update({balance:newBal}).eq("id",userId)
-
+    if(data.balance < amount){ alert("Balance kam hai"); return }
+    await client.from("login").update({balance:data.balance-amount}).eq("id",userId)
     await client.from("withdraw_requests").update({status:"approved"}).eq("id",id)
-
-    alert("Withdraw Approved ✅")
     loadWithdraw()
 }
 
-// ❌ CANCEL WITH REFUND
 async function cancelWithdraw(id,userId,amount){
-
     let { data } = await client.from("login").select("balance").eq("id",userId).single()
-
-    let newBal = data.balance + amount
-
-    await client.from("login").update({balance:newBal}).eq("id",userId)
-
+    await client.from("login").update({balance:data.balance+amount}).eq("id",userId)
     await client.from("withdraw_requests").update({status:"cancelled"}).eq("id",id)
-
-    alert("Cancelled + Refund ✅")
     loadWithdraw()
 }
 
-// AUTO LOAD
+loadUsers()
 loadDeposits()
 loadWithdraw()
 
@@ -201,7 +296,6 @@ setInterval(()=>{
     loadDeposits()
     loadWithdraw()
 },5000)
-
 </script>
 
 </body>
