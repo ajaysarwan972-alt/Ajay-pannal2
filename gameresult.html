@@ -46,7 +46,6 @@ input {
 
 <h2>Game Result</h2>
 
-<!-- ✅ NEW UPDATE SYSTEM -->
 <div class="update-box">
     <select id="marketSelect"></select>
     <input type="text" id="marketValue" placeholder="Enter number">
@@ -83,7 +82,8 @@ async function loadGames(){
     const { data, error } = await supabase.from("Game result").select("*")
 
     if(error){
-        console.log(error)
+        console.log("Load error:", error)
+        alert("Table load error")
         return
     }
 
@@ -117,7 +117,6 @@ async function loadGames(){
 
         </tr>`
 
-        // dropdown data
         opt += `<option value="${row.id}">${row.name}</option>`
     })
 
@@ -125,20 +124,21 @@ async function loadGames(){
     document.getElementById("marketSelect").innerHTML = opt
 }
 
-// UPDATE FUNCTION (INLINE)
+// INLINE UPDATE
 window.updateGame = async (id, col, val) => {
-    let { error } = await supabase
+
+    const { error } = await supabase
         .from("Game result")
         .update({ [col]: val })
         .eq("id", id)
 
     if(error){
-        console.log("Update error:", error)
-        alert("Update fail")
+        console.log("Update error:", error.message)
+        alert(error.message)
     }
 }
 
-// ✅ NEW BUTTON UPDATE SYSTEM
+// BUTTON UPDATE
 window.updateMarket = async () => {
 
     let id = document.getElementById("marketSelect").value
@@ -147,20 +147,18 @@ window.updateMarket = async () => {
 
     if(!val) return alert("Number daal")
 
-    let { error } = await supabase
+    const { error } = await supabase
         .from("Game result")
         .update({ number: val })
         .eq("id", id)
 
     if(error){
-        alert("Update fail")
-        console.log(error)
+        console.log("Update error:", error.message)
+        alert(error.message)   // 👈 अब exact error दिखेगा
         return
     }
 
-    // clear after update
     input.value = ""
-
     alert("Updated ✅")
     loadGames()
 }
