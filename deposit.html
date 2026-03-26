@@ -13,6 +13,7 @@ body{
     padding:15px;
 }
 
+/* CARD */
 .card{
     background:#fff;
     padding:20px;
@@ -21,104 +22,83 @@ body{
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
+/* AMOUNT BUTTON */
 .amount-btns{
     display:flex;
     gap:10px;
-    margin-bottom:15px;
 }
-
 .amount-btns button{
     flex:1;
-    padding:12px;
+    padding:15px;
     border:none;
     border-radius:15px;
-    background:linear-gradient(45deg,blue,red);
+    background:linear-gradient(45deg,#4facfe,#ff004c);
     color:#fff;
     font-weight:bold;
 }
 
+/* INPUT */
 input{
     width:100%;
     padding:12px;
     margin-top:10px;
-    border-radius:12px;
+    border-radius:10px;
     border:1px solid #ccc;
 }
 
+/* MAIN BUTTON */
 .main-btn{
     width:100%;
-    padding:14px;
+    padding:15px;
     border:none;
     border-radius:15px;
-    background:green;
+    background:#7cc84a;
     color:#fff;
     font-weight:bold;
     margin-top:15px;
 }
 
+/* COPY BOX */
 .copy-box{
     display:flex;
     justify-content:space-between;
-    background:linear-gradient(45deg,orange,yellow);
+    background:linear-gradient(45deg,#fbb034,#ffdd00);
     padding:12px;
     border-radius:15px;
     margin-bottom:15px;
 }
-
 .copy-btn{
-    background:linear-gradient(45deg,blue,red);
+    background:linear-gradient(45deg,#4facfe,#ff004c);
     color:#fff;
     border:none;
-    padding:8px 12px;
+    padding:10px;
     border-radius:10px;
 }
 
+/* BUTTON ROW */
 .row{
     display:flex;
     gap:10px;
-    margin-top:15px;
 }
-
 .choice-btn{
-    width:50%;
-    padding:14px;
+    flex:1;
+    padding:15px;
     border:none;
     border-radius:15px;
     color:#fff;
     font-weight:bold;
 }
+.utr-btn{ background:#7cc84a; }
+.ss-btn{ background:linear-gradient(45deg,#4facfe,#ff004c); }
 
-.utr-btn{ background:#6cc04a; }
-.ss-btn{ background:linear-gradient(45deg,blue,red); }
-
+/* PREVIEW */
 .preview{
-    width:100%;
     margin-top:15px;
+    text-align:center;
+}
+.preview img{
+    width:70%;
     border-radius:10px;
-}
-
-.btn-group{
-    display:flex;
-    gap:10px;
-    margin-top:15px;
-}
-
-.back-btn{
-    flex:1;
-    background:#ff5a5a;
-    color:#fff;
-    border:none;
-    padding:12px;
-    border-radius:12px;
-}
-
-.confirm-btn{
-    flex:1;
-    background:#7bdc5c;
-    color:#fff;
-    border:none;
-    padding:12px;
-    border-radius:12px;
 }
 </style>
 </head>
@@ -135,53 +115,37 @@ input{
 </div>
 
 <input type="number" id="amount" placeholder="Enter Amount">
-
 <button class="main-btn" onclick="goStep2()">SUBMIT</button>
 </div>
 
 <!-- STEP 2 -->
 <div class="card" id="step2" style="display:none;">
-
 <div class="copy-box">
 <span id="upi">paynearby.0000547174@indus</span>
 <button class="copy-btn" onclick="copyUpi()">Copy</button>
 </div>
 
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay" width="100%">
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay" width="100%">
 
-<div class="row">
+<div class="row" style="margin-top:15px;">
 <button class="choice-btn utr-btn" onclick="goStep3('utr')">ENTER UTR</button>
 <button class="choice-btn ss-btn" onclick="goStep3('ss')">UPLOAD SCREENSHOT</button>
 </div>
-
-<button class="main-btn" onclick="backTo1()">BACK</button>
-
 </div>
 
 <!-- STEP 3 UTR -->
 <div class="card" id="step3_utr" style="display:none;">
-
 <input type="text" id="utr" placeholder="Enter UTR Number">
-
-<div class="btn-group">
-<button class="back-btn" onclick="backTo2()">BACK</button>
-<button class="confirm-btn" onclick="submitDeposit()">CONFIRM</button>
-</div>
-
+<button class="main-btn" onclick="submitDeposit()">CONFIRM</button>
 </div>
 
 <!-- STEP 3 SCREENSHOT -->
 <div class="card" id="step3_ss" style="display:none;">
-
 <input type="file" id="file" onchange="previewImage()">
 
-<img id="preview" class="preview" style="display:none;">
+<div class="preview" id="preview"></div>
 
-<div class="btn-group">
-<button class="back-btn" onclick="backTo2()">BACK</button>
-<button class="confirm-btn" onclick="submitDeposit()">CONFIRM</button>
-</div>
-
+<button class="main-btn" onclick="submitDeposit()">CONFIRM</button>
 </div>
 
 <script>
@@ -189,10 +153,10 @@ const { createClient } = supabase
 
 const client = createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
-"YOUR_KEY"
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// test user
+// TEST USER
 if(!localStorage.getItem("user_id")){
     localStorage.setItem("user_id", "1")
     localStorage.setItem("mobile", "9999999999")
@@ -222,31 +186,22 @@ function goStep3(type){
     }
 }
 
-function backTo1(){
-    document.getElementById("step2").style.display="none"
-    document.getElementById("step1").style.display="block"
-}
-
-function backTo2(){
-    document.getElementById("step3_utr").style.display="none"
-    document.getElementById("step3_ss").style.display="none"
-    document.getElementById("step2").style.display="block"
-}
-
 function copyUpi(){
     let text = document.getElementById("upi").innerText
     navigator.clipboard.writeText(text)
     alert("Copied")
 }
 
-// IMAGE PREVIEW
+/* IMAGE PREVIEW */
 function previewImage(){
     let file = document.getElementById("file").files[0]
-    let preview = document.getElementById("preview")
-
     if(file){
-        preview.src = URL.createObjectURL(file)
-        preview.style.display = "block"
+        let reader = new FileReader()
+        reader.onload = function(e){
+            document.getElementById("preview").innerHTML =
+            `<img src="${e.target.result}">`
+        }
+        reader.readAsDataURL(file)
     }
 }
 
@@ -285,7 +240,7 @@ async function submitDeposit(){
     let userId = localStorage.getItem("user_id")
     let mobile = localStorage.getItem("mobile")
 
-    await client.from("deposit_requests").insert({
+    let { error } = await client.from("deposit_requests").insert({
         user_id: userId,
         mobile: mobile,
         amount: amount,
@@ -294,7 +249,12 @@ async function submitDeposit(){
         status: "pending"
     })
 
-    alert("Request sent ✅")
+    if(error){
+        alert("DB Error: "+error.message)
+        return
+    }
+
+    alert("Request Sent ✅")
     location.reload()
 }
 </script>
