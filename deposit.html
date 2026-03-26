@@ -13,7 +13,6 @@ body{
     padding:15px;
 }
 
-/* CARD */
 .card{
     background:#fff;
     padding:20px;
@@ -22,7 +21,6 @@ body{
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* AMOUNT BUTTON */
 .amount-btns{
     display:flex;
     gap:10px;
@@ -37,7 +35,6 @@ body{
     font-weight:bold;
 }
 
-/* INPUT */
 input{
     width:100%;
     padding:12px;
@@ -46,7 +43,6 @@ input{
     border:1px solid #ccc;
 }
 
-/* MAIN BUTTON */
 .main-btn{
     width:100%;
     padding:15px;
@@ -58,7 +54,6 @@ input{
     margin-top:15px;
 }
 
-/* COPY BOX */
 .copy-box{
     display:flex;
     justify-content:space-between;
@@ -75,7 +70,6 @@ input{
     border-radius:10px;
 }
 
-/* BUTTON ROW */
 .row{
     display:flex;
     gap:10px;
@@ -91,7 +85,6 @@ input{
 .utr-btn{ background:#7cc84a; }
 .ss-btn{ background:linear-gradient(45deg,#4facfe,#ff004c); }
 
-/* PREVIEW */
 .preview{
     margin-top:15px;
     text-align:center;
@@ -121,11 +114,11 @@ input{
 <!-- STEP 2 -->
 <div class="card" id="step2" style="display:none;">
 <div class="copy-box">
-<span id="upi">paynearby.0000547174@indus</span>
+<span id="upi">Loading...</span>
 <button class="copy-btn" onclick="copyUpi()">Copy</button>
 </div>
 
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay" width="100%">
+<img id="qr" src="" width="100%">
 
 <div class="row" style="margin-top:15px;">
 <button class="choice-btn utr-btn" onclick="goStep3('utr')">ENTER UTR</button>
@@ -142,9 +135,7 @@ input{
 <!-- STEP 3 SCREENSHOT -->
 <div class="card" id="step3_ss" style="display:none;">
 <input type="file" id="file" onchange="previewImage()">
-
 <div class="preview" id="preview"></div>
-
 <button class="main-btn" onclick="submitDeposit()">CONFIRM</button>
 </div>
 
@@ -155,6 +146,23 @@ const client = createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
+
+// LOAD SETTINGS (🔥 MAIN PART)
+async function loadSettings(){
+    let { data, error } = await client
+    .from("settings")
+    .select("*")
+    .limit(1)
+    .single()
+
+    if(data){
+        document.getElementById("upi").innerText = data.upi
+        document.getElementById("qr").src = data.qr_image
+    }else{
+        alert("Settings load error")
+    }
+}
+loadSettings()
 
 // TEST USER
 if(!localStorage.getItem("user_id")){
@@ -192,7 +200,6 @@ function copyUpi(){
     alert("Copied")
 }
 
-/* IMAGE PREVIEW */
 function previewImage(){
     let file = document.getElementById("file").files[0]
     if(file){
