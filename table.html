@@ -38,10 +38,23 @@ td, th {
     gap:10px;
     flex-wrap:wrap;
 }
+
+img{
+    width:80px;
+}
 </style>
 </head>
 
 <body>
+
+<!-- 🔔 ALARM -->
+<audio id="alarm" loop>
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+</audio>
+
+<button onclick="stopAlarm()" style="background:red;color:#fff;padding:10px;border:none;border-radius:10px;margin-bottom:15px;">
+STOP ALARM
+</button>
 
 <h2>login</h2>
 
@@ -66,6 +79,30 @@ td, th {
 </table>
 </div>
 
+<h2>Deposit Requests</h2>
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>ID</th><th>User</th><th>Amount</th><th>UTR</th><th>Screenshot</th><th>Status</th>
+</tr>
+</thead>
+<tbody id="depositData"></tbody>
+</table>
+</div>
+
+<h2>Withdraw Requests</h2>
+<div class="frame">
+<table>
+<thead>
+<tr>
+<th>ID</th><th>User</th><th>Amount</th><th>QR / Bank</th><th>Status</th>
+</tr>
+</thead>
+<tbody id="withdrawData"></tbody>
+</table>
+</div>
+
 <h2>Game result</h2>
 <div class="frame">
 
@@ -87,7 +124,6 @@ td, th {
 
 <h2>history</h2>
 
-<!-- ✅ NEW FILTER -->
 <div class="update-box">
 <select id="historyUser"><option value="all">Select ID</option></select>
 <select id="historyMarket"><option value="all">Select Market</option></select>
@@ -117,6 +153,22 @@ const supabase = createClient(
 
 let filteredData = []
 
+// 🔔 ALARM LOGIC
+let lastDepositCount = 0
+let lastWithdrawCount = 0
+
+function playAlarm(){
+    document.getElementById("alarm").play()
+}
+
+function stopAlarm(){
+    let a = document.getElementById("alarm")
+    a.pause()
+    a.currentTime = 0
+}
+window.stopAlarm = stopAlarm
+
+// USERS
 async function loadUsers(){
     const { data } = await supabase.from("login").select("*")
     let html="", opt=""
@@ -135,23 +187,52 @@ async function loadUsers(){
     historyUser.innerHTML = '<option value="all">Select ID</option>'+opt
 }
 
-window.updateBalance = async ()=>{
-    let id = userId.value
-    let amount = parseInt(document.getElementById("amount").value)
-    let action = action.value
+// 🔥 DEPOSIT
+async function loadDeposits(){
+    const { data } = await supabase.from("deposit_requests").select("*")
 
-    if(!amount) return alert("Amount daal")
+    if(data.length > lastDepositCount){
+        playAlarm()
+    }
+    lastDepositCount = data.length
 
-    const { data } = await supabase.from("login").select("balance").eq("id",id).single()
-    let newBalance = action==="deposit" ? data.balance+amount : data.balance-amount
-
-    await supabase.from("login").update({balance:newBalance}).eq("id",id)
-
-    alert("Updated")
-    document.getElementById("amount").value=""
-    loadUsers()
+    let html=""
+    data.reverse().forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.mobile}</td>
+        <td>${r.amount}</td>
+        <td>${r.utr || "-"}</td>
+        <td>${r.screenshot ? `<a href="${r.screenshot}" target="_blank"><img src="${r.screenshot}"></a>` : "-"}</td>
+        <td>${r.status}</td>
+        </tr>`
+    })
+    depositData.innerHTML = html
 }
 
+// 🔥 WITHDRAW
+async function loadWithdraw(){
+    const { data } = await supabase.from("withdraw_requests").select("*")
+
+    if(data.length > lastWithdrawCount){
+        playAlarm()
+    }
+    lastWithdrawCount = data.length
+
+    let html=""
+    data.reverse().forEach(r=>{
+        html+=`<tr>
+        <td>${r.id}</td>
+        <td>${r.mobile}</td>
+        <td>${r.amount}</td>
+        <td>${r.upi}</td>
+        <td>${r.status}</td>
+        </tr>`
+    })
+    withdrawData.innerHTML = html
+}
+
+// बाकी same
 async function loadMarkets(){
     const { data } = await supabase.from("Game result").select("name")
     let opt='<option value="all">Select Market</option>'
@@ -188,24 +269,6 @@ async function loadHistory(){
     renderHistory(data)
 }
 
-window.filterHistory = async ()=>{
-    let uid = historyUser.value
-    let market = historyMarket.value
-    let date = historyDate.value
-
-    let query = supabase.from("history").select("*")
-
-    if(uid!=="all") query=query.eq("user_id",uid)
-    if(market!=="all") query=query.eq("market",market)
-    if(date){
-        query=query.gte("created_at",date).lte("created_at",date+"T23:59:59")
-    }
-
-    const { data } = await query
-    filteredData = data
-    renderHistory(data)
-}
-
 function renderHistory(data){
     let html=""
     data.forEach(r=>{
@@ -213,11 +276,7 @@ function renderHistory(data){
         <td>${r.id}</td>
         <td>${r.user_id}</td>
         <td>${r.market}</td>
-        <td>
-            ${r.data}
-            <br>
-            <button onclick="copySingle('${r.data}')">Copy</button>
-        </td>
+        <td>${r.data}</td>
         <td>${r.total}</td>
         <td>${r.created_at}</td>
         </tr>`
@@ -225,21 +284,20 @@ function renderHistory(data){
     historyData.innerHTML=html
 }
 
-window.copySingle = (text)=>{
-    navigator.clipboard.writeText(text)
-    alert("Copied")
-}
+// AUTO REFRESH
+setInterval(()=>{
+    loadDeposits()
+    loadWithdraw()
+}, 5000)
 
-window.copyAll = ()=>{
-    let text = (filteredData.length?filteredData:[]).map(x=>x.data).join("\n\n")
-    navigator.clipboard.writeText(text)
-    alert("All Copied")
-}
-
+// LOAD
 loadUsers()
 loadMarkets()
 loadGames()
 loadHistory()
+loadDeposits()
+loadWithdraw()
+
 </script>
 
 </body>
