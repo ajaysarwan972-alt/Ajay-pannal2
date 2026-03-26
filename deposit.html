@@ -7,77 +7,21 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-    font-family: Arial;
-    background:#f2f2f2;
-    padding:20px;
-}
-
-.card{
-    background:#fff;
-    padding:20px;
-    border-radius:15px;
-    margin-bottom:20px;
-}
-
-.amount-btns{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.amount-btns button{
-    flex:1;
-    padding:15px;
-    border:none;
-    border-radius:15px;
-    background:linear-gradient(45deg,blue,red);
-    color:#fff;
-    font-weight:bold;
-}
-
-input{
-    width:100%;
-    padding:12px;
-    margin-bottom:10px;
-    border-radius:10px;
-    border:1px solid #ccc;
-}
-
-.main-btn{
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:15px;
-    background:green;
-    color:#fff;
-    font-weight:bold;
-}
-
-.copy-box{
-    display:flex;
-    justify-content:space-between;
-    background:orange;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:10px;
-}
-
-.copy-btn{
-    background:linear-gradient(45deg,blue,red);
-    color:#fff;
-    border:none;
-    padding:10px;
-    border-radius:10px;
-}
+body{font-family:Arial;background:#f2f2f2;padding:20px;}
+.card{background:#fff;padding:20px;border-radius:15px;margin-bottom:20px;}
+.amount-btns{display:flex;gap:10px;margin-bottom:15px;}
+.amount-btns button{flex:1;padding:15px;border:none;border-radius:15px;background:linear-gradient(45deg,blue,red);color:#fff;}
+.main-btn{width:100%;padding:15px;border:none;border-radius:15px;background:green;color:#fff;margin-top:10px;}
+.copy-box{display:flex;justify-content:space-between;background:orange;padding:10px;border-radius:10px;margin-bottom:10px;}
+.copy-btn{background:linear-gradient(45deg,blue,red);color:#fff;border:none;padding:10px;border-radius:10px;}
+button{cursor:pointer;}
 </style>
 </head>
 
 <body>
 
 <!-- STEP 1 -->
-<div class="card">
-
+<div class="card" id="step1">
 <div class="amount-btns">
 <button onclick="setAmount(100)">100</button>
 <button onclick="setAmount(200)">200</button>
@@ -86,14 +30,11 @@ input{
 </div>
 
 <input type="number" id="amount" placeholder="Enter Amount">
-
-<button class="main-btn" onclick="nextStep()">SUBMIT</button>
-
+<button class="main-btn" onclick="goStep2()">SUBMIT</button>
 </div>
 
 <!-- STEP 2 -->
 <div class="card" id="step2" style="display:none;">
-
 <div class="copy-box">
 <span id="upi">paynearby.0000547174@indus</span>
 <button class="copy-btn" onclick="copyUpi()">Copy</button>
@@ -101,101 +42,136 @@ input{
 
 <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay" width="100%">
 
-<input type="text" id="utr" placeholder="Enter UTR Number">
+<button class="main-btn" onclick="goStep3()">I HAVE PAID</button>
+</div>
 
+<!-- STEP 3 -->
+<div class="card" id="step3" style="display:none;text-align:center;">
+<h3>Select Option</h3>
+<button class="main-btn" onclick="goUTR()">ENTER UTR</button>
+<button class="main-btn" onclick="goSS()">UPLOAD SCREENSHOT</button>
+</div>
+
+<!-- STEP 4A UTR -->
+<div class="card" id="step4utr" style="display:none;">
+<input type="text" id="utr" placeholder="Enter UTR">
+<button class="main-btn" onclick="submitUTR()">CONFIRM</button>
+</div>
+
+<!-- STEP 4B SCREENSHOT -->
+<div class="card" id="step4ss" style="display:none;">
 <input type="file" id="file">
-
-<button class="main-btn" onclick="submitDeposit()">CONFIRM</button>
-
+<button class="main-btn" onclick="submitSS()">CONFIRM</button>
 </div>
 
 <script>
-const { createClient } = supabase
-
-const client = createClient(
+const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// test data (REMOVE later if login system ready)
+// test user
 if(!localStorage.getItem("user_id")){
-    localStorage.setItem("user_id", "1")
-    localStorage.setItem("mobile", "9999999999")
+localStorage.setItem("user_id","1")
+localStorage.setItem("mobile","9999999999")
 }
 
 function setAmount(val){
-    document.getElementById("amount").value = val
+document.getElementById("amount").value = val
 }
 
-function nextStep(){
-    let amt = document.getElementById("amount").value
+function hideAll(){
+document.getElementById("step1").style.display="none"
+document.getElementById("step2").style.display="none"
+document.getElementById("step3").style.display="none"
+document.getElementById("step4utr").style.display="none"
+document.getElementById("step4ss").style.display="none"
+}
 
-    if(!amt){
-        alert("Amount daal")
-        return
-    }
+function goStep2(){
+let amt = document.getElementById("amount").value
+if(!amt){ alert("Amount daal"); return }
+hideAll()
+document.getElementById("step2").style.display="block"
+}
 
-    document.getElementById("step2").style.display="block"
+function goStep3(){
+hideAll()
+document.getElementById("step3").style.display="block"
+}
 
-    // auto scroll
-    document.getElementById("step2").scrollIntoView({behavior:"smooth"})
+function goUTR(){
+hideAll()
+document.getElementById("step4utr").style.display="block"
+}
+
+function goSS(){
+hideAll()
+document.getElementById("step4ss").style.display="block"
 }
 
 function copyUpi(){
-    let text = document.getElementById("upi").innerText
-    navigator.clipboard.writeText(text)
-    alert("Copied")
+let text = document.getElementById("upi").innerText
+navigator.clipboard.writeText(text)
+alert("Copied")
 }
 
-async function submitDeposit(){
+// UTR submit
+async function submitUTR(){
+let amount = document.getElementById("amount").value
+let utr = document.getElementById("utr").value
 
-    let amount = document.getElementById("amount").value
-    let utr = document.getElementById("utr").value
-    let file = document.getElementById("file").files[0]
+if(!utr){
+alert("UTR daal")
+return
+}
 
-    if(!file || !utr){
-        alert("UTR + Screenshot daal")
-        return
-    }
+let userId = localStorage.getItem("user_id")
+let mobile = localStorage.getItem("mobile")
 
-    let fileName = Date.now()+"_"+file.name
+await client.from("deposit_requests").insert({
+user_id:userId,
+mobile:mobile,
+amount:amount,
+utr:utr,
+screenshot:null,
+status:"pending"
+})
 
-    // upload image
-    let { error: uploadError } = await client.storage
-        .from("screenshots")
-        .upload(fileName, file)
+alert("Request Sent ✅")
+location.reload()
+}
 
-    if(uploadError){
-        alert("Upload error")
-        return
-    }
+// Screenshot submit
+async function submitSS(){
+let amount = document.getElementById("amount").value
+let file = document.getElementById("file").files[0]
 
-    let { data } = client.storage
-        .from("screenshots")
-        .getPublicUrl(fileName)
+if(!file){
+alert("Screenshot daal")
+return
+}
 
-    let imageUrl = data.publicUrl
+let fileName = Date.now()+"_"+file.name
 
-    let userId = localStorage.getItem("user_id")
-    let mobile = localStorage.getItem("mobile")
+await client.storage.from("screenshots").upload(fileName,file)
 
-    // insert into table
-    await client.from("deposit_requests").insert({
-        user_id: userId,
-        mobile: mobile,
-        amount: amount,
-        utr: utr,
-        screenshot: imageUrl,
-        status: "pending"
-    })
+let { data } = client.storage.from("screenshots").getPublicUrl(fileName)
 
-    alert("Request sent successfully")
+let userId = localStorage.getItem("user_id")
+let mobile = localStorage.getItem("mobile")
 
-    // reset
-    document.getElementById("amount").value=""
-    document.getElementById("utr").value=""
-    document.getElementById("file").value=""
-    document.getElementById("step2").style.display="none"
+await client.from("deposit_requests").insert({
+user_id:userId,
+mobile:mobile,
+amount:amount,
+utr:null,
+screenshot:data.publicUrl,
+status:"pending"
+})
+
+alert("Request Sent ✅")
+location.reload()
 }
 </script>
 
