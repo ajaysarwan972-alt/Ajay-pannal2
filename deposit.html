@@ -75,6 +75,7 @@ input{
 
 <body>
 
+<!-- STEP 1 -->
 <div class="card">
 
 <div class="amount-btns">
@@ -84,12 +85,13 @@ input{
 <button onclick="setAmount(1000)">1000</button>
 </div>
 
-<input type="number" id="amount" placeholder="Amount">
+<input type="number" id="amount" placeholder="Enter Amount">
 
 <button class="main-btn" onclick="nextStep()">SUBMIT</button>
 
 </div>
 
+<!-- STEP 2 -->
 <div class="card" id="step2" style="display:none;">
 
 <div class="copy-box">
@@ -99,7 +101,7 @@ input{
 
 <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay" width="100%">
 
-<input type="text" id="utr" placeholder="Enter UTR">
+<input type="text" id="utr" placeholder="Enter UTR Number">
 
 <input type="file" id="file">
 
@@ -108,11 +110,18 @@ input{
 </div>
 
 <script>
+const { createClient } = supabase
 
-const supabase = window.supabase.createClient(
+const client = createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
+
+// test data (REMOVE later if login system ready)
+if(!localStorage.getItem("user_id")){
+    localStorage.setItem("user_id", "1")
+    localStorage.setItem("mobile", "9999999999")
+}
 
 function setAmount(val){
     document.getElementById("amount").value = val
@@ -120,11 +129,16 @@ function setAmount(val){
 
 function nextStep(){
     let amt = document.getElementById("amount").value
+
     if(!amt){
         alert("Amount daal")
         return
     }
+
     document.getElementById("step2").style.display="block"
+
+    // auto scroll
+    document.getElementById("step2").scrollIntoView({behavior:"smooth"})
 }
 
 function copyUpi(){
@@ -146,18 +160,27 @@ async function submitDeposit(){
 
     let fileName = Date.now()+"_"+file.name
 
-    // upload screenshot
-    await supabase.storage.from("screenshots").upload(fileName, file)
+    // upload image
+    let { error: uploadError } = await client.storage
+        .from("screenshots")
+        .upload(fileName, file)
 
-    let { data } = supabase.storage.from("screenshots").getPublicUrl(fileName)
+    if(uploadError){
+        alert("Upload error")
+        return
+    }
+
+    let { data } = client.storage
+        .from("screenshots")
+        .getPublicUrl(fileName)
 
     let imageUrl = data.publicUrl
 
     let userId = localStorage.getItem("user_id")
     let mobile = localStorage.getItem("mobile")
 
-    // insert request
-    await supabase.from("deposit_requests").insert({
+    // insert into table
+    await client.from("deposit_requests").insert({
         user_id: userId,
         mobile: mobile,
         amount: amount,
@@ -168,13 +191,12 @@ async function submitDeposit(){
 
     alert("Request sent successfully")
 
-    // clear fields
+    // reset
     document.getElementById("amount").value=""
     document.getElementById("utr").value=""
     document.getElementById("file").value=""
     document.getElementById("step2").style.display="none"
 }
-
 </script>
 
 </body>
