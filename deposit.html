@@ -54,44 +54,63 @@ input{
     margin-top:15px;
 }
 
-.copy-box{
-    display:flex;
-    justify-content:space-between;
-    background:linear-gradient(45deg,#fbb034,#ffdd00);
-    padding:12px;
-    border-radius:15px;
+/* NEW UI */
+.amount-text{
+    font-size:18px;
+    font-weight:bold;
+    text-align:center;
     margin-bottom:15px;
 }
-.copy-btn{
+.amount-text span{
+    color:green;
+}
+.upload-box{
+    background:#f2f2f2;
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.upload-btn{
     background:linear-gradient(45deg,#4facfe,#ff004c);
     color:#fff;
+    padding:15px;
     border:none;
-    padding:10px;
+    border-radius:15px;
+    font-weight:bold;
+    width:100%;
+}
+
+.preview{
+    margin-top:15px;
+}
+.preview img{
+    width:80%;
     border-radius:10px;
 }
 
 .row{
     display:flex;
     gap:10px;
+    margin-top:15px;
 }
-.choice-btn{
+.back-btn{
     flex:1;
-    padding:15px;
-    border:none;
-    border-radius:15px;
+    background:#ff4d4d;
     color:#fff;
+    border:none;
+    padding:15px;
+    border-radius:15px;
     font-weight:bold;
 }
-.utr-btn{ background:#7cc84a; }
-.ss-btn{ background:linear-gradient(45deg,#4facfe,#ff004c); }
-
-.preview{
-    margin-top:15px;
-    text-align:center;
-}
-.preview img{
-    width:70%;
-    border-radius:10px;
+.confirm-btn{
+    flex:1;
+    background:#7cc84a;
+    color:#fff;
+    border:none;
+    padding:15px;
+    border-radius:15px;
+    font-weight:bold;
 }
 </style>
 </head>
@@ -113,30 +132,23 @@ input{
 
 <!-- STEP 2 -->
 <div class="card" id="step2" style="display:none;">
-<div class="copy-box">
-<span id="upi">Loading...</span>
-<button class="copy-btn" onclick="copyUpi()">Copy</button>
+<div class="amount-text">
+<span id="showAmount">0</span> Rs. रुपये का स्क्रीनशॉट अपलोड करें फिर Confirm बटन पर क्लिक करें।
 </div>
 
-<img id="qr" src="" width="100%">
+<div class="upload-box">
+<input type="file" id="file" onchange="previewImage()" style="display:none;">
+<button class="upload-btn" onclick="document.getElementById('file').click()">
+UPLOAD PAYMENT SCREENSHOT
+</button>
 
-<div class="row" style="margin-top:15px;">
-<button class="choice-btn utr-btn" onclick="goStep3('utr')">ENTER UTR</button>
-<button class="choice-btn ss-btn" onclick="goStep3('ss')">UPLOAD SCREENSHOT</button>
-</div>
-</div>
-
-<!-- STEP 3 UTR -->
-<div class="card" id="step3_utr" style="display:none;">
-<input type="text" id="utr" placeholder="Enter UTR Number">
-<button class="main-btn" onclick="submitDeposit()">CONFIRM</button>
-</div>
-
-<!-- STEP 3 SCREENSHOT -->
-<div class="card" id="step3_ss" style="display:none;">
-<input type="file" id="file" onchange="previewImage()">
 <div class="preview" id="preview"></div>
-<button class="main-btn" onclick="submitDeposit()">CONFIRM</button>
+
+<div class="row">
+<button class="back-btn" onclick="goBack()">BACK</button>
+<button class="confirm-btn" onclick="submitDeposit()">CONFIRM</button>
+</div>
+</div>
 </div>
 
 <script>
@@ -146,23 +158,6 @@ const client = createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
-
-// LOAD SETTINGS (🔥 MAIN PART)
-async function loadSettings(){
-    let { data, error } = await client
-    .from("settings")
-    .select("*")
-    .limit(1)
-    .single()
-
-    if(data){
-        document.getElementById("upi").innerText = data.upi
-        document.getElementById("qr").src = data.qr_image
-    }else{
-        alert("Settings load error")
-    }
-}
-loadSettings()
 
 // TEST USER
 if(!localStorage.getItem("user_id")){
@@ -180,24 +175,19 @@ function goStep2(){
         alert("Amount daal")
         return
     }
+
+    // SAVE AMOUNT
+    localStorage.setItem("deposit_amount", amt)
+
+    document.getElementById("showAmount").innerText = amt
+
     document.getElementById("step1").style.display="none"
     document.getElementById("step2").style.display="block"
 }
 
-function goStep3(type){
+function goBack(){
     document.getElementById("step2").style.display="none"
-
-    if(type==="utr"){
-        document.getElementById("step3_utr").style.display="block"
-    }else{
-        document.getElementById("step3_ss").style.display="block"
-    }
-}
-
-function copyUpi(){
-    let text = document.getElementById("upi").innerText
-    navigator.clipboard.writeText(text)
-    alert("Copied")
+    document.getElementById("step1").style.display="block"
 }
 
 function previewImage(){
@@ -214,50 +204,42 @@ function previewImage(){
 
 async function submitDeposit(){
 
-    let amount = document.getElementById("amount").value
-    let utr = document.getElementById("utr")?.value || ""
-    let file = document.getElementById("file")?.files[0]
+    let amount = localStorage.getItem("deposit_amount")
+    let file = document.getElementById("file").files[0]
 
-    if(!utr && !file){
-        alert("UTR ya Screenshot daal")
+    if(!file){
+        alert("Screenshot upload kar")
         return
     }
 
-    let imageUrl = ""
+    let fileName = Date.now()+"_"+file.name
 
-    if(file){
-        let fileName = Date.now()+"_"+file.name
+    let { error } = await client.storage
+    .from("screenshots")
+    .upload(fileName, file)
 
-        let { error } = await client.storage
-        .from("screenshots")
-        .upload(fileName, file)
-
-        if(error){
-            alert("Upload error")
-            return
-        }
-
-        let { data } = client.storage
-        .from("screenshots")
-        .getPublicUrl(fileName)
-
-        imageUrl = data.publicUrl
+    if(error){
+        alert("Upload error")
+        return
     }
+
+    let { data } = client.storage
+    .from("screenshots")
+    .getPublicUrl(fileName)
 
     let userId = localStorage.getItem("user_id")
     let mobile = localStorage.getItem("mobile")
 
-    let { error } = await client.from("deposit_requests").insert({
+    let { error: dbError } = await client.from("deposit_requests").insert({
         user_id: userId,
         mobile: mobile,
         amount: amount,
-        utr: utr,
-        screenshot: imageUrl,
+        screenshot: data.publicUrl,
         status: "pending"
     })
 
-    if(error){
-        alert("DB Error: "+error.message)
+    if(dbError){
+        alert("DB Error: "+dbError.message)
         return
     }
 
