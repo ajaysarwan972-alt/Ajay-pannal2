@@ -114,7 +114,7 @@ STOP ALARM
 </table>
 </div>
 
-<!-- ✅ GAME RESULT FIXED -->
+<!-- ✅ GAME RESULT -->
 <h2>Game result</h2>
 <div class="frame">
 
@@ -265,7 +265,7 @@ async function loadWithdraw(){
     withdrawData.innerHTML = html
 }
 
-// ✅ GAME FIX
+// ✅ GAME RESULT (FINAL FIX)
 async function loadGame(){
     let { data } = await client.from("Game result").select("*")
 
@@ -290,11 +290,18 @@ async function loadGame(){
 
 async function updateMarketNumber(){
     let id = document.getElementById("marketSelect").value
-    let val = document.getElementById("marketValue").value
+    let input = document.getElementById("marketValue")
+    let val = input.value
 
     if(!val) return alert("Number daal")
 
-    await client.from("Game result").update({number: val}).eq("id", id)
+    await client
+        .from("Game result")
+        .update({ number: val })
+        .eq("id", id)
+
+    input.value = ""
+    document.getElementById("marketSelect").selectedIndex = 0
 
     alert("Updated")
     loadGame()
