@@ -12,6 +12,8 @@ body{
     background:#f2f2f2;
     padding:15px;
 }
+
+/* 🔥 TOP BAR */
 #userId{
   position:fixed;
   left:15px;
@@ -34,6 +36,7 @@ body{
   font-weight:bold;
   z-index:999;
 }
+
 .card{
     background:#fff;
     padding:20px;
@@ -42,6 +45,7 @@ body{
     margin-bottom:20px;
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
+
 .amount-btns{
     display:flex;
     gap:10px;
@@ -55,6 +59,7 @@ body{
     color:#fff;
     font-weight:bold;
 }
+
 input{
     width:100%;
     padding:12px;
@@ -62,6 +67,7 @@ input{
     border-radius:10px;
     border:1px solid #ccc;
 }
+
 .main-btn{
     width:100%;
     padding:15px;
@@ -72,6 +78,7 @@ input{
     font-weight:bold;
     margin-top:15px;
 }
+
 .amount-text{
     font-size:18px;
     font-weight:bold;
@@ -81,6 +88,7 @@ input{
 .amount-text span{
     color:green;
 }
+
 .qr-box{
     background:#f1f1f1;
     padding:15px;
@@ -102,12 +110,14 @@ input{
     object-fit:contain;
     border-radius:10px;
 }
+
 .upload-box{
     background:#f2f2f2;
     padding:20px;
     border-radius:20px;
     text-align:center;
 }
+
 .upload-btn{
     background:linear-gradient(45deg,#4facfe,#ff004c);
     color:#fff;
@@ -117,6 +127,7 @@ input{
     font-weight:bold;
     width:100%;
 }
+
 .preview{
     margin-top:15px;
 }
@@ -124,6 +135,7 @@ input{
     width:80%;
     border-radius:10px;
 }
+
 .row{
     display:flex;
     gap:10px;
@@ -169,7 +181,7 @@ input{
 
 <div class="card" id="step2" style="display:none;">
 <div class="amount-text">
-<span id="showAmount">0</span> Rs. screenshot upload karke Confirm dabao
+<span id="showAmount">0</span> Rs. screenshot upload karo
 </div>
 
 <div class="qr-box">
@@ -202,17 +214,15 @@ const client = createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// 🔥 QR LOAD
+const user = JSON.parse(localStorage.getItem("user"))
+
 async function loadQR(){
     const { data } = await client.from("settings").select("*").limit(1).single()
     if(data && data.qr){
-        document.getElementById("qrImage").src = data.qr
+        qrImage.src = data.qr
     }
 }
 loadQR()
-
-// 🔥 USER LOAD
-const user = JSON.parse(localStorage.getItem("user"))
 
 async function loadWallet(){
     if(!user) return
@@ -241,7 +251,7 @@ function goBack(){
 }
 
 function previewImage(){
-    let file = document.getElementById("file").files[0]
+    let file = fileInput.files[0]
     if(file){
         let reader = new FileReader()
         reader.onload = e=>{
@@ -251,7 +261,6 @@ function previewImage(){
     }
 }
 
-// ✅ FINAL FIX
 async function submitDeposit(){
     let amount = localStorage.getItem("deposit_amount")
     let file = document.getElementById("file").files[0]
@@ -264,20 +273,22 @@ async function submitDeposit(){
 
     let { data } = client.storage.from("screenshots").getPublicUrl(fileName)
 
-    // 🔥 login table se mobile uthao
+    // 🔥 FIX START (sirf yahi change hai)
     const { data: userData } = await client
         .from("login")
-        .select("mobile")
+        .select("mobile,name")
         .eq("id", user.id)
         .single()
 
     await client.from("deposit_requests").insert({
         user_id: user.id,
         mobile: userData.mobile,
+        name: userData.name,
         amount: amount,
         screenshot: data.publicUrl,
         status: "pending"
     })
+    // 🔥 FIX END
 
     alert("Request Sent ✅")
     location.reload()
