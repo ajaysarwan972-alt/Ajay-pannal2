@@ -155,47 +155,6 @@ body{
   background:green;
   color:white;
 }
-
-/* SIDE MENU */
-#sideMenu{
-  position:fixed;
-  top:0;
-  left:-320px;
-  width:300px;
-  height:100%;
-  background:#f8f8f8;
-  z-index:1000;
-  transition:0.3s;
-  border-radius:0 20px 20px 0;
-  overflow:auto;
-}
-
-.menuHeader{
-  padding:20px;
-  background:linear-gradient(#eee,#000);
-  font-size:20px;
-  font-weight:bold;
-}
-
-.menuItem{
-  padding:15px;
-  margin:8px 10px;
-  background:#fff;
-  border-radius:15px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
-  font-weight:bold;
-}
-
-#overlay{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.4);
-  display:none;
-  z-index:999;
-}
 </style>
 </head>
 
@@ -204,24 +163,6 @@ body{
 <div id="menuBtn" onclick="openMenu()">☰</div>
 <div id="userId">ID: 0000</div>
 <div id="wallet">₹ 0</div>
-
-<div id="sideMenu">
-  <div class="menuHeader">Ajay</div>
-
-  <div class="menuItem" onclick="go('home.html')">🏠 Home</div>
-  <div class="menuItem" onclick="go('profile.html')">👤 Profile</div>
-  <div class="menuItem" onclick="go('upi.html')">💳 UPI Details</div>
-  <div class="menuItem" onclick="go('bank.html')">🏦 Bank Details</div>
-
-  <hr>
-
-  <div class="menuItem" onclick="shareApp()">🔗 Share Now</div>
-  <div class="menuItem" onclick="go('rates.html')">📊 Game Rates</div>
-  <div class="menuItem" onclick="go('terms.html')">📄 Terms</div>
-  <div class="menuItem" onclick="logout()">🚪 Logout</div>
-</div>
-
-<div id="overlay" onclick="closeMenu()"></div>
 
 <div class="actionBar">
   <div class="actionBtn add" onclick="go('deposit.html')">Add Money</div>
@@ -239,6 +180,9 @@ body{
   <div class="navBtn">Wallet</div>
   <div class="navBtn">Profile</div>
 </div>
+
+<!-- 🔥 NEW MENU SYSTEM -->
+<script src="menu.js"></script>
 
 <script>
 const user = JSON.parse(localStorage.getItem("user"));
@@ -331,16 +275,6 @@ async function loadButtons(){
 
     container.appendChild(btn);
   });
-}
-
-function openMenu(){
-  document.getElementById("sideMenu").style.left = "0";
-  document.getElementById("overlay").style.display = "block";
-}
-
-function closeMenu(){
-  document.getElementById("sideMenu").style.left = "-320px";
-  document.getElementById("overlay").style.display = "none";
 }
 
 function go(page){
