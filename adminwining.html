@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Winning</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0;}
+.header{background:red;color:#fff;text-align:center;padding:15px;}
+.box{background:#fff;margin:10px;padding:15px;border-radius:10px;}
+input,select,button{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:1px solid #ccc;}
+button{background:green;color:#fff;border:none;}
+.card{background:#fff;margin:10px;padding:10px;border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<div class="header">Admin Winning</div>
+
+<div class="box">
+<select id="user"></select>
+<select id="market"></select>
+<input type="number" id="amount" placeholder="Enter Amount">
+<button onclick="addWin()">Add Winning</button>
+</div>
+
+<div id="list"></div>
+
+<script>
+
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// 🔥 USER LOAD (login table)
+async function loadUsers(){
+ var res = await client.from("login").select("id");
+
+ var html = `<option value="">Select User</option>`;
+ if(res.data){
+  res.data.forEach(function(u){
+   html += `<option value="${u.id}">${u.id}</option>`;
+  });
+ }
+
+ document.getElementById("user").innerHTML = html;
+}
+
+// 🔥 MARKET LOAD (history table)
+async function loadMarkets(){
+ var res = await client.from("history").select("market");
+
+ var set = new Set();
+ if(res.data){
+  res.data.forEach(function(m){
+   if(m.market) set.add(m.market);
+  });
+ }
+
+ var html = `<option value="">Select Market</option>`;
+ set.forEach(function(m){
+  html += `<option value="${m}">${m}</option>`;
+ });
+
+ document.getElementById("market").innerHTML = html;
+}
+
+// 🔥 ADD WINNING
+async function addWin(){
+
+ var user = document.getElementById("user").value;
+ var market = document.getElementById("market").value;
+ var amount = parseInt(document.getElementById("amount").value);
+
+ if(!user || !market || !amount){
+  alert("Fill all fields");
+  return;
+ }
+
+ // 👉 wallet get
+ var u = await client.from("login").select("wallet").eq("id",user).single();
+ var newWallet = (u.data.wallet || 0) + amount;
+
+ // 👉 wallet update
+ await client.from("login").update({wallet:newWallet}).eq("id",user);
+
+ // 👉 user history (winning)
+ await client.from("history").insert([{
+  user_id:user,
+  market:market,
+  amount:amount,
+  type:"win",
+  created_at:new Date().toISOString()
+ }]);
+
+ // 👉 admin record
+ await client.from("admin_winning").insert([{
+  user_id:user,
+  market:market,
+  amount:amount,
+  created_at:new Date().toISOString()
+ }]);
+
+ alert("Winning Added ✅");
+
+ loadList();
+}
+
+// 🔥 ADMIN HISTORY
+async function loadList(){
+
+ var res = await client.from("admin_winning").select("*").order("id",{ascending:false});
+
+ var html = "";
+
+ if(res.data && res.data.length>0){
+  res.data.forEach(function(d){
+   html += `
+   <div class="card">
+    User: ${d.user_id}<br>
+    Market: ${d.market}<br>
+    Amount: ₹ ${d.amount}
+   </div>
+   `;
+  });
+ }else{
+  html = "No Data";
+ }
+
+ document.getElementById("list").innerHTML = html;
+}
+
+// 🔥 INIT
+loadUsers();
+loadMarkets();
+loadList();
+
+</script>
+
+</body>
+</html>
