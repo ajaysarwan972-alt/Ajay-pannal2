@@ -31,6 +31,7 @@ button{
 
 .approve{background:green;}
 .cancel{background:red;}
+.done{color:green;font-weight:bold;}
 </style>
 </head>
 
@@ -40,7 +41,7 @@ button{
 <table>
 <thead>
 <tr>
-<th>ID</th><th>User</th><th>Amount</th><th>Status</th><th>Action</th>
+<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="depositData"></tbody>
@@ -50,7 +51,7 @@ button{
 <table>
 <thead>
 <tr>
-<th>ID</th><th>User</th><th>Amount</th><th>Status</th><th>Action</th>
+<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="withdrawData"></tbody>
@@ -63,87 +64,160 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// LOAD DEPOSIT
+// 🔥 LOAD DEPOSIT
 async function loadDeposits(){
-    let { data } = await client.from("deposit_requests").select("*").order("id",{ascending:false});
+    let { data, error } = await client
+    .from("deposit_requests")
+    .select("*")
+    .order("id",{ascending:false});
+
+    if(error){ console.log(error); return; }
 
     let html="";
     data.forEach(r=>{
+
+        let action = "";
+
+        if(r.status === "approved"){
+            action = `<span class="done">✔ Approved</span>`;
+        }else if(r.status === "cancelled"){
+            action = `<span style="color:red;">❌ Cancelled</span>`;
+        }else{
+            action = `
+            <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
+            <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
+            `;
+        }
+
         html+=`
         <tr>
         <td>${r.id}</td>
         <td>${r.user_id}</td>
+        <td>${r.name || "-"}</td>
+        <td>${r.mobile || "-"}</td>
         <td>${r.amount}</td>
         <td>${r.status}</td>
-        <td>
-        <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
-        <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
-        </td>
+        <td>${action}</td>
         </tr>`;
     });
 
     document.getElementById("depositData").innerHTML=html;
 }
 
-// LOAD WITHDRAW
+// 🔥 LOAD WITHDRAW
 async function loadWithdraw(){
-    let { data } = await client.from("withdraw_requests").select("*").order("id",{ascending:false});
+    let { data, error } = await client
+    .from("withdraw_requests")
+    .select("*")
+    .order("id",{ascending:false});
+
+    if(error){ console.log(error); return; }
 
     let html="";
     data.forEach(r=>{
+
+        let action = "";
+
+        if(r.status === "approved"){
+            action = `<span class="done">✔ Approved</span>`;
+        }else if(r.status === "cancelled"){
+            action = `<span style="color:red;">❌ Cancelled</span>`;
+        }else{
+            action = `
+            <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount})">Approve</button>
+            <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>
+            `;
+        }
+
         html+=`
         <tr>
         <td>${r.id}</td>
         <td>${r.user_id}</td>
+        <td>${r.name || "-"}</td>
+        <td>${r.mobile || "-"}</td>
         <td>${r.amount}</td>
         <td>${r.status}</td>
-        <td>
-        <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount})">Approve</button>
-        <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>
-        </td>
+        <td>${action}</td>
         </tr>`;
     });
 
     document.getElementById("withdrawData").innerHTML=html;
 }
 
-// APPROVE DEPOSIT
+// ✅ APPROVE DEPOSIT (wallet add only once)
 async function approveDeposit(id,user_id,amount){
-    await client.from("deposit_requests").update({status:"approved"}).eq("id",id);
 
-    let { data } = await client.from("login").select("balance").eq("id",user_id).single();
+    let { data: check } = await client
+    .from("deposit_requests")
+    .select("status")
+    .eq("id",id)
+    .single();
 
-    await client.from("login").update({balance:data.balance+amount}).eq("id",user_id);
+    if(check.status === "approved"){
+        alert("Already Approved");
+        return;
+    }
 
-    alert("Approved");
+    // update status
+    await client.from("deposit_requests")
+    .update({status:"approved"})
+    .eq("id",id);
+
+    // wallet add
+    let { data } = await client
+    .from("login")
+    .select("balance")
+    .eq("id",user_id)
+    .single();
+
+    let newBalance = (data.balance || 0) + amount;
+
+    await client.from("login")
+    .update({balance:newBalance})
+    .eq("id",user_id);
+
+    alert("Deposit Approved ✅");
     loadDeposits();
 }
 
-// CANCEL DEPOSIT
+// ❌ CANCEL DEPOSIT
 async function cancelDeposit(id){
-    await client.from("deposit_requests").update({status:"cancelled"}).eq("id",id);
+    await client.from("deposit_requests")
+    .update({status:"cancelled"})
+    .eq("id",id);
 
-    alert("Cancelled");
     loadDeposits();
 }
 
-// APPROVE WITHDRAW
+// ✅ APPROVE WITHDRAW (NO wallet change)
 async function approveWithdraw(id,user_id,amount){
-    await client.from("withdraw_requests").update({status:"approved"}).eq("id",id);
 
-    let { data } = await client.from("login").select("balance").eq("id",user_id).single();
+    let { data: check } = await client
+    .from("withdraw_requests")
+    .select("status")
+    .eq("id",id)
+    .single();
 
-    await client.from("login").update({balance:data.balance-amount}).eq("id",user_id);
+    if(check.status === "approved"){
+        alert("Already Approved");
+        return;
+    }
 
-    alert("Approved");
+    // ❗ only status change
+    await client.from("withdraw_requests")
+    .update({status:"approved"})
+    .eq("id",id);
+
+    alert("Withdraw Approved ✅");
     loadWithdraw();
 }
 
-// CANCEL WITHDRAW
+// ❌ CANCEL WITHDRAW
 async function cancelWithdraw(id){
-    await client.from("withdraw_requests").update({status:"cancelled"}).eq("id",id);
+    await client.from("withdraw_requests")
+    .update({status:"cancelled"})
+    .eq("id",id);
 
-    alert("Cancelled");
     loadWithdraw();
 }
 
