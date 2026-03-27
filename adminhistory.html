@@ -20,7 +20,6 @@ body{
   font-weight:bold;
 }
 
-/* 🔥 FILTER BUTTON STYLE */
 .filters{
     display:flex;
     flex-wrap:wrap;
@@ -29,20 +28,21 @@ body{
     background:#fff;
 }
 
-.filters button, .filters select{
+.filters select, .filters input{
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    flex:1;
+}
+
+.filters button{
     padding:8px 12px;
     border:none;
-    background:#007bff;
+    background:#28a745;
     color:#fff;
     border-radius:8px;
-    cursor:pointer;
 }
 
-.filters button.active{
-    background:red;
-}
-
-/* CARD */
 .card{
     background:#fff;
     margin:10px;
@@ -65,10 +65,6 @@ body{
     color:#666;
 }
 
-.bet{
-    margin-top:5px;
-}
-
 .amount{
     background:red;
     color:#fff;
@@ -82,26 +78,12 @@ body{
 
 <div class="header">Admin History</div>
 
-<!-- 🔥 NEW FILTER UI -->
 <div class="filters">
-
-    <!-- USER BUTTON FILTER -->
-    <button onclick="setUser('')" class="active">All</button>
-    <button onclick="setUser('1')">User 1</button>
-    <button onclick="setUser('2')">User 2</button>
-    <button onclick="setUser('3')">User 3</button>
-    <button onclick="setUser('4')">User 4</button>
-    <button onclick="setUser('5')">User 5</button>
-
-    <!-- MARKET DROPDOWN -->
-    <select onchange="setMarket(this.value)">
-        <option value="">All Market</option>
-        <option value="GALI">GALI</option>
-        <option value="DS">DS</option>
-        <option value="FD">FD</option>
-        <option value="GZ">GZ</option>
-    </select>
-
+    <select id="filterUser"></select>
+    <select id="filterMarket"></select>
+    <input type="date" id="startDate">
+    <input type="date" id="endDate">
+    <button onclick="loadHistory()">Apply</button>
 </div>
 
 <div id="history"></div>
@@ -112,40 +94,65 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 GLOBAL FILTER STATE
-let selectedUser = "";
-let selectedMarket = "";
+// 🔥 LOAD DROPDOWN DATA (AUTO FROM SUPABASE)
+async function loadFilters(){
 
-// USER BUTTON CLICK
-function setUser(id){
-    selectedUser = id;
+    const { data, error } = await client
+        .from("history")
+        .select("user_id, market");
 
-    // active button highlight
-    document.querySelectorAll(".filters button").forEach(btn=>{
-        btn.classList.remove("active");
+    if(error){
+        console.log(error);
+        return;
+    }
+
+    let users = new Set();
+    let markets = new Set();
+
+    data.forEach(item=>{
+        if(item.user_id) users.add(item.user_id);
+        if(item.market) markets.add(item.market);
     });
-    event.target.classList.add("active");
 
-    loadHistory();
+    // USER DROPDOWN
+    let userHTML = `<option value="">All Users</option>`;
+    users.forEach(u=>{
+        userHTML += `<option value="${u}">${u}</option>`;
+    });
+    document.getElementById("filterUser").innerHTML = userHTML;
+
+    // MARKET DROPDOWN
+    let marketHTML = `<option value="">All Market</option>`;
+    markets.forEach(m=>{
+        marketHTML += `<option value="${m}">${m}</option>`;
+    });
+    document.getElementById("filterMarket").innerHTML = marketHTML;
 }
 
-// MARKET SELECT
-function setMarket(market){
-    selectedMarket = market;
-    loadHistory();
-}
-
-// 🔥 MAIN FUNCTION
+// 🔥 LOAD DATA
 async function loadHistory(){
+
+    const user = document.getElementById("filterUser").value;
+    const market = document.getElementById("filterMarket").value;
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
 
     let query = client.from("history").select("*").order("id", { ascending: false });
 
-    if(selectedUser){
-        query = query.eq("user_id", selectedUser);
+    if(user){
+        query = query.eq("user_id", user);
     }
 
-    if(selectedMarket){
-        query = query.eq("market", selectedMarket);
+    if(market){
+        query = query.eq("market", market);
+    }
+
+    if(start){
+        query = query.gte("created_at", start + "T00:00:00");
+    }
+
+    if(end){
+        query = query.lte("created_at", end + "T23:59:59");
     }
 
     const { data, error } = await query;
@@ -158,6 +165,7 @@ async function loadHistory(){
     let html = "";
 
     data.forEach(item=>{
+
         let numbers = [];
 
         try{
@@ -178,9 +186,8 @@ async function loadHistory(){
         let date = new Date(item.created_at).toLocaleString();
 
         numbers.forEach(n=>{
-            let num = n.number ?? "00";
+            let num = String(n.number ?? "00").padStart(2,'0');
             let amount = n.amount ?? 0;
-            let formattedNum = String(num).padStart(2,'0');
 
             html += `
             <div class="card">
@@ -188,9 +195,8 @@ async function loadHistory(){
                     <div class="market">${item.market}</div>
                     <div class="date">${date}</div>
                 </div>
-
-                <div class="row bet">
-                    <div>User: ${item.user_id} | Bet No: ${formattedNum}</div>
+                <div class="row">
+                    <div>User: ${item.user_id} | Bet No: ${num}</div>
                     <div class="amount">₹ ${amount}</div>
                 </div>
             </div>
@@ -201,8 +207,10 @@ async function loadHistory(){
     document.getElementById("history").innerHTML = html || "No Data Found";
 }
 
-// LOAD DEFAULT
+// 🔥 INIT
+loadFilters();
 loadHistory();
+
 </script>
 
 </body>
