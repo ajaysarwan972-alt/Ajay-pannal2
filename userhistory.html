@@ -73,8 +73,6 @@ if(!user){
     window.location.href = "index.html";
 }
 
-console.log("USER:", user);
-
 const supabase = window.supabase.createClient(
   "https://katbdbzoufiblnnsoxkk.supabase.co",
   "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
@@ -82,28 +80,29 @@ const supabase = window.supabase.createClient(
 
 async function loadHistory(){
 
-    // ❗ filter hata diya test ke liye
-    let {data, error} = await supabase
+    let { data, error } = await supabase
         .from("history")
         .select("*")
+        .eq("user_id", parseInt(user.id))   // ✅ FINAL FIX
         .order("id", { ascending: false });
-
-    console.log("DATA FROM DB:", data);
 
     let html = "";
 
     if(!data || data.length === 0){
-        document.getElementById("history").innerHTML = "No Data Found";
+        document.getElementById("history").innerHTML = "No Data";
         return;
     }
 
-    // ✅ yaha pe manually match karenge
     data.forEach(item=>{
 
-        // 👇 user match (string + number dono handle)
-        if(item.user_id != user.id) return;
+        let numbers = {};
 
-        let numbers = JSON.parse(item.data || "{}");
+        try{
+            numbers = JSON.parse(item.data || "{}");
+        }catch(e){
+            numbers = {};
+        }
+
         let date = new Date(item.created_at).toLocaleString();
 
         for(let num in numbers){
@@ -128,7 +127,7 @@ async function loadHistory(){
 
     });
 
-    document.getElementById("history").innerHTML = html || "No Data";
+    document.getElementById("history").innerHTML = html;
 }
 
 loadHistory();
