@@ -10,18 +10,11 @@ body { font-family: Arial; padding: 20px; }
 .frame {
     width: 100%;
     height: 500px;
-    overflow: hidden; /* 🔥 SCROLL iframe me jayega */
+    overflow: hidden;
     background: #fff;
     border-radius: 10px;
     margin-bottom: 20px;
-    padding: 0; /* 🔥 extra gap hata diya */
-}
-
-iframe{
-    width:100%;
-    height:100%;
-    border:none;
-    border-radius:10px;
+    padding: 0;
 }
 
 table {
@@ -47,14 +40,22 @@ td, th {
 }
 
 button{
-    padding:5px 10px;
+    padding:10px 15px;
     border:none;
-    border-radius:5px;
+    border-radius:8px;
     cursor:pointer;
 }
 
 .approve{background:green;color:#fff;}
 .cancel{background:red;color:#fff;}
+
+.open-btn{
+    background:#4facfe;
+    color:#fff;
+    width:100%;
+    font-size:16px;
+    margin-top:10px;
+}
 
 #qrPreview{
     width:100%;
@@ -97,15 +98,10 @@ STOP ALARM
 </table>
 </div>
 
-<!-- 🔥 CLEAN 2 FRAME SYSTEM -->
-<h2>Deposit</h2>
-<div class="frame">
-<iframe src="Depositwithdrow.html#deposit"></iframe>
-</div>
-
-<h2>Withdraw</h2>
-<div class="frame">
-<iframe src="Depositwithdrow.html#withdraw"></iframe>
+<!-- 🔥 BUTTON ADDED -->
+<h2>Deposit & Withdraw</h2>
+<div class="frame" style="height:auto; padding:15px;">
+<button class="open-btn" onclick="openPage()">Open Deposit / Withdraw Page</button>
 </div>
 
 <!-- GAME RESULT -->
@@ -171,6 +167,11 @@ function stopAlarm(){
     let a = document.getElementById("alarm")
     a.pause()
     a.currentTime = 0
+}
+
+// 🔥 OPEN PAGE FUNCTION
+function openPage(){
+    window.location.href = "Depositwithdrow.html";
 }
 
 // USERS
