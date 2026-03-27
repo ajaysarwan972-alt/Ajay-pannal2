@@ -1,11 +1,11 @@
-// 🔥 MENU DATA (yahin se sab control hoga)
+// 🔥 MENU DATA
 const MENU_ITEMS = [
   {name:"🏠 Home", link:"home.html"},
   {name:"👤 Profile", link:"profile.html"},
   {name:"💳 UPI Details", link:"deposit.html"},
   {name:"🏦 Bank Details", link:"withdraw.html"},
   {name:"📜 History", link:"userhistory.html"},
-  {name:"📊 Game Rates", link:"table.html"},
+  {name:"📊 Game Rates", link:"#"}, // ❌ disabled
   {name:"📄 Terms", link:"terms.html"},
   {name:"🚪 Logout", link:"logout"}
 ];
@@ -77,6 +77,12 @@ function closeMenu(){
 }
 
 function handleMenu(link){
+
+  // ❌ Game Rates disabled
+  if(link === "#"){
+    return;
+  }
+
   if(link === "logout"){
     localStorage.removeItem("user");
     window.location.href = "index.html";
