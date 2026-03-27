@@ -13,7 +13,6 @@ body{
     padding:15px;
 }
 
-/* TOP BAR */
 #userId{
   position:fixed;
   left:15px;
@@ -42,7 +41,6 @@ body{
     padding:20px;
     border-radius:20px;
     margin-top:60px;
-    margin-bottom:20px;
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
@@ -83,39 +81,12 @@ input{
     font-size:18px;
     font-weight:bold;
     text-align:center;
-    margin-bottom:15px;
-}
-.amount-text span{
-    color:green;
 }
 
-.qr-box{
-    background:#f1f1f1;
-    padding:15px;
-    border-radius:15px;
-    margin-top:15px;
-    text-align:center;
-}
-.qr-inner{
-    width:100%;
-    max-width:320px;
-    margin:auto;
-    background:#fff;
-    padding:10px;
-    border-radius:12px;
-}
 .qr-inner img{
     width:100%;
+    max-width:300px;
     height:auto;
-    max-height:350px;
-    border-radius:10px;
-}
-
-.upload-box{
-    background:#f2f2f2;
-    padding:20px;
-    border-radius:20px;
-    text-align:center;
 }
 
 .upload-btn{
@@ -124,16 +95,12 @@ input{
     padding:15px;
     border:none;
     border-radius:15px;
-    font-weight:bold;
     width:100%;
 }
 
-.preview{
-    margin-top:15px;
-}
 .preview img{
     width:80%;
-    border-radius:10px;
+    margin-top:10px;
 }
 
 .row{
@@ -141,24 +108,16 @@ input{
     gap:10px;
     margin-top:15px;
 }
-.back-btn{
+.back-btn,.confirm-btn{
     flex:1;
-    background:#ff4d4d;
-    color:#fff;
-    border:none;
     padding:15px;
+    border:none;
     border-radius:15px;
+    color:#fff;
     font-weight:bold;
 }
-.confirm-btn{
-    flex:1;
-    background:#7cc84a;
-    color:#fff;
-    border:none;
-    padding:15px;
-    border-radius:15px;
-    font-weight:bold;
-}
+.back-btn{background:red;}
+.confirm-btn{background:green;}
 </style>
 </head>
 
@@ -181,28 +140,20 @@ input{
 
 <div class="card" id="step2" style="display:none;">
 <div class="amount-text">
-<span id="showAmount">0</span> Rs. screenshot upload karo
+<span id="showAmount">0</span> Rs. Pay karo
 </div>
 
-<div class="qr-box">
-    <h3>Scan & Pay</h3>
-    <div class="qr-inner">
-        <img id="qrImage" src="">
-    </div>
+<div style="text-align:center">
+<img id="qrImage">
 </div>
 
-<div class="upload-box">
-<input type="file" id="file" onchange="previewImage()" style="display:none;">
-<button class="upload-btn" onclick="document.getElementById('file').click()">
-UPLOAD PAYMENT SCREENSHOT
-</button>
+<input type="file" id="file" onchange="previewImage()">
 
 <div class="preview" id="preview"></div>
 
 <div class="row">
 <button class="back-btn" onclick="goBack()">BACK</button>
 <button class="confirm-btn" onclick="submitDeposit()">CONFIRM</button>
-</div>
 </div>
 </div>
 
@@ -217,111 +168,82 @@ const client = createClient(
 const user = JSON.parse(localStorage.getItem("user"))
 
 async function loadQR(){
-    const { data } = await client.from("settings").select("*").limit(1).single()
-    if(data && data.qr){
-        document.getElementById("qrImage").src = data.qr
-    }
+    let { data } = await client.from("settings").select("*").single()
+    if(data) document.getElementById("qrImage").src = data.qr
 }
 loadQR()
 
 async function loadWallet(){
     if(!user) return
-    const { data } = await client.from("login").select("balance").eq("id", user.id).single()
+    let { data } = await client.from("login").select("balance").eq("id", user.id).single()
     if(data){
-        document.getElementById("wallet").innerText = "₹ " + data.balance
-        document.getElementById("userId").innerText = "ID: " + user.id
+        wallet.innerText="₹ "+data.balance
+        userId.innerText="ID: "+user.id
     }
 }
 loadWallet()
 
-function setAmount(val){ document.getElementById("amount").value = val }
+function setAmount(val){ amount.value=val }
 
 function goStep2(){
-    let amt = document.getElementById("amount").value
+    let amt=amount.value
     if(!amt) return alert("Amount daal")
-    localStorage.setItem("deposit_amount", amt)
-    document.getElementById("showAmount").innerText = amt
-    document.getElementById("step1").style.display="none"
-    document.getElementById("step2").style.display="block"
+    localStorage.setItem("deposit_amount",amt)
+    showAmount.innerText=amt
+    step1.style.display="none"
+    step2.style.display="block"
 }
 
 function goBack(){
-    document.getElementById("step2").style.display="none"
-    document.getElementById("step1").style.display="block"
+    step2.style.display="none"
+    step1.style.display="block"
 }
 
 function previewImage(){
-    let file = document.getElementById("file").files[0]
-    if(file){
-        let reader = new FileReader()
-        reader.onload = e=>{
-            document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`
-        }
-        reader.readAsDataURL(file)
+    let file=fileInput.files[0]
+    let reader=new FileReader()
+    reader.onload=e=>{
+        preview.innerHTML=`<img src="${e.target.result}">`
     }
+    reader.readAsDataURL(file)
 }
 
 async function submitDeposit(){
 
-    if(!user){
-        alert("Login first ❌")
-        return
+    let amount=localStorage.getItem("deposit_amount")
+    let file=document.getElementById("file").files[0]
+
+    if(!file) return alert("Upload screenshot")
+
+    let fileName=Date.now()+file.name
+
+    let { error:uploadErr } = await client.storage.from("screenshots").upload(fileName,file)
+
+    if(uploadErr){
+        console.log(uploadErr)
+        return alert("Upload error")
     }
 
-    let amount = localStorage.getItem("deposit_amount")
-    let file = document.getElementById("file").files[0]
+    let { data:url }=client.storage.from("screenshots").getPublicUrl(fileName)
 
-    if(!file){
-        alert("Screenshot upload kar ❌")
-        return
-    }
+    let { data:userData }=await client.from("login").select("mobile,name").eq("id",user.id).single()
 
-    try{
-
-    let fileName = Date.now()+"_"+file.name
-
-    let { error: uploadError } = await client.storage.from("screenshots").upload(fileName, file)
-    if(uploadError){
-        console.log(uploadError)
-        alert("Upload Error ❌")
-        return
-    }
-
-    let { data: urlData } = client.storage.from("screenshots").getPublicUrl(fileName)
-
-    let { data: userData, error: userErr } = await client
-        .from("login")
-        .select("mobile,name")
-        .eq("id", user.id)
-        .single()
-
-    if(userErr || !userData){
-        alert("User fetch error ❌")
-        return
-    }
-
-    let { error: insertError } = await client.from("deposit_requests").insert([{
-        user_id: user.id,
-        mobile: userData.mobile,
-        name: userData.name,
-        amount: Number(amount),
-        screenshot: urlData.publicUrl,
-        status: "pending"
+    let { error }=await client.from("deposit_requests").insert([{
+        user_id:user.id,
+        mobile:userData.mobile,
+        name:userData.name,
+        amount:Number(amount),
+        screenshot:url.publicUrl,
+        status:"pending"
     }])
 
-    if(insertError){
-        console.log(insertError)
-        alert("Insert Error ❌")
-        return
+    if(error){
+        console.log(error)
+        return alert("Insert Error ❌")
     }
 
-    alert("Request Sent ✅")
+    alert("Success ✅")
     location.reload()
-
-    }catch(err){
-        console.log(err)
-        alert("Server Error ❌")
-    }
 }
 </script>
 
