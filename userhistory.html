@@ -25,13 +25,11 @@ body{
     margin:10px;
     padding:15px;
     border-radius:12px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
 .row{
     display:flex;
     justify-content:space-between;
-    align-items:center;
 }
 
 .market{
@@ -46,7 +44,6 @@ body{
 
 .bet{
     margin-top:5px;
-    font-size:14px;
 }
 
 .amount{
@@ -54,7 +51,6 @@ body{
     color:#fff;
     padding:5px 10px;
     border-radius:6px;
-    font-weight:bold;
 }
 </style>
 </head>
@@ -62,7 +58,6 @@ body{
 <body>
 
 <div class="header">My History</div>
-
 <div id="history"></div>
 
 <script>
@@ -70,36 +65,38 @@ body{
 const user = JSON.parse(localStorage.getItem("user"));
 
 if(!user){
+    alert("Login first");
     window.location.href = "index.html";
 }
 
-const supabase = window.supabase.createClient(
-  "https://katbdbzoufiblnnsoxkk.supabase.co",
-  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
 async function loadHistory(){
 
-    let { data, error } = await supabase
+    let { data, error } = await client
         .from("history")
         .select("*")
-        .eq("user_id", parseInt(user.id))   // ✅ FINAL FIX
         .order("id", { ascending: false });
 
-    let html = "";
-
-    if(!data || data.length === 0){
-        document.getElementById("history").innerHTML = "No Data";
+    if(error){
+        console.log(error);
         return;
     }
 
+    let html = "";
+
     data.forEach(item=>{
 
-        let numbers = {};
+        // ✅ USER MATCH FIX
+        if(item.user_id != user.id) return;
 
+        let numbers = {};
         try{
             numbers = JSON.parse(item.data || "{}");
-        }catch(e){
+        }catch{
             numbers = {};
         }
 
@@ -118,7 +115,7 @@ async function loadHistory(){
                 </div>
 
                 <div class="row bet">
-                    <div>Jodi Digit &nbsp; <b>Bet No.: ${formattedNum}</b></div>
+                    <div>Bet No: ${formattedNum}</div>
                     <div class="amount">₹ ${amount}</div>
                 </div>
             </div>
@@ -127,7 +124,7 @@ async function loadHistory(){
 
     });
 
-    document.getElementById("history").innerHTML = html;
+    document.getElementById("history").innerHTML = html || "No Data Found";
 }
 
 loadHistory();
