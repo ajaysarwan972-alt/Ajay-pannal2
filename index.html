@@ -85,29 +85,33 @@ try{
 
 let { data, error } = await client
 .from("login")
-.select("*")
+.select("id, mobile")   // 🔥 only needed fields
 .eq("mobile", mobile)
 .eq("password", password)
-.single(); // ✅ FINAL FIX
+.single(); // ✅ FIX
 
 if(error || !data){
   alert("Wrong Mobile or Password ❌");
   return;
 }
 
-// 🔥 CLEAN + SAVE USER
+// 🔥 FORCE CLEAN STORAGE
 localStorage.clear();
 
+// 🔥 SAVE CORRECT USER
 localStorage.setItem("user", JSON.stringify({
-  id: Number(data.id),   // 🔥 force number
+  id: Number(data.id),
   mobile: data.mobile
 }));
+
+// 🔥 DEBUG (REMOVE LATER)
+console.log("LOGIN USER:", data);
 
 alert("Login Success ✅");
 window.location.href = "home.html";
 
 }catch(err){
-  console.log(err);
+  console.log("LOGIN ERROR:", err);
   alert("Server Error ❌");
 }
 
