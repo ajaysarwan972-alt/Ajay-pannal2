@@ -64,17 +64,30 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
+// 🔥 COMMON FUNCTION (USER FIX)
+async function getUserDetails(user_id){
+    let { data } = await client
+    .from("login")
+    .select("name,mobile")
+    .eq("id", user_id)
+    .single();
+
+    return data || {name:"-", mobile:"-"};
+}
+
 // 🔥 LOAD DEPOSIT
 async function loadDeposits(){
-    let { data, error } = await client
+
+    let { data } = await client
     .from("deposit_requests")
     .select("*")
     .order("id",{ascending:false});
 
-    if(error){ console.log(error); return; }
-
     let html="";
-    data.forEach(r=>{
+
+    for (let r of data){
+
+        let userInfo = await getUserDetails(r.user_id);
 
         let action = "";
 
@@ -93,28 +106,30 @@ async function loadDeposits(){
         <tr>
         <td>${r.id}</td>
         <td>${r.user_id}</td>
-        <td>${r.name || "-"}</td>
-        <td>${r.mobile || "-"}</td>
+        <td>${userInfo.name}</td>
+        <td>${userInfo.mobile}</td>
         <td>${r.amount}</td>
         <td>${r.status}</td>
         <td>${action}</td>
         </tr>`;
-    });
+    }
 
     document.getElementById("depositData").innerHTML=html;
 }
 
 // 🔥 LOAD WITHDRAW
 async function loadWithdraw(){
-    let { data, error } = await client
+
+    let { data } = await client
     .from("withdraw_requests")
     .select("*")
     .order("id",{ascending:false});
 
-    if(error){ console.log(error); return; }
-
     let html="";
-    data.forEach(r=>{
+
+    for (let r of data){
+
+        let userInfo = await getUserDetails(r.user_id);
 
         let action = "";
 
@@ -133,18 +148,18 @@ async function loadWithdraw(){
         <tr>
         <td>${r.id}</td>
         <td>${r.user_id}</td>
-        <td>${r.name || "-"}</td>
-        <td>${r.mobile || "-"}</td>
+        <td>${userInfo.name}</td>
+        <td>${userInfo.mobile}</td>
         <td>${r.amount}</td>
         <td>${r.status}</td>
         <td>${action}</td>
         </tr>`;
-    });
+    }
 
     document.getElementById("withdrawData").innerHTML=html;
 }
 
-// ✅ APPROVE DEPOSIT (wallet add only once)
+// ✅ APPROVE DEPOSIT
 async function approveDeposit(id,user_id,amount){
 
     let { data: check } = await client
@@ -158,12 +173,10 @@ async function approveDeposit(id,user_id,amount){
         return;
     }
 
-    // update status
     await client.from("deposit_requests")
     .update({status:"approved"})
     .eq("id",id);
 
-    // wallet add
     let { data } = await client
     .from("login")
     .select("balance")
@@ -203,7 +216,6 @@ async function approveWithdraw(id,user_id,amount){
         return;
     }
 
-    // ❗ only status change
     await client.from("withdraw_requests")
     .update({status:"approved"})
     .eq("id",id);
