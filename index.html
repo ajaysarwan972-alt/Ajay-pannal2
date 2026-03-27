@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
-<link rel="manifest" href="manifest.json">
+
 <style>
 body {
   margin:0;
@@ -56,20 +56,20 @@ button{
 <p>New User?</p>
 <button class="register" onclick="window.location.href='signup.html'">REGISTER NOW</button>
 
-<!-- ✅ SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-let user = localStorage.getItem("user");
 
-if(user){
-  window.location.href = "home.html";
-}
 const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
-// ✅ FIXED INIT
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 🔥 AUTO LOGIN CHECK
+let user = localStorage.getItem("user");
+if(user){
+  window.location.href = "home.html";
+}
 
 async function login(){
 
@@ -84,23 +84,24 @@ if(!mobile || !password){
 try{
 
 let { data, error } = await client
-.from("login")   // ✅ tera table name
+.from("login")
 .select("*")
 .eq("mobile", mobile)
 .eq("password", password)
-.maybeSingle();
+.single(); // ✅ FINAL FIX
 
 if(error || !data){
   alert("Wrong Mobile or Password ❌");
   return;
 }
 
-let userData = {
-  id: data.id,
-  mobile: data.mobile,
-};
+// 🔥 CLEAN + SAVE USER
+localStorage.clear();
 
-localStorage.setItem("user", JSON.stringify(userData));
+localStorage.setItem("user", JSON.stringify({
+  id: Number(data.id),   // 🔥 force number
+  mobile: data.mobile
+}));
 
 alert("Login Success ✅");
 window.location.href = "home.html";
