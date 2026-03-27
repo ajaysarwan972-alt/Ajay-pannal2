@@ -23,8 +23,8 @@ th,td{
 }
 
 img{
-    width:80px;
-    height:80px;
+    width:70px;
+    height:70px;
     object-fit:cover;
     border-radius:5px;
 }
@@ -78,15 +78,14 @@ let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
 let lastDepositCount = 0;
 let lastWithdrawCount = 0;
 
-// 🔥 USER DETAILS
+// ✅ USER DETAILS FIXED
 async function getUserDetails(user_id){
     let { data } = await client
     .from("login")
     .select("name,mobile")
-    .eq("id", user_id)
-    .single();
+    .eq("id", user_id);
 
-    return data || {name:"-", mobile:"-"};
+    return data && data.length ? data[0] : {name:"-", mobile:"-"};
 }
 
 // 🔥 LOAD DEPOSIT
@@ -116,9 +115,14 @@ async function loadDeposits(){
             `;
         }
 
-        let screenshot = r.screenshot 
-        ? `<img src="${r.screenshot.trim()}">` 
-        : "-";
+        // ✅ SCREENSHOT FIX
+        let screenshot = "-";
+        if(r.screenshot){
+            let url = r.screenshot.toString().trim();
+            if(url.includes("http")){
+                screenshot = `<img src="${url}">`;
+            }
+        }
 
         html+=`
         <tr>
@@ -136,7 +140,7 @@ async function loadDeposits(){
     document.getElementById("depositData").innerHTML=html;
 }
 
-// 🔥 LOAD WITHDRAW (FINAL FIX)
+// 🔥 LOAD WITHDRAW
 async function loadWithdraw(){
 
     let { data } = await client
@@ -163,14 +167,13 @@ async function loadWithdraw(){
             `;
         }
 
-        // 🔥 FINAL STRONG FIX
+        // ✅ DETAILS FIX (image / upi)
         let details = "-";
 
         if(r.screenshot){
             let url = r.screenshot.toString().trim();
-
             if(url.includes("http")){
-                details = `<img src="${url}" width="70">`;
+                details = `<img src="${url}">`;
             }else{
                 details = url;
             }
