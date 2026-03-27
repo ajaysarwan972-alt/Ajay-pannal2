@@ -94,20 +94,33 @@ async function loadHistory(){
         let numbers = [];
 
         try{
-            numbers = JSON.parse(item.data || "[]"); // ✅ FIX
-        }catch{
-            numbers = [];
+            let parsed = JSON.parse(item.data || "[]");
+
+            // ✅ अगर array है
+            if(Array.isArray(parsed)){
+                numbers = parsed;
+            }
+            // ✅ अगर object है (old data)
+            else if(typeof parsed === "object"){
+                numbers = Object.entries(parsed).map(([k,v])=>({
+                    number: k,
+                    amount: typeof v === "object" ? v.amount || v.value : v
+                }));
+            }
+
+        }catch(e){
+            console.log("Bad Data Skip:", item.data);
+            return; // ❌ खराब row skip
         }
 
         let date = new Date(item.created_at).toLocaleString();
 
-        // ✅ ARRAY LOOP FIX
         numbers.forEach(n => {
 
-            let num = n.number || "00";
-            let amount = n.amount || 0;
+            let num = n.number ?? "00";
+            let amount = n.amount ?? 0;
 
-            let formattedNum = num.toString().padStart(2,'0');
+            let formattedNum = String(num).padStart(2,'0');
 
             html += `
             <div class="card">
