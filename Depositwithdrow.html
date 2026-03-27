@@ -296,6 +296,22 @@ setInterval(checkNewRequests, 5000);
 loadDeposits();
 loadWithdraw();
 
+
+// 🔥 FINAL SAFE FILTER (ONLY UI CHANGE)
+window.addEventListener("load", () => {
+
+    let hash = window.location.hash;
+
+    if(hash === "#deposit"){
+        document.getElementById("withdraw").style.display = "none";
+    }
+
+    if(hash === "#withdraw"){
+        document.getElementById("deposit").style.display = "none";
+    }
+
+});
+
 </script>
 
 </body>
