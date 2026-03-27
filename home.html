@@ -45,6 +45,7 @@ body{
   border-radius:20px;
   font-weight:bold;
   z-index:999;
+  cursor:pointer;
 }
 
 /* ACTION */
@@ -149,6 +150,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  cursor:pointer;
 }
 
 .active{
@@ -162,7 +164,9 @@ body{
 
 <div id="menuBtn" onclick="openMenu()">☰</div>
 <div id="userId">ID: 0000</div>
-<div id="wallet">₹ 0</div>
+
+<!-- 🔥 CLICKABLE WALLET -->
+<div id="wallet" onclick="goWallet()">₹ 0</div>
 
 <div class="actionBar">
   <div class="actionBtn add" onclick="go('deposit.html')">Add Money</div>
@@ -174,14 +178,14 @@ body{
 
 <a class="whatsapp" href="https://wa.me/" target="_blank">💬</a>
 
+<!-- 🔥 UPDATED NAV -->
 <div id="bottomNav">
   <div class="navBtn active">Home</div>
   <div class="navBtn">Game</div>
-  <div class="navBtn">Wallet</div>
+  <div class="navBtn" onclick="goWallet()">Wallet</div>
   <div class="navBtn">Profile</div>
 </div>
 
-<!-- 🔥 NEW MENU SYSTEM -->
 <script src="menu.js"></script>
 
 <script>
@@ -287,6 +291,10 @@ function shareApp(){
     text: "Join now",
     url: window.location.href
   });
+}
+
+function goWallet(){
+  window.location.href = "wallet.html";
 }
 
 function logout(){
