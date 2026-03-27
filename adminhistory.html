@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin History</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+    background:#f2f2f2;
+    font-family:Arial;
+    margin:0;
+}
+
+.header{
+  background:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.filters{
+    display:flex;
+    gap:10px;
+    padding:10px;
+    background:#fff;
+}
+
+.filters input{
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    flex:1;
+}
+
+.filters button{
+    padding:8px 12px;
+    border:none;
+    background:#28a745;
+    color:#fff;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.card{
+    background:#fff;
+    margin:10px;
+    padding:15px;
+    border-radius:12px;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+}
+
+.market{
+    color:red;
+    font-weight:bold;
+}
+
+.date{
+    font-size:12px;
+    color:#666;
+}
+
+.bet{
+    margin-top:5px;
+}
+
+.amount{
+    background:red;
+    color:#fff;
+    padding:5px 10px;
+    border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Admin History</div>
+
+<div class="filters">
+    <input type="text" id="filterUser" placeholder="Filter by User ID">
+    <input type="text" id="filterMarket" placeholder="Filter by Market">
+    <button onclick="loadHistory()">Apply Filter</button>
+</div>
+
+<div id="history"></div>
+
+<script>
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+async function loadHistory(){
+
+    const userFilter = document.getElementById("filterUser").value.trim();
+    const marketFilter = document.getElementById("filterMarket").value.trim();
+
+    let query = client.from("history").select("*").order("id", { ascending: false });
+
+    if(userFilter){
+        query = query.eq("user_id", userFilter);
+    }
+    if(marketFilter){
+        query = query.eq("market", marketFilter);
+    }
+
+    const { data, error } = await query;
+
+    if(error){
+        console.log(error);
+        return;
+    }
+
+    let html = "";
+
+    data.forEach(item=>{
+        let numbers = [];
+        try{
+            let parsed = JSON.parse(item.data || "[]");
+            if(Array.isArray(parsed)){
+                numbers = parsed;
+            } else if(typeof parsed === "object"){
+                numbers = Object.entries(parsed).map(([k,v])=>({
+                    number: k,
+                    amount: typeof v === "object" ? v.amount || v.value : v
+                }));
+            }
+        }catch(e){
+            console.log("Bad Data Skip:", item.data);
+            return;
+        }
+
+        let date = new Date(item.created_at).toLocaleString();
+
+        numbers.forEach(n=>{
+            let num = n.number ?? "00";
+            let amount = n.amount ?? 0;
+            let formattedNum = String(num).padStart(2,'0');
+
+            html += `
+            <div class="card">
+                <div class="row">
+                    <div class="market">${item.market}</div>
+                    <div class="date">${date}</div>
+                </div>
+
+                <div class="row bet">
+                    <div>User: ${item.user_id} | Bet No: ${formattedNum}</div>
+                    <div class="amount">₹ ${amount}</div>
+                </div>
+            </div>
+            `;
+        });
+    });
+
+    document.getElementById("history").innerHTML = html || "No Data Found";
+}
+
+loadHistory();
+</script>
+
+</body>
+</html>
