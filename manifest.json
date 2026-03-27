@@ -1,8 +1,8 @@
 {
   "name": "Badshah App",
   "short_name": "Badshah",
-  "description": "Badshah gaming app",
-  "start_url": "https://ajaysarwan972-alt.github.io/Ajay-pannal2/",
+  "description": "Play Badshah gaming app online",
+  "start_url": "/Ajay-pannal2/",
   "scope": "/Ajay-pannal2/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -10,12 +10,9 @@
   "orientation": "portrait",
   "icons": [
     {
-      "icons": [
-  {
-    "src": "icon.png",
-    "sizes": "512x512",
-    "type": "image/png"
-  }
-      ]
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
