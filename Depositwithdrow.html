@@ -58,7 +58,7 @@ button{
 <table>
 <thead>
 <tr>
-<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Screenshot</th><th>Status</th><th>Action</th>
+<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Details</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="withdrawData"></tbody>
@@ -136,7 +136,7 @@ async function loadDeposits(){
     document.getElementById("depositData").innerHTML=html;
 }
 
-// 🔥 LOAD WITHDRAW
+// 🔥 LOAD WITHDRAW (🔥 FIXED)
 async function loadWithdraw(){
 
     let { data } = await client
@@ -163,9 +163,15 @@ async function loadWithdraw(){
             `;
         }
 
-        let screenshot = r.screenshot 
-        ? `<img src="${r.screenshot}">` 
-        : "-";
+        // 🔥 MAIN FIX (screenshot / upi / text sab handle)
+        let details = "-";
+
+        if(r.screenshot && r.screenshot.startsWith("http")){
+            details = `<img src="${r.screenshot}">`;
+        }
+        else if(r.upi){
+            details = r.upi;
+        }
 
         html+=`
         <tr>
@@ -174,7 +180,7 @@ async function loadWithdraw(){
         <td>${userInfo.name}</td>
         <td>${userInfo.mobile}</td>
         <td>${r.amount}</td>
-        <td>${screenshot}</td>
+        <td>${details}</td>
         <td>${r.status}</td>
         <td>${action}</td>
         </tr>`;
@@ -250,7 +256,7 @@ async function cancelWithdraw(id){
     loadWithdraw();
 }
 
-// 🔔 NEW REQUEST CHECK (REAL FIX)
+// 🔔 ALERT SYSTEM (FIXED)
 async function checkNewRequests(){
 
     let { data: dep } = await client.from("deposit_requests").select("id");
@@ -264,13 +270,13 @@ async function checkNewRequests(){
 
     if(dep.length > lastDepositCount){
         audio.play();
-        alert("New Deposit Request 🔥");
+        alert("New Deposit 🔥");
         loadDeposits();
     }
 
     if(wid.length > lastWithdrawCount){
         audio.play();
-        alert("New Withdraw Request 🔥");
+        alert("New Withdraw 🔥");
         loadWithdraw();
     }
 
@@ -278,7 +284,7 @@ async function checkNewRequests(){
     lastWithdrawCount = wid.length;
 }
 
-// ⏱ CHECK EVERY 5 SEC
+// ⏱ AUTO CHECK
 setInterval(checkNewRequests, 5000);
 
 // AUTO LOAD
