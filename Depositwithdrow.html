@@ -117,7 +117,7 @@ async function loadDeposits(){
         }
 
         let screenshot = r.screenshot 
-        ? `<img src="${r.screenshot}">` 
+        ? `<img src="${r.screenshot.trim()}">` 
         : "-";
 
         html+=`
@@ -136,7 +136,7 @@ async function loadDeposits(){
     document.getElementById("depositData").innerHTML=html;
 }
 
-// 🔥 LOAD WITHDRAW (🔥 FIXED)
+// 🔥 LOAD WITHDRAW (FINAL FIX)
 async function loadWithdraw(){
 
     let { data } = await client
@@ -163,11 +163,17 @@ async function loadWithdraw(){
             `;
         }
 
-        // 🔥 MAIN FIX (screenshot / upi / text sab handle)
+        // 🔥 FINAL STRONG FIX
         let details = "-";
 
-        if(r.screenshot && r.screenshot.startsWith("http")){
-            details = `<img src="${r.screenshot}">`;
+        if(r.screenshot){
+            let url = r.screenshot.toString().trim();
+
+            if(url.includes("http")){
+                details = `<img src="${url}" width="70">`;
+            }else{
+                details = url;
+            }
         }
         else if(r.upi){
             details = r.upi;
@@ -256,7 +262,7 @@ async function cancelWithdraw(id){
     loadWithdraw();
 }
 
-// 🔔 ALERT SYSTEM (FIXED)
+// 🔔 ALERT SYSTEM
 async function checkNewRequests(){
 
     let { data: dep } = await client.from("deposit_requests").select("id");
@@ -284,7 +290,6 @@ async function checkNewRequests(){
     lastWithdrawCount = wid.length;
 }
 
-// ⏱ AUTO CHECK
 setInterval(checkNewRequests, 5000);
 
 // AUTO LOAD
