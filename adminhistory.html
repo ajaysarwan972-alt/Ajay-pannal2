@@ -20,6 +20,7 @@ body{
   font-weight:bold;
 }
 
+/* 🔥 FILTER BUTTON STYLE */
 .filters{
     display:flex;
     flex-wrap:wrap;
@@ -28,22 +29,20 @@ body{
     background:#fff;
 }
 
-.filters input{
-    padding:8px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    flex:1;
-}
-
-.filters button{
+.filters button, .filters select{
     padding:8px 12px;
     border:none;
-    background:#28a745;
+    background:#007bff;
     color:#fff;
     border-radius:8px;
     cursor:pointer;
 }
 
+.filters button.active{
+    background:red;
+}
+
+/* CARD */
 .card{
     background:#fff;
     margin:10px;
@@ -83,12 +82,26 @@ body{
 
 <div class="header">Admin History</div>
 
+<!-- 🔥 NEW FILTER UI -->
 <div class="filters">
-    <input type="text" id="filterUser" placeholder="Filter by User ID">
-    <input type="text" id="filterMarket" placeholder="Filter by Market">
-    <input type="date" id="filterStartDate" placeholder="Start Date">
-    <input type="date" id="filterEndDate" placeholder="End Date">
-    <button onclick="loadHistory()">Apply Filter</button>
+
+    <!-- USER BUTTON FILTER -->
+    <button onclick="setUser('')" class="active">All</button>
+    <button onclick="setUser('1')">User 1</button>
+    <button onclick="setUser('2')">User 2</button>
+    <button onclick="setUser('3')">User 3</button>
+    <button onclick="setUser('4')">User 4</button>
+    <button onclick="setUser('5')">User 5</button>
+
+    <!-- MARKET DROPDOWN -->
+    <select onchange="setMarket(this.value)">
+        <option value="">All Market</option>
+        <option value="GALI">GALI</option>
+        <option value="DS">DS</option>
+        <option value="FD">FD</option>
+        <option value="GZ">GZ</option>
+    </select>
+
 </div>
 
 <div id="history"></div>
@@ -99,26 +112,40 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-async function loadHistory(){
+// 🔥 GLOBAL FILTER STATE
+let selectedUser = "";
+let selectedMarket = "";
 
-    const userFilter = document.getElementById("filterUser").value.trim();
-    const marketFilter = document.getElementById("filterMarket").value.trim();
-    const startDate = document.getElementById("filterStartDate").value;
-    const endDate = document.getElementById("filterEndDate").value;
+// USER BUTTON CLICK
+function setUser(id){
+    selectedUser = id;
+
+    // active button highlight
+    document.querySelectorAll(".filters button").forEach(btn=>{
+        btn.classList.remove("active");
+    });
+    event.target.classList.add("active");
+
+    loadHistory();
+}
+
+// MARKET SELECT
+function setMarket(market){
+    selectedMarket = market;
+    loadHistory();
+}
+
+// 🔥 MAIN FUNCTION
+async function loadHistory(){
 
     let query = client.from("history").select("*").order("id", { ascending: false });
 
-    if(userFilter){
-        query = query.eq("user_id", userFilter);
+    if(selectedUser){
+        query = query.eq("user_id", selectedUser);
     }
-    if(marketFilter){
-        query = query.eq("market", marketFilter);
-    }
-    if(startDate){
-        query = query.gte("created_at", startDate + "T00:00:00");
-    }
-    if(endDate){
-        query = query.lte("created_at", endDate + "T23:59:59");
+
+    if(selectedMarket){
+        query = query.eq("market", selectedMarket);
     }
 
     const { data, error } = await query;
@@ -132,8 +159,10 @@ async function loadHistory(){
 
     data.forEach(item=>{
         let numbers = [];
+
         try{
             let parsed = JSON.parse(item.data || "[]");
+
             if(Array.isArray(parsed)){
                 numbers = parsed;
             } else if(typeof parsed === "object"){
@@ -143,7 +172,6 @@ async function loadHistory(){
                 }));
             }
         }catch(e){
-            console.log("Bad Data Skip:", item.data);
             return;
         }
 
@@ -173,6 +201,7 @@ async function loadHistory(){
     document.getElementById("history").innerHTML = html || "No Data Found";
 }
 
+// LOAD DEFAULT
 loadHistory();
 </script>
 
