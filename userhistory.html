@@ -104,7 +104,13 @@ async function loadHistory(){
 
         for(let num in numbers){
 
-            let amount = numbers[num];
+            let rawAmount = numbers[num];
+
+            // 🔥 MAIN FIX (object handle)
+            let amount = typeof rawAmount === "object" 
+                ? rawAmount.amount || rawAmount.value || 0 
+                : rawAmount;
+
             let formattedNum = num.toString().padStart(2,'0');
 
             html += `
