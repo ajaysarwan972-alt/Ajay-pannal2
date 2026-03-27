@@ -116,6 +116,9 @@ input{
 
 <div id="savedQR"></div>
 
+<!-- 🔥 NEW: screenshot input -->
+<input type="file" id="withdrawImg">
+
 <div class="row">
 <button class="btn back" onclick="goBack()">BACK</button>
 <button class="btn confirm" onclick="submitWithdraw()">CONFIRM</button>
@@ -149,7 +152,7 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// ✅ USER LOAD
+// USER
 const user = JSON.parse(localStorage.getItem("user"))
 
 async function loadUser(){
@@ -212,15 +215,22 @@ async function saveQR(){
     location.reload()
 }
 
-// 🔥 WITHDRAW (BALANCE CHECK + CUT)
+// 🔥 WITHDRAW (UPDATED)
 async function submitWithdraw(){
 
     let amount = parseInt(localStorage.getItem("withdraw_amount"))
     let qr = localStorage.getItem("user_qr")
+    let file = document.getElementById("withdrawImg").files[0]
 
     if(!qr) return alert("QR save kar")
+    if(!file) return alert("Screenshot upload kar")
 
-    // balance check
+    // upload screenshot
+    let fileName = Date.now() + "_" + file.name
+    await client.storage.from("screenshots").upload(fileName,file)
+
+    let imageUrl = `https://katbdbzoufiblnnsoxkk.supabase.co/storage/v1/object/public/screenshots/${fileName}`
+
     const { data } = await client
     .from("login")
     .select("balance")
@@ -232,7 +242,6 @@ async function submitWithdraw(){
         return
     }
 
-    // CUT BALANCE
     let newBalance = data.balance - amount
 
     await client
@@ -240,12 +249,12 @@ async function submitWithdraw(){
     .update({balance:newBalance})
     .eq("id", user.id)
 
-    // INSERT REQUEST
     await client.from("withdraw_requests").insert({
         user_id: user.id,
         mobile: user.mobile,
         amount: amount,
         upi: qr,
+        screenshot: imageUrl,
         status: "pending"
     })
 
@@ -253,11 +262,7 @@ async function submitWithdraw(){
     location.reload()
 }
 
-// BANK
-function openBank(){
-    bankForm.style.display="block"
-}
-
+// BANK (UPDATED)
 async function submitBank(){
 
     let name = document.getElementById("name").value
@@ -265,8 +270,15 @@ async function submitBank(){
     let acc2 = document.getElementById("acc2").value
     let ifsc = document.getElementById("ifsc").value
     let amount = parseInt(localStorage.getItem("withdraw_amount"))
+    let file = document.getElementById("withdrawImg").files[0]
 
+    if(!file) return alert("Screenshot upload kar")
     if(acc1 !== acc2) return alert("Account match nahi")
+
+    let fileName = Date.now() + "_" + file.name
+    await client.storage.from("screenshots").upload(fileName,file)
+
+    let imageUrl = `https://katbdbzoufiblnnsoxkk.supabase.co/storage/v1/object/public/screenshots/${fileName}`
 
     const { data } = await client
     .from("login")
@@ -288,6 +300,7 @@ async function submitBank(){
         mobile: user.mobile,
         amount: amount,
         upi: name+" | "+acc1+" | "+ifsc,
+        screenshot: imageUrl,
         status: "pending"
     })
 
