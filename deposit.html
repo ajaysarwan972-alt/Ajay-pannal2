@@ -13,7 +13,7 @@ body{
     padding:15px;
 }
 
-/* 🔥 TOP BAR */
+/* TOP BAR */
 #userId{
   position:fixed;
   left:15px;
@@ -23,6 +23,7 @@ body{
   padding:8px 15px;
   border-radius:20px;
   font-weight:bold;
+  z-index:999;
 }
 #wallet{
   position:fixed;
@@ -33,6 +34,7 @@ body{
   padding:8px 15px;
   border-radius:20px;
   font-weight:bold;
+  z-index:999;
 }
 
 .card{
@@ -40,6 +42,7 @@ body{
     padding:20px;
     border-radius:20px;
     margin-top:60px;
+    margin-bottom:20px;
     box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
@@ -76,10 +79,43 @@ input{
     margin-top:15px;
 }
 
+.amount-text{
+    font-size:18px;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:15px;
+}
+.amount-text span{
+    color:green;
+}
+
+.qr-box{
+    background:#f1f1f1;
+    padding:15px;
+    border-radius:15px;
+    margin-top:15px;
+    text-align:center;
+}
+.qr-inner{
+    width:100%;
+    max-width:320px;
+    margin:auto;
+    background:#fff;
+    padding:10px;
+    border-radius:12px;
+}
 .qr-inner img{
     width:100%;
-    height:auto; /* ✅ FIXED */
+    height:auto;
+    max-height:350px;
     border-radius:10px;
+}
+
+.upload-box{
+    background:#f2f2f2;
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
 }
 
 .upload-btn{
@@ -90,12 +126,13 @@ input{
     border-radius:15px;
     font-weight:bold;
     width:100%;
-    margin-top:10px;
 }
 
+.preview{
+    margin-top:15px;
+}
 .preview img{
     width:80%;
-    margin-top:10px;
     border-radius:10px;
 }
 
@@ -106,19 +143,21 @@ input{
 }
 .back-btn{
     flex:1;
-    background:red;
+    background:#ff4d4d;
     color:#fff;
-    padding:15px;
     border:none;
-    border-radius:10px;
+    padding:15px;
+    border-radius:15px;
+    font-weight:bold;
 }
 .confirm-btn{
     flex:1;
-    background:green;
+    background:#7cc84a;
     color:#fff;
-    padding:15px;
     border:none;
-    border-radius:10px;
+    padding:15px;
+    border-radius:15px;
+    font-weight:bold;
 }
 </style>
 </head>
@@ -141,13 +180,22 @@ input{
 </div>
 
 <div class="card" id="step2" style="display:none;">
-<h3><span id="showAmount">0</span> Rs. Pay karo</h3>
-
-<div class="qr-inner">
-<img id="qrImage" src="">
+<div class="amount-text">
+<span id="showAmount">0</span> Rs. screenshot upload karo
 </div>
 
-<input type="file" id="file" onchange="previewImage()">
+<div class="qr-box">
+    <h3>Scan & Pay</h3>
+    <div class="qr-inner">
+        <img id="qrImage" src="">
+    </div>
+</div>
+
+<div class="upload-box">
+<input type="file" id="file" onchange="previewImage()" style="display:none;">
+<button class="upload-btn" onclick="document.getElementById('file').click()">
+UPLOAD PAYMENT SCREENSHOT
+</button>
 
 <div class="preview" id="preview"></div>
 
@@ -156,121 +204,125 @@ input{
 <button class="confirm-btn" onclick="submitDeposit()">CONFIRM</button>
 </div>
 </div>
+</div>
 
 <script>
+const { createClient } = supabase
 
-const client = supabase.createClient(
+const client = createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
 const user = JSON.parse(localStorage.getItem("user"))
 
-if(!user){
-  alert("Login karo")
-  window.location.href="index.html"
-}
-
-// 🔥 LOAD QR
 async function loadQR(){
-  let { data } = await client.from("settings").select("qr").single()
-  if(data) qrImage.src = data.qr
+    const { data } = await client.from("settings").select("*").limit(1).single()
+    if(data && data.qr){
+        document.getElementById("qrImage").src = data.qr
+    }
 }
 loadQR()
 
-// 🔥 LOAD WALLET
 async function loadWallet(){
-  let { data } = await client
-  .from("login")
-  .select("balance")
-  .eq("id", user.id)
-  .single()
-
-  if(data){
-    wallet.innerText = "₹ " + data.balance
-    userId.innerText = "ID: " + user.id
-  }
+    if(!user) return
+    const { data } = await client.from("login").select("balance").eq("id", user.id).single()
+    if(data){
+        document.getElementById("wallet").innerText = "₹ " + data.balance
+        document.getElementById("userId").innerText = "ID: " + user.id
+    }
 }
 loadWallet()
 
-function setAmount(v){ amount.value=v }
+function setAmount(val){ document.getElementById("amount").value = val }
 
 function goStep2(){
-  let amt = amount.value
-  if(!amt) return alert("Amount daal")
-  localStorage.setItem("deposit_amount", amt)
-  showAmount.innerText = amt
-  step1.style.display="none"
-  step2.style.display="block"
+    let amt = document.getElementById("amount").value
+    if(!amt) return alert("Amount daal")
+    localStorage.setItem("deposit_amount", amt)
+    document.getElementById("showAmount").innerText = amt
+    document.getElementById("step1").style.display="none"
+    document.getElementById("step2").style.display="block"
 }
 
 function goBack(){
-  step2.style.display="none"
-  step1.style.display="block"
+    document.getElementById("step2").style.display="none"
+    document.getElementById("step1").style.display="block"
 }
 
 function previewImage(){
-  let file = document.getElementById("file").files[0]
-  if(file){
-    let reader = new FileReader()
-    reader.onload = e=>{
-      preview.innerHTML = `<img src="${e.target.result}">`
+    let file = document.getElementById("file").files[0]
+    if(file){
+        let reader = new FileReader()
+        reader.onload = e=>{
+            document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`
+        }
+        reader.readAsDataURL(file)
     }
-    reader.readAsDataURL(file)
-  }
 }
 
-// 🔥 FINAL FIXED SUBMIT
 async function submitDeposit(){
 
-  let amount = localStorage.getItem("deposit_amount")
-  let file = document.getElementById("file").files[0]
+    if(!user){
+        alert("Login first ❌")
+        return
+    }
 
-  if(!file) return alert("Screenshot upload kar")
+    let amount = localStorage.getItem("deposit_amount")
+    let file = document.getElementById("file").files[0]
 
-  let fileName = Date.now()+"_"+file.name
+    if(!file){
+        alert("Screenshot upload kar ❌")
+        return
+    }
 
-  let { error: uploadError } = await client
-  .storage.from("screenshots")
-  .upload(fileName, file)
+    try{
 
-  if(uploadError){
-    alert("Upload Error ❌")
-    console.log(uploadError)
-    return
-  }
+    let fileName = Date.now()+"_"+file.name
 
-  let { data: publicUrlData } = client
-  .storage.from("screenshots")
-  .getPublicUrl(fileName)
+    let { error: uploadError } = await client.storage.from("screenshots").upload(fileName, file)
+    if(uploadError){
+        console.log(uploadError)
+        alert("Upload Error ❌")
+        return
+    }
 
-  let { data: userData } = await client
-  .from("login")
-  .select("mobile,name")
-  .eq("id", user.id)
-  .single()
+    let { data: urlData } = client.storage.from("screenshots").getPublicUrl(fileName)
 
-  let { error: insertError } = await client
-  .from("deposit_requests")
-  .insert([{
-    user_id: user.id,
-    mobile: userData.mobile,
-    name: userData.name,
-    amount: Number(amount),
-    screenshot: publicUrlData.publicUrl,
-    status: "pending"
-  }])
+    let { data: userData, error: userErr } = await client
+        .from("login")
+        .select("mobile,name")
+        .eq("id", user.id)
+        .single()
 
-  if(insertError){
-    alert("Insert Error ❌")
-    console.log(insertError)
-    return
-  }
+    if(userErr || !userData){
+        alert("User fetch error ❌")
+        return
+    }
 
-  alert("Request Sent ✅")
-  location.reload()
+    let { error: insertError } = await client.from("deposit_requests").insert([{
+        user_id: user.id,
+        mobile: userData.mobile,
+        name: userData.name,
+        amount: Number(amount),
+        screenshot: urlData.publicUrl,
+        status: "pending"
+    }])
+
+    if(insertError){
+        console.log(insertError)
+        alert("Insert Error ❌")
+        return
+    }
+
+    alert("Request Sent ✅")
+    location.reload()
+
+    }catch(err){
+        console.log(err)
+        alert("Server Error ❌")
+    }
 }
-
 </script>
 
 </body>
