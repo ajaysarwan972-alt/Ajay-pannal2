@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payments</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{font-family:Arial;background:#f2f2f2;padding:10px;}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    margin-bottom:20px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+button{
+    padding:5px 10px;
+    border:none;
+    border-radius:5px;
+    color:#fff;
+}
+
+.approve{background:green;}
+.cancel{background:red;}
+</style>
+</head>
+
+<body>
+
+<h3>Deposit</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th><th>User</th><th>Amount</th><th>Status</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="depositData"></tbody>
+</table>
+
+<h3>Withdraw</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th><th>User</th><th>Amount</th><th>Status</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="withdrawData"></tbody>
+</table>
+
+<script>
+
+const client = supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// LOAD DEPOSIT
+async function loadDeposits(){
+    let { data } = await client.from("deposit_requests").select("*").order("id",{ascending:false});
+
+    let html="";
+    data.forEach(r=>{
+        html+=`
+        <tr>
+        <td>${r.id}</td>
+        <td>${r.user_id}</td>
+        <td>${r.amount}</td>
+        <td>${r.status}</td>
+        <td>
+        <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
+        <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
+        </td>
+        </tr>`;
+    });
+
+    document.getElementById("depositData").innerHTML=html;
+}
+
+// LOAD WITHDRAW
+async function loadWithdraw(){
+    let { data } = await client.from("withdraw_requests").select("*").order("id",{ascending:false});
+
+    let html="";
+    data.forEach(r=>{
+        html+=`
+        <tr>
+        <td>${r.id}</td>
+        <td>${r.user_id}</td>
+        <td>${r.amount}</td>
+        <td>${r.status}</td>
+        <td>
+        <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount})">Approve</button>
+        <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>
+        </td>
+        </tr>`;
+    });
+
+    document.getElementById("withdrawData").innerHTML=html;
+}
+
+// APPROVE DEPOSIT
+async function approveDeposit(id,user_id,amount){
+    await client.from("deposit_requests").update({status:"approved"}).eq("id",id);
+
+    let { data } = await client.from("login").select("balance").eq("id",user_id).single();
+
+    await client.from("login").update({balance:data.balance+amount}).eq("id",user_id);
+
+    alert("Approved");
+    loadDeposits();
+}
+
+// CANCEL DEPOSIT
+async function cancelDeposit(id){
+    await client.from("deposit_requests").update({status:"cancelled"}).eq("id",id);
+
+    alert("Cancelled");
+    loadDeposits();
+}
+
+// APPROVE WITHDRAW
+async function approveWithdraw(id,user_id,amount){
+    await client.from("withdraw_requests").update({status:"approved"}).eq("id",id);
+
+    let { data } = await client.from("login").select("balance").eq("id",user_id).single();
+
+    await client.from("login").update({balance:data.balance-amount}).eq("id",user_id);
+
+    alert("Approved");
+    loadWithdraw();
+}
+
+// CANCEL WITHDRAW
+async function cancelWithdraw(id){
+    await client.from("withdraw_requests").update({status:"cancelled"}).eq("id",id);
+
+    alert("Cancelled");
+    loadWithdraw();
+}
+
+// AUTO LOAD
+loadDeposits();
+loadWithdraw();
+
+</script>
+
+</body>
+</html>
