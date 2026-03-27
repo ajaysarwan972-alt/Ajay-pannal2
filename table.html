@@ -97,10 +97,15 @@ STOP ALARM
 </table>
 </div>
 
-<!-- 🔥 REPLACED AREA -->
-<h2>Deposit & Withdraw</h2>
-<div class="frame">
-<iframe src="Depositwithdrow.html"></iframe>
+<!-- 🔥 FIXED AREA -->
+<h2>Deposit</h2>
+<div class="frame" style="height:400px;">
+<iframe src="Depositwithdrow.html#deposit"></iframe>
+</div>
+
+<h2>Withdraw</h2>
+<div class="frame" style="height:400px;">
+<iframe src="Depositwithdrow.html#withdraw"></iframe>
 </div>
 
 <!-- GAME RESULT -->
@@ -158,7 +163,7 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-// 🔊 ALARM SAME
+// 🔊 ALARM
 function playAlarm(){
     document.getElementById("alarm").play().catch(()=>{})
 }
