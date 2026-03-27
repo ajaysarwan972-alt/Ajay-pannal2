@@ -60,7 +60,11 @@ button{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+let user = localStorage.getItem("user");
 
+if(user){
+  window.location.href = "home.html";
+}
 const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
