@@ -90,7 +90,6 @@ async function loadHistory(){
 
     data.forEach(item=>{
 
-        // ✅ USER MATCH FIX
         if(item.user_id != user.id) return;
 
         let numbers = {};
@@ -104,9 +103,10 @@ async function loadHistory(){
 
         for(let num in numbers){
 
+            num = parseInt(num); // ✅ MAIN FIX
+
             let rawAmount = numbers[num];
 
-            // 🔥 MAIN FIX (object handle)
             let amount = typeof rawAmount === "object" 
                 ? rawAmount.amount || rawAmount.value || 0 
                 : rawAmount;
