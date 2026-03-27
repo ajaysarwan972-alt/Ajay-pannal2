@@ -44,6 +44,9 @@ button{
 
 <body>
 
+<!-- 🔥 DEPOSIT WRAP -->
+<div id="deposit">
+
 <h3>Deposit</h3>
 <table>
 <thead>
@@ -53,6 +56,11 @@ button{
 </thead>
 <tbody id="depositData"></tbody>
 </table>
+
+</div>
+
+<!-- 🔥 WITHDRAW WRAP -->
+<div id="withdraw">
 
 <h3>Withdraw</h3>
 <table>
@@ -64,6 +72,8 @@ button{
 <tbody id="withdrawData"></tbody>
 </table>
 
+</div>
+
 <script>
 
 const client = supabase.createClient(
@@ -71,14 +81,11 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔊 SOUND
 let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
 
-// 🔔 ALERT TRACK
 let lastDepositCount = 0;
 let lastWithdrawCount = 0;
 
-// ✅ USER DETAILS FIXED
 async function getUserDetails(user_id){
     let { data } = await client
     .from("login")
@@ -88,7 +95,6 @@ async function getUserDetails(user_id){
     return data && data.length ? data[0] : {name:"-", mobile:"-"};
 }
 
-// 🔥 LOAD DEPOSIT
 async function loadDeposits(){
 
     let { data } = await client
@@ -115,7 +121,6 @@ async function loadDeposits(){
             `;
         }
 
-        // ✅ SCREENSHOT FIX
         let screenshot = "-";
         if(r.screenshot){
             let url = r.screenshot.toString().trim();
@@ -140,7 +145,6 @@ async function loadDeposits(){
     document.getElementById("depositData").innerHTML=html;
 }
 
-// 🔥 LOAD WITHDRAW
 async function loadWithdraw(){
 
     let { data } = await client
@@ -167,7 +171,6 @@ async function loadWithdraw(){
             `;
         }
 
-        // ✅ DETAILS FIX (image / upi)
         let details = "-";
 
         if(r.screenshot){
@@ -198,7 +201,6 @@ async function loadWithdraw(){
     document.getElementById("withdrawData").innerHTML=html;
 }
 
-// ✅ APPROVE DEPOSIT
 async function approveDeposit(id,user_id,amount){
 
     let { data: check } = await client
@@ -234,7 +236,6 @@ async function approveDeposit(id,user_id,amount){
     loadDeposits();
 }
 
-// ❌ CANCEL DEPOSIT
 async function cancelDeposit(id){
     await client.from("deposit_requests")
     .update({status:"cancelled"})
@@ -243,7 +244,6 @@ async function cancelDeposit(id){
     loadDeposits();
 }
 
-// ✅ APPROVE WITHDRAW
 async function approveWithdraw(id){
 
     await client.from("withdraw_requests")
@@ -256,7 +256,6 @@ async function approveWithdraw(id){
     loadWithdraw();
 }
 
-// ❌ CANCEL WITHDRAW
 async function cancelWithdraw(id){
     await client.from("withdraw_requests")
     .update({status:"cancelled"})
@@ -265,7 +264,6 @@ async function cancelWithdraw(id){
     loadWithdraw();
 }
 
-// 🔔 ALERT SYSTEM
 async function checkNewRequests(){
 
     let { data: dep } = await client.from("deposit_requests").select("id");
@@ -295,7 +293,6 @@ async function checkNewRequests(){
 
 setInterval(checkNewRequests, 5000);
 
-// AUTO LOAD
 loadDeposits();
 loadWithdraw();
 
