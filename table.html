@@ -9,12 +9,19 @@ body { font-family: Arial; padding: 20px; }
 
 .frame {
     width: 100%;
-    height: 300px;
+    height: 500px;
     overflow: auto;
     background: #fff;
     border-radius: 10px;
     margin-bottom: 20px;
     padding: 10px;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+    border-radius:10px;
 }
 
 table {
@@ -90,28 +97,10 @@ STOP ALARM
 </table>
 </div>
 
-<h2>Deposit Requests</h2>
+<!-- 🔥 REPLACED AREA -->
+<h2>Deposit & Withdraw</h2>
 <div class="frame">
-<table>
-<thead>
-<tr>
-<th>ID</th><th>User ID</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Screenshot</th><th>Status</th><th>Action</th>
-</tr>
-</thead>
-<tbody id="depositData"></tbody>
-</table>
-</div>
-
-<h2>Withdraw Requests</h2>
-<div class="frame">
-<table>
-<thead>
-<tr>
-<th>ID</th><th>User ID</th><th>Name</th><th>Mobile</th><th>Amount</th><th>QR</th><th>Status</th><th>Action</th>
-</tr>
-</thead>
-<tbody id="withdrawData"></tbody>
-</table>
+<iframe src="Depositwithdrow.html"></iframe>
 </div>
 
 <!-- GAME RESULT -->
@@ -169,13 +158,10 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 )
 
-let lastDepositCount = 0
-let lastWithdrawCount = 0
-
+// 🔊 ALARM SAME
 function playAlarm(){
     document.getElementById("alarm").play().catch(()=>{})
 }
-
 function stopAlarm(){
     let a = document.getElementById("alarm")
     a.pause()
@@ -213,70 +199,10 @@ async function updateBalance(){
     loadUsers()
 }
 
-// DEPOSIT
-async function loadDeposits(){
-    let { data } = await client.from("deposit_requests").select("*")
-
-    if(data.length > lastDepositCount){ playAlarm() }
-    lastDepositCount = data.length
-
-    let html=""
-    data.reverse().forEach(r=>{
-        html+=`<tr>
-        <td>${r.id}</td>
-        <td>${r.user_id}</td>
-        <td>-</td>
-        <td>-</td>
-        <td>${r.amount}</td>
-        <td><img src="${r.screenshot}" width="60"></td>
-        <td>${r.status}</td>
-        <td>
-        <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
-        <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
-        </td>
-        </tr>`
-    })
-    depositData.innerHTML = html
-}
-
-// WITHDRAW
-async function loadWithdraw(){
-    let { data } = await client.from("withdraw_requests").select("*")
-
-    if(data.length > lastWithdrawCount){ playAlarm() }
-    lastWithdrawCount = data.length
-
-    let html=""
-    data.reverse().forEach(r=>{
-        html+=`<tr>
-        <td>${r.id}</td>
-        <td>${r.user_id}</td>
-        <td>-</td>
-        <td>-</td>
-        <td>${r.amount}</td>
-        <td>${r.upi}</td>
-        <td>${r.status}</td>
-        <td>
-        <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount})">Approve</button>
-        <button class="cancel" onclick="cancelWithdraw(${r.id},${r.user_id},${r.amount})">Cancel</button>
-        </td>
-        </tr>`
-    })
-    withdrawData.innerHTML = html
-}
-
-// GAME RESULT
+// GAME
 async function loadGame(){
-    let { data, error } = await client.from("Game result").select("*")
-
-    if(error){
-        console.log(error)
-        return
-    }
-
-    let html=""
-    let opt=""
-
+    let { data } = await client.from("Game result").select("*")
+    let html="", opt=""
     data.forEach(r=>{
         html+=`<tr>
         <td>${r.id}</td>
@@ -285,35 +211,16 @@ async function loadGame(){
         <td>${r.open}</td>
         <td>${r.close}</td>
         </tr>`
-
         opt+=`<option value="${r.id}">${r.name}</option>`
     })
-
     gameData.innerHTML = html
     marketSelect.innerHTML = opt
 }
 
 async function updateMarketNumber(){
     let id = marketSelect.value
-    let input = document.getElementById("marketValue")
-    let val = input.value.trim()
-
-    if(!val) return alert("Number daal")
-
-    let { error } = await client
-        .from("Game result")
-        .update({ number: val })
-        .eq("id", id)
-
-    if(error){
-        console.log(error)
-        alert("Update fail")
-        return
-    }
-
-    input.value = ""
-
-    alert("Updated")
+    let val = document.getElementById("marketValue").value
+    await client.from("Game result").update({ number: val }).eq("id", id)
     loadGame()
 }
 
@@ -337,44 +244,28 @@ async function loadHistory(){
 // QR
 async function loadQR(){
     let { data } = await client.from("settings").select("qr").eq("name","payment").single()
-    if(data?.qr){
-        qrPreview.src = data.qr
-    }
+    if(data?.qr){ qrPreview.src = data.qr }
 }
 
 async function uploadQR(){
     let file = qrFile.files[0]
-    if(!file) return alert("File select kar")
-
     let fileName = "qr_"+Date.now()
     await client.storage.from("screenshots").upload(fileName, file)
-
     let { data } = client.storage.from("screenshots").getPublicUrl(fileName)
-
     await client.from("settings").update({qr:data.publicUrl}).eq("name","payment")
-
-    alert("QR Updated")
     loadQR()
 }
 
 async function deleteQR(){
     await client.from("settings").update({qr:null}).eq("name","payment")
     qrPreview.src=""
-    alert("QR Deleted")
 }
 
 // LOAD
 loadUsers()
-loadDeposits()
-loadWithdraw()
 loadGame()
 loadHistory()
 loadQR()
-
-setInterval(()=>{
-    loadDeposits()
-    loadWithdraw()
-},5000)
 </script>
 
 </body>
