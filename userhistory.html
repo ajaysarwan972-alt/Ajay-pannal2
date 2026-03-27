@@ -79,6 +79,7 @@ async function loadHistory(){
     let { data, error } = await client
         .from("history")
         .select("*")
+        .eq("user_id", user.id)
         .order("id", { ascending: false });
 
     if(error){
@@ -90,8 +91,6 @@ async function loadHistory(){
 
     data.forEach(item=>{
 
-        if(item.user_id != user.id) return;
-
         let numbers = {};
         try{
             numbers = JSON.parse(item.data || "{}");
@@ -101,15 +100,20 @@ async function loadHistory(){
 
         let date = new Date(item.created_at).toLocaleString();
 
-        for(let num in numbers){
+        // 🔥 FIX: keys ko properly handle kar
+        Object.entries(numbers).forEach(([key, value]) => {
 
-            num = parseInt(num); // ✅ MAIN FIX
+            let num = key;
 
-            let rawAmount = numbers[num];
+            // ❌ agar 0 aa raha hai to skip mat kar, show karo
+            if(num === "0" || num === 0){
+                num = "00";
+            }
 
-            let amount = typeof rawAmount === "object" 
-                ? rawAmount.amount || rawAmount.value || 0 
-                : rawAmount;
+            // amount fix
+            let amount = typeof value === "object" 
+                ? value.amount || value.value || 0 
+                : value;
 
             let formattedNum = num.toString().padStart(2,'0');
 
@@ -126,7 +130,7 @@ async function loadHistory(){
                 </div>
             </div>
             `;
-        }
+        });
 
     });
 
