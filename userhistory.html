@@ -91,29 +91,21 @@ async function loadHistory(){
 
     data.forEach(item=>{
 
-        let numbers = {};
+        let numbers = [];
+
         try{
-            numbers = JSON.parse(item.data || "{}");
+            numbers = JSON.parse(item.data || "[]"); // ✅ FIX
         }catch{
-            numbers = {};
+            numbers = [];
         }
 
         let date = new Date(item.created_at).toLocaleString();
 
-        // 🔥 FIX: keys ko properly handle kar
-        Object.entries(numbers).forEach(([key, value]) => {
+        // ✅ ARRAY LOOP FIX
+        numbers.forEach(n => {
 
-            let num = key;
-
-            // ❌ agar 0 aa raha hai to skip mat kar, show karo
-            if(num === "0" || num === 0){
-                num = "00";
-            }
-
-            // amount fix
-            let amount = typeof value === "object" 
-                ? value.amount || value.value || 0 
-                : value;
+            let num = n.number || "00";
+            let amount = n.amount || 0;
 
             let formattedNum = num.toString().padStart(2,'0');
 
