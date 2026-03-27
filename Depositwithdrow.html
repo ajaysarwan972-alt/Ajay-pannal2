@@ -22,6 +22,13 @@ th,td{
     text-align:center;
 }
 
+img{
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:5px;
+}
+
 button{
     padding:5px 10px;
     border:none;
@@ -41,7 +48,7 @@ button{
 <table>
 <thead>
 <tr>
-<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Status</th><th>Action</th>
+<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Screenshot</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="depositData"></tbody>
@@ -51,7 +58,7 @@ button{
 <table>
 <thead>
 <tr>
-<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Status</th><th>Action</th>
+<th>ID</th><th>User</th><th>Name</th><th>Mobile</th><th>Amount</th><th>Screenshot</th><th>Status</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="withdrawData"></tbody>
@@ -64,7 +71,14 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 COMMON FUNCTION (USER FIX)
+// 🔊 SOUND
+let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
+
+// 🔔 ALERT TRACK
+let lastDepositCount = 0;
+let lastWithdrawCount = 0;
+
+// 🔥 USER DETAILS
 async function getUserDetails(user_id){
     let { data } = await client
     .from("login")
@@ -102,6 +116,10 @@ async function loadDeposits(){
             `;
         }
 
+        let screenshot = r.screenshot 
+        ? `<img src="${r.screenshot}">` 
+        : "-";
+
         html+=`
         <tr>
         <td>${r.id}</td>
@@ -109,6 +127,7 @@ async function loadDeposits(){
         <td>${userInfo.name}</td>
         <td>${userInfo.mobile}</td>
         <td>${r.amount}</td>
+        <td>${screenshot}</td>
         <td>${r.status}</td>
         <td>${action}</td>
         </tr>`;
@@ -139,10 +158,14 @@ async function loadWithdraw(){
             action = `<span style="color:red;">❌ Cancelled</span>`;
         }else{
             action = `
-            <button class="approve" onclick="approveWithdraw(${r.id},${r.user_id},${r.amount})">Approve</button>
+            <button class="approve" onclick="approveWithdraw(${r.id})">Approve</button>
             <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>
             `;
         }
+
+        let screenshot = r.screenshot 
+        ? `<img src="${r.screenshot}">` 
+        : "-";
 
         html+=`
         <tr>
@@ -151,6 +174,7 @@ async function loadWithdraw(){
         <td>${userInfo.name}</td>
         <td>${userInfo.mobile}</td>
         <td>${r.amount}</td>
+        <td>${screenshot}</td>
         <td>${r.status}</td>
         <td>${action}</td>
         </tr>`;
@@ -189,7 +213,9 @@ async function approveDeposit(id,user_id,amount){
     .update({balance:newBalance})
     .eq("id",user_id);
 
+    audio.play();
     alert("Deposit Approved ✅");
+
     loadDeposits();
 }
 
@@ -202,25 +228,16 @@ async function cancelDeposit(id){
     loadDeposits();
 }
 
-// ✅ APPROVE WITHDRAW (NO wallet change)
-async function approveWithdraw(id,user_id,amount){
-
-    let { data: check } = await client
-    .from("withdraw_requests")
-    .select("status")
-    .eq("id",id)
-    .single();
-
-    if(check.status === "approved"){
-        alert("Already Approved");
-        return;
-    }
+// ✅ APPROVE WITHDRAW
+async function approveWithdraw(id){
 
     await client.from("withdraw_requests")
     .update({status:"approved"})
     .eq("id",id);
 
+    audio.play();
     alert("Withdraw Approved ✅");
+
     loadWithdraw();
 }
 
@@ -232,6 +249,37 @@ async function cancelWithdraw(id){
 
     loadWithdraw();
 }
+
+// 🔔 NEW REQUEST CHECK (REAL FIX)
+async function checkNewRequests(){
+
+    let { data: dep } = await client.from("deposit_requests").select("id");
+    let { data: wid } = await client.from("withdraw_requests").select("id");
+
+    if(lastDepositCount === 0 && lastWithdrawCount === 0){
+        lastDepositCount = dep.length;
+        lastWithdrawCount = wid.length;
+        return;
+    }
+
+    if(dep.length > lastDepositCount){
+        audio.play();
+        alert("New Deposit Request 🔥");
+        loadDeposits();
+    }
+
+    if(wid.length > lastWithdrawCount){
+        audio.play();
+        alert("New Withdraw Request 🔥");
+        loadWithdraw();
+    }
+
+    lastDepositCount = dep.length;
+    lastWithdrawCount = wid.length;
+}
+
+// ⏱ CHECK EVERY 5 SEC
+setInterval(checkNewRequests, 5000);
 
 // AUTO LOAD
 loadDeposits();
