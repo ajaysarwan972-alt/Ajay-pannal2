@@ -17,7 +17,6 @@ body{font-family:Arial;background:#f2f2f2;margin:0;}
 <body>
 
 <div class="header">My Winning</div>
-
 <div id="list">Loading...</div>
 
 <script>
@@ -28,25 +27,22 @@ const client = window.supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 LOGIN USER (IMPORTANT FIX)
+// ✅ GET USER
 var userData = localStorage.getItem("user");
 
-// 👉 OBJECT ko parse karo
 if(!userData){
   alert("Login first!");
 }
 
 var userId;
 
-// 🔥 HANDLE BOTH CASE (string ya object)
 try {
   let parsed = JSON.parse(userData);
-  userId = parsed.id;   // 👉 agar object hai
+  userId = parsed.id;
 } catch {
-  userId = userData;    // 👉 agar direct "4" hai
+  userId = userData;
 }
 
-// 🔥 CLEAN VALUE
 userId = userId ? userId.toString().trim() : "";
 
 console.log("USER ID:", userId);
@@ -55,9 +51,9 @@ console.log("USER ID:", userId);
 async function loadData(){
 
     let {data, error} = await client
-        .from("admin wining")   // ✅ SAME TABLE
+        .from("admin wining")
         .select("*")
-        .eq("User id", userId)  // ✅ MATCH USER
+        .eq("user_id", userId)   // ✅ FIXED HERE
         .order("id",{ascending:false});
 
     if(error){
