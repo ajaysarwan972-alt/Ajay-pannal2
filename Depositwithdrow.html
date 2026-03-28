@@ -8,34 +8,10 @@
 
 <style>
 body{font-family:Arial;background:#f2f2f2;padding:10px;}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:#fff;
-    margin-bottom:20px;
-}
-
-th,td{
-    border:1px solid #ccc;
-    padding:8px;
-    text-align:center;
-}
-
-img{
-    width:70px;
-    height:70px;
-    object-fit:cover;
-    border-radius:5px;
-}
-
-button{
-    padding:5px 10px;
-    border:none;
-    border-radius:5px;
-    color:#fff;
-}
-
+table{width:100%;border-collapse:collapse;background:#fff;margin-bottom:20px;}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;}
+img{width:70px;height:70px;object-fit:cover;border-radius:5px;}
+button{padding:5px 10px;border:none;border-radius:5px;color:#fff;}
 .approve{background:green;}
 .cancel{background:red;}
 .done{color:green;font-weight:bold;}
@@ -77,10 +53,11 @@ const client = supabase.createClient(
 
 let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
 
-let lastDepositCount = 0;
-let lastWithdrawCount = 0;
+// ✅ FIXED ID TRACKING
+let lastDepositId = 0;
+let lastWithdrawId = 0;
 
-// 🔥 TELEGRAM FUNCTION
+// ✅ TELEGRAM
 function sendTelegram(msg){
   fetch("https://api.telegram.org/bot8631347165:AAFj1Mh4TNOZggro3KvHyDR6cwfY-aeoKNA/sendMessage", {
     method: "POST",
@@ -108,12 +85,10 @@ async function loadDeposits(){
     .order("id",{ascending:false});
 
     let html="";
-
     for (let r of data){
         let userInfo = await getUserDetails(r.user_id);
 
         let action = "";
-
         if(r.status === "approved"){
             action = `<span class="done">✔ Approved</span>`;
         }else if(r.status === "cancelled"){
@@ -121,16 +96,12 @@ async function loadDeposits(){
         }else{
             action = `
             <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
-            <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
-            `;
+            <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>`;
         }
 
         let screenshot = "-";
-        if(r.screenshot){
-            let url = r.screenshot.toString().trim();
-            if(url.includes("http")){
-                screenshot = `<img src="${url}">`;
-            }
+        if(r.screenshot && r.screenshot.includes("http")){
+            screenshot = `<img src="${r.screenshot}">`;
         }
 
         html+=`
@@ -145,7 +116,6 @@ async function loadDeposits(){
         <td>${action}</td>
         </tr>`;
     }
-
     document.getElementById("depositData").innerHTML=html;
 }
 
@@ -156,12 +126,10 @@ async function loadWithdraw(){
     .order("id",{ascending:false});
 
     let html="";
-
     for (let r of data){
         let userInfo = await getUserDetails(r.user_id);
 
         let action = "";
-
         if(r.status === "approved"){
             action = `<span class="done">✔ Approved</span>`;
         }else if(r.status === "cancelled"){
@@ -169,22 +137,12 @@ async function loadWithdraw(){
         }else{
             action = `
             <button class="approve" onclick="approveWithdraw(${r.id})">Approve</button>
-            <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>
-            `;
+            <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>`;
         }
 
-        let details = "-";
-
-        if(r.screenshot){
-            let url = r.screenshot.toString().trim();
-            if(url.includes("http")){
-                details = `<img src="${url}">`;
-            }else{
-                details = url;
-            }
-        }
-        else if(r.upi){
-            details = r.upi;
+        let details = r.upi || "-";
+        if(r.screenshot && r.screenshot.includes("http")){
+            details = `<img src="${r.screenshot}">`;
         }
 
         html+=`
@@ -199,98 +157,49 @@ async function loadWithdraw(){
         <td>${action}</td>
         </tr>`;
     }
-
     document.getElementById("withdrawData").innerHTML=html;
 }
 
-async function approveDeposit(id,user_id,amount){
-    let { data: check } = await client
-    .from("deposit_requests")
-    .select("status")
-    .eq("id",id)
-    .single();
-
-    if(check.status === "approved"){
-        alert("Already Approved");
-        return;
-    }
-
-    await client.from("deposit_requests")
-    .update({status:"approved"})
-    .eq("id",id);
-
-    let { data } = await client
-    .from("login")
-    .select("balance")
-    .eq("id",user_id)
-    .single();
-
-    let newBalance = (data.balance || 0) + amount;
-
-    await client.from("login")
-    .update({balance:newBalance})
-    .eq("id",user_id);
-
-    audio.play();
-    alert("Deposit Approved ✅");
-
-    loadDeposits();
-}
-
-async function cancelDeposit(id){
-    await client.from("deposit_requests")
-    .update({status:"cancelled"})
-    .eq("id",id);
-
-    loadDeposits();
-}
-
-async function approveWithdraw(id){
-    await client.from("withdraw_requests")
-    .update({status:"approved"})
-    .eq("id",id);
-
-    audio.play();
-    alert("Withdraw Approved ✅");
-
-    loadWithdraw();
-}
-
-async function cancelWithdraw(id){
-    await client.from("withdraw_requests")
-    .update({status:"cancelled"})
-    .eq("id",id);
-
-    loadWithdraw();
-}
-
+// ✅ MAIN FIXED DETECTOR
 async function checkNewRequests(){
 
-    let { data: dep } = await client.from("deposit_requests").select("id");
-    let { data: wid } = await client.from("withdraw_requests").select("id");
+    let { data: dep } = await client
+    .from("deposit_requests")
+    .select("id")
+    .order("id",{ascending:false})
+    .limit(1);
 
-    if(lastDepositCount === 0 && lastWithdrawCount === 0){
-        lastDepositCount = dep.length;
-        lastWithdrawCount = wid.length;
+    let { data: wid } = await client
+    .from("withdraw_requests")
+    .select("id")
+    .order("id",{ascending:false})
+    .limit(1);
+
+    let currentDepId = dep.length ? dep[0].id : 0;
+    let currentWidId = wid.length ? wid[0].id : 0;
+
+    if(lastDepositId === 0 && lastWithdrawId === 0){
+        lastDepositId = currentDepId;
+        lastWithdrawId = currentWidId;
         return;
     }
 
-    if(dep.length > lastDepositCount){
+    if(currentDepId > lastDepositId){
         audio.play();
         alert("New Deposit 🔥");
         loadDeposits();
         sendTelegram("💰 New Deposit Request");
     }
 
-    if(wid.length > lastWithdrawCount){
+    if(currentWidId > lastWithdrawId){
         audio.play();
         alert("New Withdraw 🔥");
         loadWithdraw();
         sendTelegram("💸 New Withdraw Request");
     }
 
-    lastDepositCount = dep.length;
-    lastWithdrawCount = wid.length;
+    lastDepositId = currentDepId;
+    lastWithdrawId = currentWidId;
 }
 
 setInterval(checkNewRequests, 5000);
@@ -300,11 +209,9 @@ loadWithdraw();
 
 window.addEventListener("load", () => {
     let hash = window.location.hash;
-
     if(hash === "#deposit"){
         document.getElementById("withdraw").style.display = "none";
     }
-
     if(hash === "#withdraw"){
         document.getElementById("deposit").style.display = "none";
     }
