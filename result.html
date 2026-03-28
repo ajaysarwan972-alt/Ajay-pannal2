@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0;}
+.header{background:red;color:#fff;text-align:center;padding:15px;}
+.row{background:#fff;margin:10px;padding:10px;border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<div class="header" id="title">Result</div>
+<div id="list">Loading...</div>
+
+<script>
+
+const client = window.supabase.createClient(
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+// GET MARKET NAME
+const params = new URLSearchParams(window.location.search);
+const market = params.get("market");
+
+document.getElementById("title").innerText = market + " Result";
+
+async function loadData(){
+
+ let {data,error} = await client
+   .from("results")   // ⚠️ yaha tera RESULT table hona chahiye
+   .select("*")
+   .eq("market",market)
+   .order("date",{ascending:false});
+
+ if(error){
+   document.getElementById("list").innerHTML="Error";
+   return;
+ }
+
+ let html="";
+
+ data.forEach(d=>{
+   html+=`
+   <div class="row">
+     ${d.date} - <b>${d.result}</b>
+   </div>`;
+ });
+
+ document.getElementById("list").innerHTML=html;
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
