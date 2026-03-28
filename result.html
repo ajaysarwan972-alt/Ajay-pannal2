@@ -25,7 +25,7 @@ const client = window.supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// GET MARKET NAME
+// GET MARKET
 const params = new URLSearchParams(window.location.search);
 const market = params.get("market");
 
@@ -34,24 +34,29 @@ document.getElementById("title").innerText = market + " Result";
 async function loadData(){
 
  let {data,error} = await client
-   .from("results")   // ⚠️ yaha tera RESULT table hona chahiye
+   .from("Game result")   // ✅ FIXED
    .select("*")
-   .eq("market",market)
+   .eq("name", market)   // ✅ column name = name
    .order("date",{ascending:false});
 
  if(error){
-   document.getElementById("list").innerHTML="Error";
+   console.log(error);
+   document.getElementById("list").innerHTML="Error loading data";
    return;
  }
 
  let html="";
 
- data.forEach(d=>{
-   html+=`
-   <div class="row">
-     ${d.date} - <b>${d.result}</b>
-   </div>`;
- });
+ if(data.length === 0){
+   html = "<h3 style='padding:10px;'>No Data Found</h3>";
+ }else{
+   data.forEach(d=>{
+     html+=`
+     <div class="row">
+       ${d.date || "No Date"} - <b>${d.result || "-"}</b>
+     </div>`;
+   });
+ }
 
  document.getElementById("list").innerHTML=html;
 }
