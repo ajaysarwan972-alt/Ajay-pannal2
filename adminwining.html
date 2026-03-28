@@ -31,38 +31,47 @@ button{background:green;color:#fff;border:none;}
 
 <script>
 
+// ✅ FIXED SUPABASE
+const supabase = window.supabase;
+
 const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
-"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+"YOUR_PUBLIC_ANON_KEY" // 👉 apna correct key daal
 );
 
-// 🔥 USER LOAD (login table)
+// 🔥 USER LOAD
 async function loadUsers(){
- var res = await client.from("login").select("id");
+ let {data, error} = await client.from("login").select("id");
 
- var html = `<option value="">Select User</option>`;
- if(res.data){
-  res.data.forEach(function(u){
-   html += `<option value="${u.id}">${u.id}</option>`;
-  });
+ if(error){
+  console.log(error);
+  return;
  }
+
+ let html = `<option value="">Select User</option>`;
+ data.forEach(u=>{
+  html += `<option value="${u.id}">${u.id}</option>`;
+ });
 
  document.getElementById("user").innerHTML = html;
 }
 
-// 🔥 MARKET LOAD (history table)
+// 🔥 MARKET LOAD
 async function loadMarkets(){
- var res = await client.from("history").select("market");
+ let {data, error} = await client.from("history").select("market");
 
- var set = new Set();
- if(res.data){
-  res.data.forEach(function(m){
-   if(m.market) set.add(m.market);
-  });
+ if(error){
+  console.log(error);
+  return;
  }
 
- var html = `<option value="">Select Market</option>`;
- set.forEach(function(m){
+ let set = new Set();
+ data.forEach(m=>{
+  if(m.market) set.add(m.market);
+ });
+
+ let html = `<option value="">Select Market</option>`;
+ set.forEach(m=>{
   html += `<option value="${m}">${m}</option>`;
  });
 
@@ -72,9 +81,9 @@ async function loadMarkets(){
 // 🔥 ADD WINNING
 async function addWin(){
 
- var user = document.getElementById("user").value;
- var market = document.getElementById("market").value;
- var amount = parseInt(document.getElementById("amount").value);
+ let user = document.getElementById("user").value;
+ let market = document.getElementById("market").value;
+ let amount = parseInt(document.getElementById("amount").value);
 
  if(!user || !market || !amount){
   alert("Fill all fields");
@@ -82,14 +91,34 @@ async function addWin(){
  }
 
  // 👉 wallet get
- var u = await client.from("login").select("wallet").eq("id",user).single();
- var newWallet = (u.data.wallet || 0) + amount;
+ let {data:u, error:e1} = await client
+  .from("login")
+  .select("wallet")
+  .eq("id",user)
+  .single();
+
+ if(e1){
+  alert("User fetch error");
+  console.log(e1);
+  return;
+ }
+
+ let newWallet = (u.wallet || 0) + amount;
 
  // 👉 wallet update
- await client.from("login").update({wallet:newWallet}).eq("id",user);
+ let {error:e2} = await client
+  .from("login")
+  .update({wallet:newWallet})
+  .eq("id",user);
 
- // 👉 user history (winning)
- await client.from("history").insert([{
+ if(e2){
+  alert("Wallet update error");
+  console.log(e2);
+  return;
+ }
+
+ // 👉 history insert
+ let {error:e3} = await client.from("history").insert([{
   user_id:user,
   market:market,
   amount:amount,
@@ -97,28 +126,47 @@ async function addWin(){
   created_at:new Date().toISOString()
  }]);
 
+ if(e3){
+  console.log(e3);
+ }
+
  // 👉 admin record
- await client.from("admin_winning").insert([{
+ let {error:e4} = await client.from("admin_winning").insert([{
   user_id:user,
   market:market,
   amount:amount,
   created_at:new Date().toISOString()
  }]);
 
+ if(e4){
+  alert("Admin insert error");
+  console.log(e4);
+  return;
+ }
+
  alert("Winning Added ✅");
 
  loadList();
 }
 
-// 🔥 ADMIN HISTORY
+// 🔥 LOAD LIST
 async function loadList(){
 
- var res = await client.from("admin_winning").select("*").order("id",{ascending:false});
+ let {data, error} = await client
+  .from("admin_winning")
+  .select("*")
+  .order("id",{ascending:false});
 
- var html = "";
+ if(error){
+  console.log(error);
+  document.getElementById("list").innerHTML = "Error loading data";
+  return;
+ }
 
- if(res.data && res.data.length>0){
-  res.data.forEach(function(d){
+ let html = "";
+
+ if(data.length > 0){
+  data.forEach(d=>{
    html += `
    <div class="card">
     User: ${d.user_id}<br>
