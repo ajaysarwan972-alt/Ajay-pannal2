@@ -25,38 +25,43 @@ body{font-family:Arial;background:#f2f2f2;margin:0;}
 
 <script>
 
-const client = supabase.createClient(
+// ✅ FIXED SUPABASE
+const client = window.supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 LOGIN USER ID AUTO
+// 🔥 USER ID
 var userId = localStorage.getItem("user_id");
 
 if(!userId){
     alert("Login first!");
 }
 
-// 🔥 LOAD DATA
+// 🔥 LOAD DATA (FIXED TABLE)
 async function loadData(){
 
-    var res = await client
-        .from("history")
+    let {data, error} = await client
+        .from("admin_winning")   // 👈 IMPORTANT CHANGE
         .select("*")
         .eq("user_id", userId)
-        .eq("type","win")   // 👈 sirf winning show karega
         .order("id",{ascending:false});
 
-    var total = 0;
-    var html = "";
+    if(error){
+        console.log(error);
+        return;
+    }
 
-    if(res.data){
-        res.data.forEach(function(item){
+    let total = 0;
+    let html = "";
 
-            var amount = item.amount || 0;
+    if(data && data.length > 0){
+        data.forEach(function(item){
+
+            let amount = item.amount || 0;
             total += amount;
 
-            var date = new Date(item.created_at).toLocaleString();
+            let date = new Date(item.created_at).toLocaleString();
 
             html += `
             <div class="card">
@@ -66,9 +71,11 @@ async function loadData(){
             </div>
             `;
         });
+    }else{
+        html = "No Winning Found";
     }
 
-    document.getElementById("list").innerHTML = html || "No Winning Found";
+    document.getElementById("list").innerHTML = html;
     document.getElementById("total").innerHTML = "Total: ₹ " + total;
 }
 
