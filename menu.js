@@ -1,3 +1,5 @@
+<script>
+
 // 🔥 MENU DATA
 const MENU_ITEMS = [
   {name:"🏠 Home", link:"home.html"},
@@ -6,7 +8,7 @@ const MENU_ITEMS = [
   {name:"🏦 Bank Details", link:"withdraw.html"},
   {name:"📜 History", link:"userhistory.html"},
 
-  {name:"💰 Winning", link:"userwining.html"}, // ✅ ADD KIYA
+  {name:"💰 Winning", link:"userwining.html"}, // ✅ spelling check kar
 
   {name:"📊 Game Rates", link:"#"},
   {name:"📄 Terms", link:"terms.html"},
@@ -31,7 +33,6 @@ overflow:auto;
 ">
 
 <h2 style="margin-bottom:15px;">Menu</h2>
-
 <div id="menuItems"></div>
 
 </div>
@@ -87,11 +88,13 @@ function handleMenu(link){
     return;
   }
 
-  // logout
+  // ✅ LOGOUT FIX
   if(link === "logout"){
-    localStorage.removeItem("user");
+    localStorage.removeItem("user id"); // 🔥 FIXED
     window.location.href = "index.html";
   } else {
     window.location.href = link;
   }
 }
+
+</script>
