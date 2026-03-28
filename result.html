@@ -20,24 +20,26 @@ body{font-family:Arial;background:#f2f2f2;margin:0;}
 
 <script>
 
+// ✅ SUPABASE
 const client = window.supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// GET MARKET
+// ✅ GET MARKET NAME FROM URL
 const params = new URLSearchParams(window.location.search);
 const market = params.get("market");
 
+// TITLE SET
 document.getElementById("title").innerText = market + " Result";
 
+// ✅ LOAD DATA
 async function loadData(){
 
  let {data,error} = await client
-   .from("Game result")   // ✅ FIXED
+   .from("Game result")
    .select("*")
-   .eq("name", market)   // ✅ column name = name
-   .order("date",{ascending:false});
+   .eq("name", market);
 
  if(error){
    console.log(error);
@@ -47,13 +49,16 @@ async function loadData(){
 
  let html="";
 
- if(data.length === 0){
+ // ✅ TODAY DATE (AUTO)
+ let today = new Date().toLocaleDateString();
+
+ if(!data || data.length === 0){
    html = "<h3 style='padding:10px;'>No Data Found</h3>";
  }else{
    data.forEach(d=>{
      html+=`
      <div class="row">
-       ${d.date || "No Date"} - <b>${d.result || "-"}</b>
+       ${today} - <b>${d.number || "-"}</b>
      </div>`;
    });
  }
@@ -61,6 +66,7 @@ async function loadData(){
  document.getElementById("list").innerHTML=html;
 }
 
+// RUN
 loadData();
 
 </script>
