@@ -32,7 +32,7 @@ const client = window.supabase.createClient(
 );
 
 // 🔥 USER ID
-var userId = localStorage.getItem("user_id");
+var userId = localStorage.getItem("user id");
 
 if(!userId){
     alert("Login first!");
@@ -42,7 +42,7 @@ if(!userId){
 async function loadData(){
 
     let {data, error} = await client
-        .from("admin_winning")   // 👈 IMPORTANT CHANGE
+        .from("admin winning")   // 👈 IMPORTANT CHANGE
         .select("*")
         .eq("user_id", userId)
         .order("id",{ascending:false});
