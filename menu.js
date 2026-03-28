@@ -6,8 +6,9 @@ const MENU_ITEMS = [
 {name:"🏦 Bank Details", link:"withdraw.html"},
 {name:"📜 History", link:"userhistory.html"},
 
-{name:"💰 Winning", link:"userwining.html"}, // ✅ ADD KIYA
+{name:"📊 Result", link:"market.html"}, // ✅ LOCAL PAGE
 
+{name:"💰 Winning", link:"userwining.html"},
 {name:"📊 Game Rates", link:"#"},
 {name:"📄 Terms", link:"terms.html"},
 {name:"🚪 Logout", link:"logout"}
@@ -15,47 +16,54 @@ const MENU_ITEMS = [
 
 // 🔥 MENU + OVERLAY CREATE
 document.body.insertAdjacentHTML("beforeend", `
+<div id="sideMenu" style="
+position:fixed;
+top:0;
+left:-100%;
+width:80%;
+height:100%;
+background:#fff;
+z-index:9999;
+padding:15px;
+transition:0.3s;
+border-top-right-radius:20px;
+border-bottom-right-radius:20px;
+overflow:auto;
+">
+<h2 style="margin-bottom:15px;">Menu</h2>
+<div id="menuItems"></div>
+</div>
 
-<div id="sideMenu" style="  
-position:fixed;  
-top:0;  
-left:-100%;  
-width:80%;  
-height:100%;  
-background:#fff;  
-z-index:9999;  
-padding:15px;  
-transition:0.3s;  
-border-top-right-radius:20px;  
-border-bottom-right-radius:20px;  
-overflow:auto;  
-">  <h2 style="margin-bottom:15px;">Menu</h2>  <div id="menuItems"></div>  </div>  <div id="overlay" onclick="closeMenu()" style="  
-position:fixed;  
-top:0;  
-left:0;  
-width:100%;  
-height:100%;  
-background:rgba(0,0,0,0.5);  
-display:none;  
-z-index:9998;  
-"></div>  
-`);  // 🔥 MENU ITEMS LOAD
+<div id="overlay" onclick="closeMenu()" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+z-index:9998;
+"></div>
+`);
+
+// 🔥 MENU ITEMS LOAD
 let html = "";
 MENU_ITEMS.forEach(item=>{
 html += `
+<div style="
+padding:15px;
+margin-top:10px;
+background:#f2f2f2;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
+" onclick="handleMenu('${item.link}')">
+${item.name}
+</div>
+`;
+});
 
-  <div style="  
-    padding:15px;  
-    margin-top:10px;  
-    background:#f2f2f2;  
-    border-radius:12px;  
-    font-weight:bold;  
-    cursor:pointer;  
-  " onclick="handleMenu('${item.link}')">  
-    ${item.name}  
-  </div>  
-  `;  
-});  document.getElementById("menuItems").innerHTML = html;
+document.getElementById("menuItems").innerHTML = html;
 
 // 🔥 FUNCTIONS
 function openMenu(){
