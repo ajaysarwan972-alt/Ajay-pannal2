@@ -1,75 +1,67 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Result</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-body{font-family:Arial;background:#f2f2f2;margin:0;}
-.header{background:red;color:#fff;text-align:center;padding:15px;}
-.row{background:#fff;margin:10px;padding:10px;border-radius:10px;}
-</style>
-</head>
-
-<body>
-
-<div class="header" id="title">Result</div>
-<div id="list">Loading...</div>
-
 <script>
 
-// ✅ SUPABASE
 const client = window.supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// ✅ GET MARKET NAME FROM URL
 const params = new URLSearchParams(window.location.search);
 const market = params.get("market");
 
-// TITLE SET
 document.getElementById("title").innerText = market + " Result";
 
-// ✅ LOAD DATA
 async function loadData(){
 
  let {data,error} = await client
    .from("Game result")
    .select("*")
-   .eq("name", market);
+   .eq("name", market)
+   .single();
 
  if(error){
    console.log(error);
-   document.getElementById("list").innerHTML="Error loading data";
+   document.getElementById("list").innerHTML="Error";
    return;
  }
 
- let html="";
+ let result = data.number;
+ let today = new Date().toISOString().split("T")[0];
 
- // ✅ TODAY DATE (AUTO)
- let today = new Date().toLocaleDateString();
+ // 🔥 localStorage key per market
+ let key = "history_" + market;
 
- if(!data || data.length === 0){
-   html = "<h3 style='padding:10px;'>No Data Found</h3>";
+ let history = JSON.parse(localStorage.getItem(key)) || [];
+
+ // 🔥 check aaj ka record hai?
+ let index = history.findIndex(h => h.date === today);
+
+ if(index !== -1){
+   // update same day
+   history[index].result = result;
  }else{
-   data.forEach(d=>{
-     html+=`
-     <div class="row">
-       ${today} - <b>${d.number || "-"}</b>
-     </div>`;
-   });
+   // new day entry
+   history.push({date: today, result: result});
  }
 
- document.getElementById("list").innerHTML=html;
+ // 🔥 sirf last 30 din
+ history = history.slice(-30);
+
+ // save
+ localStorage.setItem(key, JSON.stringify(history));
+
+ // show
+ let html = "";
+
+ history.reverse().forEach(h=>{
+   html += `
+   <div class="row">
+     ${h.date} - <b>${h.result}</b>
+   </div>`;
+ });
+
+ document.getElementById("list").innerHTML = html;
 }
 
-// RUN
 loadData();
 
 </script>
-
-</body>
-</html>
