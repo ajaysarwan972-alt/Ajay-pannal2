@@ -5,7 +5,10 @@ const MENU_ITEMS = [
   {name:"💳 UPI Details", link:"deposit.html"},
   {name:"🏦 Bank Details", link:"withdraw.html"},
   {name:"📜 History", link:"userhistory.html"},
-  {name:"📊 Game Rates", link:"#"}, // ✅ popup ke liye
+
+  {name:"💰 Winning", link:"userwining.html"}, // ✅ ADD KIYA
+
+  {name:"📊 Game Rates", link:"#"},
   {name:"📄 Terms", link:"terms.html"},
   {name:"🚪 Logout", link:"logout"}
 ];
