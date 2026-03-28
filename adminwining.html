@@ -21,9 +21,19 @@ button{background:green;color:#fff;border:none;}
 <div class="header">Admin Winning</div>
 
 <div class="box">
-<input type="text" id="user" placeholder="Enter User ID">
-<input type="text" id="market" placeholder="Enter Market Name">
+
+<!-- ✅ USER DROPDOWN -->
+<select id="user">
+<option value="">Select User</option>
+</select>
+
+<!-- ✅ MARKET DROPDOWN -->
+<select id="market">
+<option value="">Select Market</option>
+</select>
+
 <input type="number" id="amount" placeholder="Enter Amount">
+
 <button onclick="addWin()">Add Winning</button>
 </div>
 
@@ -37,7 +47,52 @@ const client = window.supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 ADD WINNING (SIMPLE)
+
+// 🔥 LOAD USERS (LOGIN TABLE)
+async function loadUsers(){
+ let {data, error} = await client
+  .from("login")
+  .select("id");
+
+ if(error){
+  console.log(error);
+  return;
+ }
+
+ let select = document.getElementById("user");
+
+ data.forEach(d=>{
+  let opt = document.createElement("option");
+  opt.value = d.id;
+  opt.textContent = d.id;
+  select.appendChild(opt);
+ });
+}
+
+
+// 🔥 LOAD MARKET (GAME RESULT TABLE)
+async function loadMarket(){
+ let {data, error} = await client
+  .from("Game result")
+  .select("market");
+
+ if(error){
+  console.log(error);
+  return;
+ }
+
+ let select = document.getElementById("market");
+
+ data.forEach(d=>{
+  let opt = document.createElement("option");
+  opt.value = d.market;
+  opt.textContent = d.market;
+  select.appendChild(opt);
+ });
+}
+
+
+// 🔥 ADD WINNING
 async function addWin(){
 
  let user = document.getElementById("user").value;
@@ -49,11 +104,11 @@ async function addWin(){
   return;
  }
 
- let {error} = await client.from("admin winning").insert([{
-  user id:user,
-  market:market,
-  amount:amount,
-  created_at:new Date().toISOString()
+ let {error} = await client.from("admin wining").insert([{
+  "User id": user,
+  market: market,
+  amount: amount,
+  created_at: new Date().toISOString()
  }]);
 
  if(error){
@@ -63,15 +118,15 @@ async function addWin(){
  }
 
  alert("Winning Added ✅");
-
  loadList();
 }
 
-// 🔥 LOAD ADMIN LIST
+
+// 🔥 LOAD LIST
 async function loadList(){
 
  let {data, error} = await client
-  .from("admin_winning")
+  .from("admin wining")
   .select("*")
   .order("id",{ascending:false});
 
@@ -87,7 +142,7 @@ async function loadList(){
   data.forEach(d=>{
    html += `
    <div class="card">
-    User: ${d.user_id}<br>
+    User: ${d["User id"]}<br>
     Market: ${d.market}<br>
     Amount: ₹ ${d.amount}
    </div>
@@ -100,6 +155,10 @@ async function loadList(){
  document.getElementById("list").innerHTML = html;
 }
 
+
+// 🔥 INIT
+loadUsers();
+loadMarket();
 loadList();
 
 </script>
