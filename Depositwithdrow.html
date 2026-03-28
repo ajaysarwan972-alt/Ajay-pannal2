@@ -44,9 +44,7 @@ button{
 
 <body>
 
-<!-- 🔥 DEPOSIT WRAP -->
 <div id="deposit">
-
 <h3>Deposit</h3>
 <table>
 <thead>
@@ -56,12 +54,9 @@ button{
 </thead>
 <tbody id="depositData"></tbody>
 </table>
-
 </div>
 
-<!-- 🔥 WITHDRAW WRAP -->
 <div id="withdraw">
-
 <h3>Withdraw</h3>
 <table>
 <thead>
@@ -71,7 +66,6 @@ button{
 </thead>
 <tbody id="withdrawData"></tbody>
 </table>
-
 </div>
 
 <script>
@@ -86,6 +80,18 @@ let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
 let lastDepositCount = 0;
 let lastWithdrawCount = 0;
 
+// 🔥 TELEGRAM FUNCTION
+function sendTelegram(msg){
+  fetch("https://api.telegram.org/bot8631347165:AAFj1Mh4TNOZggro3KvHyDR6cwfY-aeoKNA/sendMessage", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      chat_id: "603135850",
+      text: msg
+    })
+  });
+}
+
 async function getUserDetails(user_id){
     let { data } = await client
     .from("login")
@@ -96,7 +102,6 @@ async function getUserDetails(user_id){
 }
 
 async function loadDeposits(){
-
     let { data } = await client
     .from("deposit_requests")
     .select("*")
@@ -105,7 +110,6 @@ async function loadDeposits(){
     let html="";
 
     for (let r of data){
-
         let userInfo = await getUserDetails(r.user_id);
 
         let action = "";
@@ -146,7 +150,6 @@ async function loadDeposits(){
 }
 
 async function loadWithdraw(){
-
     let { data } = await client
     .from("withdraw_requests")
     .select("*")
@@ -155,7 +158,6 @@ async function loadWithdraw(){
     let html="";
 
     for (let r of data){
-
         let userInfo = await getUserDetails(r.user_id);
 
         let action = "";
@@ -202,7 +204,6 @@ async function loadWithdraw(){
 }
 
 async function approveDeposit(id,user_id,amount){
-
     let { data: check } = await client
     .from("deposit_requests")
     .select("status")
@@ -245,7 +246,6 @@ async function cancelDeposit(id){
 }
 
 async function approveWithdraw(id){
-
     await client.from("withdraw_requests")
     .update({status:"approved"})
     .eq("id",id);
@@ -279,12 +279,14 @@ async function checkNewRequests(){
         audio.play();
         alert("New Deposit 🔥");
         loadDeposits();
+        sendTelegram("💰 New Deposit Request");
     }
 
     if(wid.length > lastWithdrawCount){
         audio.play();
         alert("New Withdraw 🔥");
         loadWithdraw();
+        sendTelegram("💸 New Withdraw Request");
     }
 
     lastDepositCount = dep.length;
@@ -296,10 +298,7 @@ setInterval(checkNewRequests, 5000);
 loadDeposits();
 loadWithdraw();
 
-
-// 🔥 FINAL SAFE FILTER (ONLY UI CHANGE)
 window.addEventListener("load", () => {
-
     let hash = window.location.hash;
 
     if(hash === "#deposit"){
@@ -309,7 +308,6 @@ window.addEventListener("load", () => {
     if(hash === "#withdraw"){
         document.getElementById("deposit").style.display = "none";
     }
-
 });
 
 </script>
