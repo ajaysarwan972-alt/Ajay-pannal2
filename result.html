@@ -26,6 +26,22 @@ const client = window.supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
+// ✅ DATE FIX FUNCTION (ONLY ADD)
+function getCustomDate(){
+ let now = new Date()
+ let hours = now.getHours()
+
+ if(hours < 6){
+   now.setDate(now.getDate() - 1)
+ }
+
+ let year = now.getFullYear()
+ let month = String(now.getMonth()+1).padStart(2,'0')
+ let day = String(now.getDate()).padStart(2,'0')
+
+ return `${year}-${month}-${day}`
+}
+
 // ✅ URL se market lo
 const params = new URLSearchParams(window.location.search);
 const market = params.get("market");
@@ -55,7 +71,12 @@ async function loadData(){
  }
 
  let result = data.number || "-";
- let today = new Date().toISOString().split("T")[0];
+
+ // ❌ OLD
+ // let today = new Date().toISOString().split("T")[0];
+
+ // ✅ NEW (FIXED)
+ let today = getCustomDate();
 
  let key = "history_" + market;
 
