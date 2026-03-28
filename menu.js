@@ -6,7 +6,7 @@ const MENU_ITEMS = [
 {name:"🏦 Bank Details", link:"withdraw.html"},
 {name:"📜 History", link:"userhistory.html"},
 
-{name:"💰 Winning", link:"userwining.html"}, // ✅ ADD KIYA
+{name:"💰 Winning", link:"Userwining.html"}, // ✅ ADD KIYA
 
 {name:"📊 Game Rates", link:"#"},
 {name:"📄 Terms", link:"terms.html"},
