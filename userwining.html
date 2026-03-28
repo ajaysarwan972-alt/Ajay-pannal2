@@ -17,7 +17,6 @@ body{font-family:Arial;background:#f2f2f2;margin:0;}
 <body>
 
 <div class="header">My Winning</div>
-
 <div id="list">Loading...</div>
 
 <script>
@@ -28,18 +27,25 @@ const client = window.supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// ✅ USER ID FIX
-var userId = localStorage.getItem("user");
+// ✅ GET USER ID (FIXED)
+let userData = localStorage.getItem("user");
 
-if(!userId){
+if(!userData){
     alert("Login first!");
 }
 
-// 🔥 CLEAN VALUE (MOST IMPORTANT)
-userId = userId ? userId.trim() : "";
+let userId;
 
-// 🔍 DEBUG
-console.log("User ID:", userId);
+try{
+    let parsed = JSON.parse(userData);
+    userId = parsed.id;
+}catch{
+    userId = userData;
+}
+
+userId = userId ? userId.toString().trim() : "";
+
+console.log("USER ID:", userId);
 
 // 🔥 LOAD DATA
 async function loadData(){
@@ -47,7 +53,7 @@ async function loadData(){
     let {data, error} = await client
         .from("admin wining")
         .select("*")
-        .eq("User id", userId)
+        .eq("user_id", userId)   // ✅ FINAL FIX
         .order("id",{ascending:false});
 
     if(error){
