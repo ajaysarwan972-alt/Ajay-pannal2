@@ -77,7 +77,7 @@ async function addWin(){
  }
 
  let {error} = await client.from("admin wining").insert([{
-  user_id: user,   // ✅ FINAL FIX
+  user_id: user,
   market: market,
   amount: amount,
   created_at: new Date().toISOString()
@@ -90,6 +90,10 @@ async function addWin(){
  }
 
  alert("Added ✅");
+
+ // ✅ ONLY THIS LINE ADDED
+ document.getElementById("amount").value = "";
+
  loadList();
 }
 
