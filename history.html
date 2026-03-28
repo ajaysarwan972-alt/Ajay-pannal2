@@ -177,13 +177,17 @@ async function loadHistory(){
         query = query.eq("market", market)
     }
 
+    // ✅ FIXED DATE FILTER
     if(date){
+        let start = date + "T00:00:00"
+        let end = date + "T23:59:59"
+
         query = query
-        .gte("created_at", date)
-        .lte("created_at", date + "T23:59:59")
+        .gte("created_at", start)
+        .lte("created_at", end)
     }
 
-    let { data } = await query.order("id",{ascending:false})
+    let { data } = await query.order("created_at",{ascending:false})
 
     currentData = data
 
