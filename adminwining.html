@@ -22,12 +22,10 @@ button{background:green;color:#fff;border:none;}
 
 <div class="box">
 
-<!-- ✅ USER DROPDOWN -->
 <select id="user">
 <option value="">Select User</option>
 </select>
 
-<!-- ✅ MARKET DROPDOWN -->
 <select id="market">
 <option value="">Select Market</option>
 </select>
@@ -48,18 +46,16 @@ const client = window.supabase.createClient(
 );
 
 
-// 🔥 LOAD USERS (LOGIN TABLE)
+// 🔥 LOAD USERS
 async function loadUsers(){
  let {data, error} = await client
   .from("login")
   .select("id");
 
- if(error){
-  console.log(error);
-  return;
- }
+ if(error){ console.log(error); return; }
 
  let select = document.getElementById("user");
+ select.innerHTML = '<option value="">Select User</option>';
 
  data.forEach(d=>{
   let opt = document.createElement("option");
@@ -70,29 +66,27 @@ async function loadUsers(){
 }
 
 
-// 🔥 LOAD MARKET (GAME RESULT TABLE)
+// 🔥 LOAD MARKET (FIXED)
 async function loadMarket(){
  let {data, error} = await client
-  .from("Game result")
-  .select("market");
+  .from("Game result")   // table name same rakha
+  .select("name");       // ✅ FIX HERE
 
- if(error){
-  console.log(error);
-  return;
- }
+ if(error){ console.log(error); return; }
 
  let select = document.getElementById("market");
+ select.innerHTML = '<option value="">Select Market</option>';
 
  data.forEach(d=>{
   let opt = document.createElement("option");
-  opt.value = d.market;
-  opt.textContent = d.market;
+  opt.value = d.name;      // ✅ FIX
+  opt.textContent = d.name; // ✅ FIX
   select.appendChild(opt);
  });
 }
 
 
-// 🔥 ADD WINNING
+// 🔥 ADD WINNING (FIXED)
 async function addWin(){
 
  let user = document.getElementById("user").value;
@@ -104,8 +98,9 @@ async function addWin(){
   return;
  }
 
- let {error} = await client.from("admin wining").insert([{
-  "User id": user,
+ let {error} = await client.from("admin_winning") // ✅ FIX TABLE NAME
+ .insert([{
+  user_id: user,     // ✅ FIX COLUMN
   market: market,
   amount: amount,
   created_at: new Date().toISOString()
@@ -126,7 +121,7 @@ async function addWin(){
 async function loadList(){
 
  let {data, error} = await client
-  .from("admin wining")
+  .from("admin_winning")   // ✅ FIX
   .select("*")
   .order("id",{ascending:false});
 
@@ -142,7 +137,7 @@ async function loadList(){
   data.forEach(d=>{
    html += `
    <div class="card">
-    User: ${d["User id"]}<br>
+    User: ${d.user_id}<br>
     Market: ${d.market}<br>
     Amount: ₹ ${d.amount}
    </div>
