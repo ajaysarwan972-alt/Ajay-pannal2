@@ -8,10 +8,34 @@
 
 <style>
 body{font-family:Arial;background:#f2f2f2;padding:10px;}
-table{width:100%;border-collapse:collapse;background:#fff;margin-bottom:20px;}
-th,td{border:1px solid #ccc;padding:8px;text-align:center;}
-img{width:70px;height:70px;object-fit:cover;border-radius:5px;}
-button{padding:5px 10px;border:none;border-radius:5px;color:#fff;}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    margin-bottom:20px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+img{
+    width:70px;
+    height:70px;
+    object-fit:cover;
+    border-radius:5px;
+}
+
+button{
+    padding:5px 10px;
+    border:none;
+    border-radius:5px;
+    color:#fff;
+}
+
 .approve{background:green;}
 .cancel{background:red;}
 .done{color:green;font-weight:bold;}
@@ -20,7 +44,9 @@ button{padding:5px 10px;border:none;border-radius:5px;color:#fff;}
 
 <body>
 
+<!-- 🔥 DEPOSIT WRAP -->
 <div id="deposit">
+
 <h3>Deposit</h3>
 <table>
 <thead>
@@ -30,9 +56,12 @@ button{padding:5px 10px;border:none;border-radius:5px;color:#fff;}
 </thead>
 <tbody id="depositData"></tbody>
 </table>
+
 </div>
 
+<!-- 🔥 WITHDRAW WRAP -->
 <div id="withdraw">
+
 <h3>Withdraw</h3>
 <table>
 <thead>
@@ -42,6 +71,7 @@ button{padding:5px 10px;border:none;border-radius:5px;color:#fff;}
 </thead>
 <tbody id="withdrawData"></tbody>
 </table>
+
 </div>
 
 <script>
@@ -53,29 +83,8 @@ const client = supabase.createClient(
 
 let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
 
-// 🔥 AUDIO UNLOCK (mobile fix)
-document.body.addEventListener("click", () => {
-    audio.play().then(()=>{
-        audio.pause();
-        audio.currentTime = 0;
-    });
-}, {once:true});
-
-// 🔥 TRACKING
-let lastDepositId = 0;
-let lastWithdrawId = 0;
-
-// 🔥 TELEGRAM
-function sendTelegram(msg){
-  fetch("https://api.telegram.org/bot8631347165:AAFj1Mh4TNOZggro3KvHyDR6cwfY-aeoKNA/sendMessage", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      chat_id: "603135850",
-      text: msg
-    })
-  });
-}
+let lastDepositCount = 0;
+let lastWithdrawCount = 0;
 
 async function getUserDetails(user_id){
     let { data } = await client
@@ -86,31 +95,38 @@ async function getUserDetails(user_id){
     return data && data.length ? data[0] : {name:"-", mobile:"-"};
 }
 
-// 🔥 LOAD DEPOSIT
 async function loadDeposits(){
+
     let { data } = await client
     .from("deposit_requests")
     .select("*")
     .order("id",{ascending:false});
 
     let html="";
+
     for (let r of data){
+
         let userInfo = await getUserDetails(r.user_id);
 
-        let action="";
-        if(r.status==="approved"){
-            action=`<span class="done">✔ Approved</span>`;
-        }else if(r.status==="cancelled"){
-            action=`<span style="color:red;">❌ Cancelled</span>`;
+        let action = "";
+
+        if(r.status === "approved"){
+            action = `<span class="done">✔ Approved</span>`;
+        }else if(r.status === "cancelled"){
+            action = `<span style="color:red;">❌ Cancelled</span>`;
         }else{
-            action=`
+            action = `
             <button class="approve" onclick="approveDeposit(${r.id},${r.user_id},${r.amount})">Approve</button>
-            <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>`;
+            <button class="cancel" onclick="cancelDeposit(${r.id})">Cancel</button>
+            `;
         }
 
-        let screenshot="-";
-        if(r.screenshot && r.screenshot.includes("http")){
-            screenshot=`<img src="${r.screenshot}">`;
+        let screenshot = "-";
+        if(r.screenshot){
+            let url = r.screenshot.toString().trim();
+            if(url.includes("http")){
+                screenshot = `<img src="${url}">`;
+            }
         }
 
         html+=`
@@ -129,31 +145,44 @@ async function loadDeposits(){
     document.getElementById("depositData").innerHTML=html;
 }
 
-// 🔥 LOAD WITHDRAW
 async function loadWithdraw(){
+
     let { data } = await client
     .from("withdraw_requests")
     .select("*")
     .order("id",{ascending:false});
 
     let html="";
+
     for (let r of data){
+
         let userInfo = await getUserDetails(r.user_id);
 
-        let action="";
-        if(r.status==="approved"){
-            action=`<span class="done">✔ Approved</span>`;
-        }else if(r.status==="cancelled"){
-            action=`<span style="color:red;">❌ Cancelled</span>`;
+        let action = "";
+
+        if(r.status === "approved"){
+            action = `<span class="done">✔ Approved</span>`;
+        }else if(r.status === "cancelled"){
+            action = `<span style="color:red;">❌ Cancelled</span>`;
         }else{
-            action=`
+            action = `
             <button class="approve" onclick="approveWithdraw(${r.id})">Approve</button>
-            <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>`;
+            <button class="cancel" onclick="cancelWithdraw(${r.id})">Cancel</button>
+            `;
         }
 
-        let details=r.upi || "-";
-        if(r.screenshot && r.screenshot.includes("http")){
-            details=`<img src="${r.screenshot}">`;
+        let details = "-";
+
+        if(r.screenshot){
+            let url = r.screenshot.toString().trim();
+            if(url.includes("http")){
+                details = `<img src="${url}">`;
+            }else{
+                details = url;
+            }
+        }
+        else if(r.upi){
+            details = r.upi;
         }
 
         html+=`
@@ -172,16 +201,15 @@ async function loadWithdraw(){
     document.getElementById("withdrawData").innerHTML=html;
 }
 
-// 🔥 APPROVE / CANCEL
-
 async function approveDeposit(id,user_id,amount){
+
     let { data: check } = await client
     .from("deposit_requests")
     .select("status")
     .eq("id",id)
     .single();
 
-    if(check.status==="approved"){
+    if(check.status === "approved"){
         alert("Already Approved");
         return;
     }
@@ -196,13 +224,15 @@ async function approveDeposit(id,user_id,amount){
     .eq("id",user_id)
     .single();
 
-    let newBalance=(data.balance||0)+amount;
+    let newBalance = (data.balance || 0) + amount;
 
     await client.from("login")
     .update({balance:newBalance})
     .eq("id",user_id);
 
+    audio.play();
     alert("Deposit Approved ✅");
+
     loadDeposits();
 }
 
@@ -215,11 +245,14 @@ async function cancelDeposit(id){
 }
 
 async function approveWithdraw(id){
+
     await client.from("withdraw_requests")
     .update({status:"approved"})
     .eq("id",id);
 
+    audio.play();
     alert("Withdraw Approved ✅");
+
     loadWithdraw();
 }
 
@@ -231,52 +264,53 @@ async function cancelWithdraw(id){
     loadWithdraw();
 }
 
-// 🔥 DETECTOR (FINAL)
 async function checkNewRequests(){
 
-    let { data: dep } = await client
-    .from("deposit_requests")
-    .select("id")
-    .order("id",{ascending:false})
-    .limit(1);
+    let { data: dep } = await client.from("deposit_requests").select("id");
+    let { data: wid } = await client.from("withdraw_requests").select("id");
 
-    let { data: wid } = await client
-    .from("withdraw_requests")
-    .select("id")
-    .order("id",{ascending:false})
-    .limit(1);
-
-    let depId = dep.length ? dep[0].id : 0;
-    let widId = wid.length ? wid[0].id : 0;
-
-    if(lastDepositId===0 && lastWithdrawId===0){
-        lastDepositId=depId;
-        lastWithdrawId=widId;
+    if(lastDepositCount === 0 && lastWithdrawCount === 0){
+        lastDepositCount = dep.length;
+        lastWithdrawCount = wid.length;
         return;
     }
 
-    if(depId>lastDepositId){
+    if(dep.length > lastDepositCount){
         audio.play();
         alert("New Deposit 🔥");
-        sendTelegram("💰 New Deposit Request");
         loadDeposits();
     }
 
-    if(widId>lastWithdrawId){
+    if(wid.length > lastWithdrawCount){
         audio.play();
         alert("New Withdraw 🔥");
-        sendTelegram("💸 New Withdraw Request");
         loadWithdraw();
     }
 
-    lastDepositId=depId;
-    lastWithdrawId=widId;
+    lastDepositCount = dep.length;
+    lastWithdrawCount = wid.length;
 }
 
-setInterval(checkNewRequests,5000);
+setInterval(checkNewRequests, 5000);
 
 loadDeposits();
 loadWithdraw();
+
+
+// 🔥 FINAL SAFE FILTER (ONLY UI CHANGE)
+window.addEventListener("load", () => {
+
+    let hash = window.location.hash;
+
+    if(hash === "#deposit"){
+        document.getElementById("withdraw").style.display = "none";
+    }
+
+    if(hash === "#withdraw"){
+        document.getElementById("deposit").style.display = "none";
+    }
+
+});
 
 </script>
 
