@@ -2,40 +2,23 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Winning</title>
+<title>My Winning</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{font-family:Arial;background:#f2f2f2;margin:0;}
-.header{background:red;color:#fff;text-align:center;padding:15px;}
-.box{background:#fff;margin:10px;padding:15px;border-radius:10px;}
-input,select,button{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:1px solid #ccc;}
-button{background:green;color:#fff;border:none;}
+.header{background:green;color:#fff;text-align:center;padding:15px;}
 .card{background:#fff;margin:10px;padding:10px;border-radius:10px;}
+.win{color:green;font-weight:bold;}
 </style>
 </head>
 
 <body>
 
-<div class="header">Admin Winning</div>
+<div class="header">My Winning</div>
 
-<div class="box">
-
-<select id="user">
-<option value="">Select User</option>
-</select>
-
-<select id="market">
-<option value="">Select Market</option>
-</select>
-
-<input type="number" id="amount" placeholder="Enter Amount">
-
-<button onclick="addWin()">Add Winning</button>
-</div>
-
-<div id="list"></div>
+<div id="list">Loading...</div>
 
 <script>
 
@@ -45,117 +28,71 @@ const client = window.supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
+// 🔥 LOGIN USER (IMPORTANT FIX)
+var userData = localStorage.getItem("user");
 
-// 🔥 LOAD USERS
-async function loadUsers(){
- let {data, error} = await client
-  .from("login")
-  .select("id");
-
- if(error){ console.log(error); return; }
-
- let select = document.getElementById("user");
- select.innerHTML = '<option value="">Select User</option>';
-
- data.forEach(d=>{
-  let opt = document.createElement("option");
-  opt.value = d.id;
-  opt.textContent = d.id;
-  select.appendChild(opt);
- });
+// 👉 OBJECT ko parse karo
+if(!userData){
+  alert("Login first!");
 }
 
+var userId;
 
-// 🔥 LOAD MARKET
-async function loadMarket(){
- let {data, error} = await client
-  .from("Game result")
-  .select("name");
-
- if(error){ console.log(error); return; }
-
- let select = document.getElementById("market");
- select.innerHTML = '<option value="">Select Market</option>';
-
- data.forEach(d=>{
-  let opt = document.createElement("option");
-  opt.value = d.name;
-  opt.textContent = d.name;
-  select.appendChild(opt);
- });
+// 🔥 HANDLE BOTH CASE (string ya object)
+try {
+  let parsed = JSON.parse(userData);
+  userId = parsed.id;   // 👉 agar object hai
+} catch {
+  userId = userData;    // 👉 agar direct "4" hai
 }
 
+// 🔥 CLEAN VALUE
+userId = userId ? userId.toString().trim() : "";
 
-// 🔥 ADD WINNING (FINAL FIXED)
-async function addWin(){
+console.log("USER ID:", userId);
 
- let user = document.getElementById("user").value;
- let market = document.getElementById("market").value;
- let amount = parseInt(document.getElementById("amount").value);
+// 🔥 LOAD DATA
+async function loadData(){
 
- if(!user || !market || !amount){
-  alert("Fill all fields");
-  return;
- }
+    let {data, error} = await client
+        .from("admin wining")   // ✅ SAME TABLE
+        .select("*")
+        .eq("User id", userId)  // ✅ MATCH USER
+        .order("id",{ascending:false});
 
- let {error} = await client
-  .from("admin wining")   // ✅ EXACT TABLE NAME
-  .insert([{
-    "User id": user,      // ✅ EXACT COLUMN NAME
-    market: market,
-    amount: amount,
-    created_at: new Date().toISOString()
-  }]);
+    if(error){
+        console.log(error);
+        document.getElementById("list").innerHTML = "Error loading";
+        return;
+    }
 
- if(error){
-  console.log(error);
-  alert("Error adding winning");
-  return;
- }
+    let html = "";
 
- alert("Winning Added ✅");
- loadList();
+    if(data && data.length > 0){
+
+        data.forEach(function(item){
+
+            let date = item.created_at 
+                ? new Date(item.created_at).toLocaleString()
+                : "No Date";
+
+            html += `
+            <div class="card">
+                <div>Market: ${item.market}</div>
+                <div>Date: ${date}</div>
+                <div class="win">₹ ${item.amount}</div>
+            </div>
+            `;
+        });
+
+    } else {
+        html = "<h3 style='padding:10px;'>No Winning Found</h3>";
+    }
+
+    document.getElementById("list").innerHTML = html;
 }
 
-
-// 🔥 LOAD LIST
-async function loadList(){
-
- let {data, error} = await client
-  .from("admin wining")   // ✅ SAME TABLE
-  .select("*")
-  .order("id",{ascending:false});
-
- if(error){
-  console.log(error);
-  document.getElementById("list").innerHTML = "Error loading";
-  return;
- }
-
- let html = "";
-
- if(data.length > 0){
-  data.forEach(d=>{
-   html += `
-   <div class="card">
-    User: ${d["User id"]}<br>
-    Market: ${d.market}<br>
-    Amount: ₹ ${d.amount}
-   </div>
-   `;
-  });
- }else{
-  html = "No Data";
- }
-
- document.getElementById("list").innerHTML = html;
-}
-
-
-// 🔥 INIT
-loadUsers();
-loadMarket();
-loadList();
+loadData();
 
 </script>
 
