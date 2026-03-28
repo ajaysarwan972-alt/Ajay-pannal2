@@ -86,7 +86,7 @@ async function loadMarket(){
 }
 
 
-// 🔥 ADD WINNING (FINAL FIX)
+// 🔥 ADD WINNING (FINAL FIXED)
 async function addWin(){
 
  let user = document.getElementById("user").value;
@@ -99,9 +99,9 @@ async function addWin(){
  }
 
  let {error} = await client
-  .from("admin wining")   // ✅ EXACT SAME NAME AS DB
+  .from("admin wining")   // ✅ EXACT TABLE NAME
   .insert([{
-    "user id": user,      // ✅ EXACT SAME COLUMN
+    "User id": user,      // ✅ EXACT COLUMN NAME
     market: market,
     amount: amount,
     created_at: new Date().toISOString()
@@ -122,7 +122,7 @@ async function addWin(){
 async function loadList(){
 
  let {data, error} = await client
-  .from("admin wining")   // ✅ SAME NAME
+  .from("admin wining")   // ✅ SAME TABLE
   .select("*")
   .order("id",{ascending:false});
 
@@ -138,7 +138,7 @@ async function loadList(){
   data.forEach(d=>{
    html += `
    <div class="card">
-    User: ${d["user id"]}<br>
+    User: ${d["User id"]}<br>
     Market: ${d.market}<br>
     Amount: ₹ ${d.amount}
    </div>
