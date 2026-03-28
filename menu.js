@@ -5,7 +5,7 @@ const MENU_ITEMS = [
   {name:"💳 UPI Details", link:"deposit.html"},
   {name:"🏦 Bank Details", link:"withdraw.html"},
   {name:"📜 History", link:"userhistory.html"},
-  {name:"📊 Game Rates", link:"#"}, // ❌ disabled
+  {name:"📊 Game Rates", link:"#"}, // ✅ popup ke liye
   {name:"📄 Terms", link:"terms.html"},
   {name:"🚪 Logout", link:"logout"}
 ];
@@ -78,11 +78,13 @@ function closeMenu(){
 
 function handleMenu(link){
 
-  // ❌ Game Rates disabled
+  // ✅ Game Rates popup
   if(link === "#"){
+    alert("RATE LIST:-*\n\n• जोड़ी रेट: 1 ke 90, 10 ke 950\n\n• हर्फ़ रेट: 10 ke 90, 100 ke 950");
     return;
   }
 
+  // logout
   if(link === "logout"){
     localStorage.removeItem("user");
     window.location.href = "index.html";
