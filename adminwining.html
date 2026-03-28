@@ -49,8 +49,8 @@ async function addWin(){
   return;
  }
 
- let {error} = await client.from("admin_winning").insert([{
-  user_id:user,
+ let {error} = await client.from("admin winning").insert([{
+  user id:user,
   market:market,
   amount:amount,
   created_at:new Date().toISOString()
