@@ -50,7 +50,7 @@
   <h2>Signup</h2>
 
   <input id="name" type="text" placeholder="Full Name">
-  <input id="mobile" type="tel" maxlength="10" placeholder="Mobile Number" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+  <input id="mobile" type="text" placeholder="Mobile Number">
   <input id="password" type="password" placeholder="Password">
 
   <button onclick="signup()">REGISTER</button>
@@ -58,7 +58,7 @@
 
 <script>
 
-// 🔥 SUPABASE
+// 🔥 SUPABASE (APNI DALNA)
 const SUPABASE_URL = "https://katbdbzoufiblnnsoxkk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
@@ -71,20 +71,14 @@ async function signup() {
   let mobile = document.getElementById("mobile").value;
   let password = document.getElementById("password").value;
 
-  // ✅ MOBILE CHECK
-  if(!/^\d{10}$/.test(mobile)){
-    alert("10 digit mobile number daalo");
-    return;
-  }
-
-  // ✅ validation
+  // validation
   if(!name || !mobile || !password){
     alert("Sab fill kar");
     return;
   }
 
-  // ✅ insert data
-  let { error } = await client
+  // insert data
+  let { data, error } = await client
     .from("login")
     .insert([
       { name: name, mobile: mobile, password: password, balance: 0 }
