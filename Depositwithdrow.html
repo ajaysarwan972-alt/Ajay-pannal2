@@ -53,7 +53,15 @@ const client = supabase.createClient(
 
 let audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
 
-// ✅ FIXED ID TRACKING
+// ✅ AUDIO UNLOCK (IMPORTANT)
+document.body.addEventListener("click", () => {
+    audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+    });
+}, { once: true });
+
+// ✅ TRACKING
 let lastDepositId = 0;
 let lastWithdrawId = 0;
 
@@ -160,7 +168,7 @@ async function loadWithdraw(){
     document.getElementById("withdrawData").innerHTML=html;
 }
 
-// ✅ MAIN FIXED DETECTOR
+// ✅ DETECTOR
 async function checkNewRequests(){
 
     let { data: dep } = await client
@@ -187,15 +195,15 @@ async function checkNewRequests(){
     if(currentDepId > lastDepositId){
         audio.play();
         alert("New Deposit 🔥");
-        loadDeposits();
         sendTelegram("💰 New Deposit Request");
+        loadDeposits();
     }
 
     if(currentWidId > lastWithdrawId){
         audio.play();
         alert("New Withdraw 🔥");
-        loadWithdraw();
         sendTelegram("💸 New Withdraw Request");
+        loadWithdraw();
     }
 
     lastDepositId = currentDepId;
