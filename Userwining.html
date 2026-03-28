@@ -25,30 +25,32 @@ body{font-family:Arial;background:#f2f2f2;margin:0;}
 
 <script>
 
-// ✅ FIXED SUPABASE
+// ✅ SUPABASE
 const client = window.supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 USER ID
-var userId = localStorage.getItem("user id");
+// 🔥 USER ID (IMPORTANT FIX)
+var userId = localStorage.getItem("user"); // ✅ yaha "user"
 
+// 🔥 CHECK LOGIN
 if(!userId){
     alert("Login first!");
 }
 
-// 🔥 LOAD DATA (FIXED TABLE)
+// 🔥 LOAD DATA
 async function loadData(){
 
     let {data, error} = await client
-        .from("admin winning")   // 👈 IMPORTANT CHANGE
+        .from("admin wining")   // ✅ EXACT TABLE NAME
         .select("*")
-        .eq("user_id", userId)
+        .eq("User id", userId) // ✅ EXACT COLUMN NAME
         .order("id",{ascending:false});
 
     if(error){
         console.log(error);
+        document.getElementById("list").innerHTML = "Error loading";
         return;
     }
 
@@ -61,7 +63,9 @@ async function loadData(){
             let amount = item.amount || 0;
             total += amount;
 
-            let date = new Date(item.created_at).toLocaleString();
+            let date = item.created_at 
+                ? new Date(item.created_at).toLocaleString()
+                : "No Date";
 
             html += `
             <div class="card">
