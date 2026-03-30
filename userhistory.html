@@ -91,36 +91,54 @@ async function loadHistory(){
 
     data.forEach(item=>{
 
-        let numbers = [];
+        if(!item.data) return;
+
+        let arr;
 
         try{
-            let parsed = JSON.parse(item.data || "[]");
-
-            // ✅ अगर array है
-            if(Array.isArray(parsed)){
-                numbers = parsed;
-            }
-            // ✅ अगर object है (old data)
-            else if(typeof parsed === "object"){
-                numbers = Object.entries(parsed).map(([k,v])=>({
-                    number: k,
-                    amount: typeof v === "object" ? v.amount || v.value : v
-                }));
-            }
-
-        }catch(e){
-            console.log("Bad Data Skip:", item.data);
-            return; // ❌ खराब row skip
+            arr = JSON.parse(item.data);
+        }catch{
+            return;
         }
+
+        if(!Array.isArray(arr)) return;
 
         let date = new Date(item.created_at).toLocaleString();
 
-        numbers.forEach(n => {
+        arr.forEach(n => {
 
-            let num = n.number ?? "00";
-            let amount = n.amount ?? 0;
+            let num = "";
+            let amount = 0;
 
-            let formattedNum = String(num).padStart(2,'0');
+            // ❌ ignore typing/image
+            if(n.number === "TYPING") return;
+
+            // ✅ format 1 (number/amount)
+            if(n.number && n.amount){
+                num = String(n.number).padStart(2,'0');
+                amount = n.amount;
+            }
+
+            // ✅ format 2 (num/a copy-paste)
+            else if(n.num && n.a){
+                num = String(n.num).padStart(2,'0');
+                amount = n.a;
+            }
+
+            // ✅ format 3 (A/B andar bahar)
+            else if(n.type && n.number != null){
+                if(n.type === "A"){
+                    num = "A" + n.number;
+                }else if(n.type === "B"){
+                    num = "B" + n.number;
+                }
+                amount = n.amount || 0;
+            }
+
+            // ❌ बाकी सब ignore
+            else{
+                return;
+            }
 
             html += `
             <div class="card">
@@ -130,7 +148,7 @@ async function loadHistory(){
                 </div>
 
                 <div class="row bet">
-                    <div>Bet No: ${formattedNum}</div>
+                    <div>Bet No: ${num}</div>
                     <div class="amount">₹ ${amount}</div>
                 </div>
             </div>
