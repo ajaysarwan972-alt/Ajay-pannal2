@@ -2,83 +2,48 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dealer Game</title>
+<title>Admin History</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{margin:0;background:#020817;font-family:Arial;color:#00e5ff;}
+body{background:#f2f2f2;font-family:Arial;margin:0;}
 
-#dealerId{
-position:fixed;left:10px;top:10px;
-background:green;color:#fff;padding:8px 15px;border-radius:25px;
-}
-
-#wallet{
-position:fixed;right:10px;top:10px;
-background:red;color:#fff;padding:8px 15px;border-radius:25px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(10,1fr);
-gap:6px;
-padding:10px;
-margin-top:70px;
-margin-bottom:80px;
-}
-
-.box{
-border:1px solid #0ff;
-border-radius:10px;
-padding:6px;
-text-align:center;
-}
-
-.section{padding:10px;}
-
-.smallGrid{
-display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:8px;
-}
-
-.sbox{
-background:#111;
-border-radius:10px;
-padding:8px;
-text-align:center;
-}
-
-#totalBox{
-position:fixed;
-bottom:0;
-width:100%;
-background:linear-gradient(to right,blue,red);
-color:#fff;
-text-align:center;
+.header{
+background:#fff;
 padding:15px;
+text-align:center;
 font-weight:bold;
+}
+
+.card{
+background:#fff;
+margin:10px;
+padding:15px;
+border-radius:12px;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+}
+
+.market{color:red;font-weight:bold;}
+.date{font-size:12px;color:#666;}
+
+.amount{
+background:red;
+color:#fff;
+padding:5px 10px;
+border-radius:6px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="dealerId">ID</div>
-<div id="wallet">₹ 0</div>
-
-<div class="grid" id="grid"></div>
-
-<div class="section">
-<h3>Single Andar</h3>
-<div class="smallGrid" id="andar"></div>
-
-<h3>Single Bahar</h3>
-<div class="smallGrid" id="bahar"></div>
-</div>
-
-<div id="totalBox">Total: ₹ 0</div>
+<div class="header">Admin History</div>
+<div id="history"></div>
 
 <script>
 
@@ -87,132 +52,96 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-const dealer = JSON.parse(localStorage.getItem("dealer"));
+async function loadHistory(){
 
-/* TOP */
-async function loadTop(){
-let {data} = await client.from("dealers").select("balance").eq("id", dealer.id).single();
-wallet.innerText="₹ "+(data?.balance||0);
-dealerId.innerText="ID: "+dealer.id;
-}
-loadTop();
+let {data} = await client
+.from("history")
+.select("*")
+.order("id",{ascending:false});
 
-/* MAIN GRID */
-for(let i=0;i<100;i++){
-let n=i.toString().padStart(2,'0');
-grid.innerHTML+=`<div class="box">${n}<div id="amt_${n}">0</div></div>`;
-}
+let html="";
 
-/* ANDAR (number×) */
-for(let i=0;i<10;i++){
-andar.innerHTML+=`<div class="sbox">${i}×<div id="andar_${i}">0</div></div>`;
-}
-
-/* BAHAR (×number) */
-for(let i=0;i<10;i++){
-bahar.innerHTML+=`<div class="sbox">×${i}<div id="bahar_${i}">0</div></div>`;
-}
-
-/* DATA LOAD */
-async function loadData(){
-
-let {data} = await client.from("history").select("*");
-
-let map={}, andarMap={}, baharMap={}, total=0;
-
-data.forEach(row=>{
-
-if(!row.data) return;
+data.forEach(item=>{
 
 let numbers=[];
 
 try{
-numbers = JSON.parse(row.data);
-}catch{
-return;
+
+if(!item.data) return;
+
+let parsed = typeof item.data==="string"
+? JSON.parse(item.data)
+: item.data;
+
+if(!Array.isArray(parsed)) return;
+
+parsed.forEach(p=>{
+
+if(!p || p.number==="TYPING") return;
+
+let num="";
+let amt=0;
+
+/* NORMAL */
+if(p.number!==undefined && p.amount!==undefined && !p.type){
+num=String(p.number).padStart(2,'0');
+amt=Number(p.amount);
 }
 
-numbers.forEach(n=>{
-
-/* ❌ typing ignore */
-if(n.number==="TYPING") return;
-
-/* ✅ NORMAL */
-if(n.number && n.amount){
-
-let num = String(n.number).padStart(2,'0');
-let amt = Number(n.amount)||0;
-
-map[num]=(map[num]||0)+amt;
-total+=amt;
-
-let a=num%10;
-let b=Math.floor(num/10);
-
-andarMap[a]=(andarMap[a]||0)+amt;
-baharMap[b]=(baharMap[b]||0)+amt;
-}
-
-/* ✅ COPY PASTE */
-if(n.num && n.a){
-
-let num = String(n.num).padStart(2,'0');
-let amt = Number(n.a)||0;
-
-map[num]=(map[num]||0)+amt;
-total+=amt;
-
-let a=num%10;
-let b=Math.floor(num/10);
-
-andarMap[a]=(andarMap[a]||0)+amt;
-baharMap[b]=(baharMap[b]||0)+amt;
-}
-
-/* ✅ A/B FORMAT */
-if(n.type){
-
-let digit = Number(n.number);
-let amt = Number(n.amount)||0;
-
-if(n.type==="A"){
-andarMap[digit]=(andarMap[digit]||0)+amt;
-}
-
-if(n.type==="B"){
-baharMap[digit]=(baharMap[digit]||0)+amt;
-}
-
-total+=amt;
-}
-
-});
-
-});
-
-/* MAIN GRID FILL */
-for(let i=0;i<100;i++){
-let n=i.toString().padStart(2,'0');
-document.getElementById("amt_"+n).innerText = map[n]||0;
+/* COPY PASTE */
+else if(p.num!==undefined && p.a!==undefined){
+num=String(p.num).padStart(2,'0');
+amt=Number(p.a);
 }
 
 /* ANDAR */
-for(let i=0;i<10;i++){
-document.getElementById("andar_"+i).innerText = andarMap[i]||0;
+else if(p.type==="A"){
+num=p.number+"×";
+amt=Number(p.amount||0);
 }
 
 /* BAHAR */
-for(let i=0;i<10;i++){
-document.getElementById("bahar_"+i).innerText = baharMap[i]||0;
+else if(p.type==="B"){
+num="×"+p.number;
+amt=Number(p.amount||0);
 }
 
-/* TOTAL */
-document.getElementById("totalBox").innerText="Total: ₹ "+total;
+/* PUSH */
+if(num!=="" && !isNaN(amt)){
+numbers.push({number:num,amount:amt});
+}
+
+});
+
+}catch(e){
+console.log("error",item.data);
+}
+
+/* SHOW */
+numbers.forEach(n=>{
+
+html+=`
+<div class="card">
+<div class="row">
+<div class="market">${item.market}</div>
+<div class="date">${new Date(item.created_at).toLocaleString()}</div>
+</div>
+<div class="row">
+<div>User: ${item.user_id} | Bet No: ${n.number}</div>
+<div class="amount">₹ ${n.amount}</div>
+</div>
+</div>
+`;
+
+});
+
+});
+
+document.getElementById("history").innerHTML = html || "No Data";
 
 }
 
-loadData();
-setInterval(()=>{loadData();loadTop();},5000);
+loadHistory();
 
 </script>
 
