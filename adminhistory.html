@@ -2,214 +2,217 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin History</title>
+<title>Dealer Game</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{
-    background:#f2f2f2;
-    font-family:Arial;
-    margin:0;
+body{margin:0;background:#020817;font-family:Arial;color:#00e5ff;}
+
+#dealerId{
+position:fixed;left:10px;top:10px;
+background:green;color:#fff;padding:8px 15px;border-radius:25px;
 }
 
-.header{
-  background:#fff;
-  padding:15px;
-  text-align:center;
-  font-weight:bold;
+#wallet{
+position:fixed;right:10px;top:10px;
+background:red;color:#fff;padding:8px 15px;border-radius:25px;
 }
 
-.filters{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    padding:10px;
-    background:#fff;
+.grid{
+display:grid;
+grid-template-columns:repeat(10,1fr);
+gap:6px;
+padding:10px;
+margin-top:70px;
+margin-bottom:80px;
 }
 
-.filters select, .filters input{
-    padding:8px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    flex:1;
+.box{
+border:1px solid #0ff;
+border-radius:10px;
+padding:6px;
+text-align:center;
 }
 
-.filters button{
-    padding:8px 12px;
-    border:none;
-    background:#28a745;
-    color:#fff;
-    border-radius:8px;
+.section{padding:10px;}
+
+.smallGrid{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:8px;
 }
 
-.card{
-    background:#fff;
-    margin:10px;
-    padding:15px;
-    border-radius:12px;
+.sbox{
+background:#111;
+border-radius:10px;
+padding:8px;
+text-align:center;
 }
 
-.row{
-    display:flex;
-    justify-content:space-between;
-}
-
-.market{
-    color:red;
-    font-weight:bold;
-}
-
-.date{
-    font-size:12px;
-    color:#666;
-}
-
-.amount{
-    background:red;
-    color:#fff;
-    padding:5px 10px;
-    border-radius:6px;
+#totalBox{
+position:fixed;
+bottom:0;
+width:100%;
+background:linear-gradient(to right,blue,red);
+color:#fff;
+text-align:center;
+padding:15px;
+font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">Admin History</div>
+<div id="dealerId">ID</div>
+<div id="wallet">₹ 0</div>
 
-<div class="filters">
-    <select id="filterUser"></select>
-    <select id="filterMarket"></select>
-    <input type="date" id="startDate">
-    <input type="date" id="endDate">
-    <button onclick="loadHistory()">Apply</button>
+<div class="grid" id="grid"></div>
+
+<div class="section">
+<h3>Single Andar</h3>
+<div class="smallGrid" id="andar"></div>
+
+<h3>Single Bahar</h3>
+<div class="smallGrid" id="bahar"></div>
 </div>
 
-<div id="history"></div>
+<div id="totalBox">Total: ₹ 0</div>
 
 <script>
+
 const client = supabase.createClient(
 "https://katbdbzoufiblnnsoxkk.supabase.co",
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-// 🔥 LOAD DROPDOWN DATA (AUTO FROM SUPABASE)
-async function loadFilters(){
+const dealer = JSON.parse(localStorage.getItem("dealer"));
 
-    const { data, error } = await client
-        .from("history")
-        .select("user_id, market");
+/* TOP */
+async function loadTop(){
+let {data} = await client.from("dealers").select("balance").eq("id", dealer.id).single();
+wallet.innerText="₹ "+(data?.balance||0);
+dealerId.innerText="ID: "+dealer.id;
+}
+loadTop();
 
-    if(error){
-        console.log(error);
-        return;
-    }
-
-    let users = new Set();
-    let markets = new Set();
-
-    data.forEach(item=>{
-        if(item.user_id) users.add(item.user_id);
-        if(item.market) markets.add(item.market);
-    });
-
-    // USER DROPDOWN
-    let userHTML = `<option value="">All Users</option>`;
-    users.forEach(u=>{
-        userHTML += `<option value="${u}">${u}</option>`;
-    });
-    document.getElementById("filterUser").innerHTML = userHTML;
-
-    // MARKET DROPDOWN
-    let marketHTML = `<option value="">All Market</option>`;
-    markets.forEach(m=>{
-        marketHTML += `<option value="${m}">${m}</option>`;
-    });
-    document.getElementById("filterMarket").innerHTML = marketHTML;
+/* MAIN GRID */
+for(let i=0;i<100;i++){
+let n=i.toString().padStart(2,'0');
+grid.innerHTML+=`<div class="box">${n}<div id="amt_${n}">0</div></div>`;
 }
 
-// 🔥 LOAD DATA
-async function loadHistory(){
-
-    const user = document.getElementById("filterUser").value;
-    const market = document.getElementById("filterMarket").value;
-    const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
-
-    let query = client.from("history").select("*").order("id", { ascending: false });
-
-    if(user){
-        query = query.eq("user_id", user);
-    }
-
-    if(market){
-        query = query.eq("market", market);
-    }
-
-    if(start){
-        query = query.gte("created_at", start + "T00:00:00");
-    }
-
-    if(end){
-        query = query.lte("created_at", end + "T23:59:59");
-    }
-
-    const { data, error } = await query;
-
-    if(error){
-        console.log(error);
-        return;
-    }
-
-    let html = "";
-
-    data.forEach(item=>{
-
-        let numbers = [];
-
-        try{
-            let parsed = JSON.parse(item.data || "[]");
-
-            if(Array.isArray(parsed)){
-                numbers = parsed;
-            } else if(typeof parsed === "object"){
-                numbers = Object.entries(parsed).map(([k,v])=>({
-                    number: k,
-                    amount: typeof v === "object" ? v.amount || v.value : v
-                }));
-            }
-        }catch(e){
-            return;
-        }
-
-        let date = new Date(item.created_at).toLocaleString();
-
-        numbers.forEach(n=>{
-            let num = String(n.number ?? "00").padStart(2,'0');
-            let amount = n.amount ?? 0;
-
-            html += `
-            <div class="card">
-                <div class="row">
-                    <div class="market">${item.market}</div>
-                    <div class="date">${date}</div>
-                </div>
-                <div class="row">
-                    <div>User: ${item.user_id} | Bet No: ${num}</div>
-                    <div class="amount">₹ ${amount}</div>
-                </div>
-            </div>
-            `;
-        });
-    });
-
-    document.getElementById("history").innerHTML = html || "No Data Found";
+/* ANDAR (number×) */
+for(let i=0;i<10;i++){
+andar.innerHTML+=`<div class="sbox">${i}×<div id="andar_${i}">0</div></div>`;
 }
 
-// 🔥 INIT
-loadFilters();
-loadHistory();
+/* BAHAR (×number) */
+for(let i=0;i<10;i++){
+bahar.innerHTML+=`<div class="sbox">×${i}<div id="bahar_${i}">0</div></div>`;
+}
+
+/* DATA LOAD */
+async function loadData(){
+
+let {data} = await client.from("history").select("*");
+
+let map={}, andarMap={}, baharMap={}, total=0;
+
+data.forEach(row=>{
+
+if(!row.data) return;
+
+let numbers=[];
+
+try{
+numbers = JSON.parse(row.data);
+}catch{
+return;
+}
+
+numbers.forEach(n=>{
+
+/* ❌ typing ignore */
+if(n.number==="TYPING") return;
+
+/* ✅ NORMAL */
+if(n.number && n.amount){
+
+let num = String(n.number).padStart(2,'0');
+let amt = Number(n.amount)||0;
+
+map[num]=(map[num]||0)+amt;
+total+=amt;
+
+let a=num%10;
+let b=Math.floor(num/10);
+
+andarMap[a]=(andarMap[a]||0)+amt;
+baharMap[b]=(baharMap[b]||0)+amt;
+}
+
+/* ✅ COPY PASTE */
+if(n.num && n.a){
+
+let num = String(n.num).padStart(2,'0');
+let amt = Number(n.a)||0;
+
+map[num]=(map[num]||0)+amt;
+total+=amt;
+
+let a=num%10;
+let b=Math.floor(num/10);
+
+andarMap[a]=(andarMap[a]||0)+amt;
+baharMap[b]=(baharMap[b]||0)+amt;
+}
+
+/* ✅ A/B FORMAT */
+if(n.type){
+
+let digit = Number(n.number);
+let amt = Number(n.amount)||0;
+
+if(n.type==="A"){
+andarMap[digit]=(andarMap[digit]||0)+amt;
+}
+
+if(n.type==="B"){
+baharMap[digit]=(baharMap[digit]||0)+amt;
+}
+
+total+=amt;
+}
+
+});
+
+});
+
+/* MAIN GRID FILL */
+for(let i=0;i<100;i++){
+let n=i.toString().padStart(2,'0');
+document.getElementById("amt_"+n).innerText = map[n]||0;
+}
+
+/* ANDAR */
+for(let i=0;i<10;i++){
+document.getElementById("andar_"+i).innerText = andarMap[i]||0;
+}
+
+/* BAHAR */
+for(let i=0;i<10;i++){
+document.getElementById("bahar_"+i).innerText = baharMap[i]||0;
+}
+
+/* TOTAL */
+document.getElementById("totalBox").innerText="Total: ₹ "+total;
+
+}
+
+loadData();
+setInterval(()=>{loadData();loadTop();},5000);
 
 </script>
 
