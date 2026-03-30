@@ -7,35 +7,46 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body{background:#f2f2f2;font-family:Arial;margin:0;}
+body{
+    background:#f2f2f2;
+    font-family:Arial;
+    margin:0;
+}
 
 .header{
-background:#fff;
-padding:15px;
-text-align:center;
-font-weight:bold;
+  background:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
 }
 
 .card{
-background:#fff;
-margin:10px;
-padding:15px;
-border-radius:12px;
+    background:#fff;
+    margin:10px;
+    padding:15px;
+    border-radius:12px;
 }
 
 .row{
-display:flex;
-justify-content:space-between;
+    display:flex;
+    justify-content:space-between;
 }
 
-.market{color:red;font-weight:bold;}
-.date{font-size:12px;color:#666;}
+.market{
+    color:red;
+    font-weight:bold;
+}
+
+.date{
+    font-size:12px;
+    color:#666;
+}
 
 .amount{
-background:red;
-color:#fff;
-padding:5px 10px;
-border-radius:6px;
+    background:red;
+    color:#fff;
+    padding:5px 10px;
+    border-radius:6px;
 }
 </style>
 </head>
@@ -54,91 +65,103 @@ const client = supabase.createClient(
 
 async function loadHistory(){
 
-let {data} = await client
-.from("history")
-.select("*")
-.order("id",{ascending:false});
+    let {data,error} = await client
+    .from("history")
+    .select("*")
+    .order("id",{ascending:false});
 
-let html="";
+    if(error){
+        console.log(error);
+        return;
+    }
 
-data.forEach(item=>{
+    let html="";
 
-let numbers=[];
+    data.forEach(item=>{
 
-try{
+        let numbers=[];
 
-if(!item.data) return;
+        try{
 
-let parsed = typeof item.data==="string"
-? JSON.parse(item.data)
-: item.data;
+            if(!item.data) return;
 
-if(!Array.isArray(parsed)) return;
+            let parsed;
 
-parsed.forEach(p=>{
+            try{
+                parsed = typeof item.data === "string"
+                    ? JSON.parse(item.data)
+                    : item.data;
+            }catch{
+                return;
+            }
 
-if(!p || p.number==="TYPING") return;
+            if(!parsed) return;
 
-let num="";
-let amt=0;
+            if(!Array.isArray(parsed)){
+                parsed = [parsed];
+            }
 
-/* NORMAL */
-if(p.number!==undefined && p.amount!==undefined && !p.type){
-num=String(p.number).padStart(2,'0');
-amt=Number(p.amount);
-}
+            parsed.forEach(p=>{
 
-/* COPY PASTE */
-else if(p.num!==undefined && p.a!==undefined){
-num=String(p.num).padStart(2,'0');
-amt=Number(p.a);
-}
+                if(!p) return;
 
-/* ANDAR */
-else if(p.type==="A"){
-num=p.number+"×";
-amt=Number(p.amount||0);
-}
+                let num="";
+                let amt=0;
 
-/* BAHAR */
-else if(p.type==="B"){
-num="×"+p.number;
-amt=Number(p.amount||0);
-}
+                let number = p.number ?? p.num ?? null;
+                let amount = p.amount ?? p.a ?? p.value ?? 0;
 
-/* PUSH */
-if(num!=="" && !isNaN(amt)){
-numbers.push({number:num,amount:amt});
-}
+                // ❌ skip typing
+                if(number === "TYPING") return;
 
-});
+                // ✅ ANDAR
+                if(p.type === "A"){
+                    num = number + "×";
+                }
 
-}catch(e){
-console.log("error",item.data);
-}
+                // ✅ BAHAR
+                else if(p.type === "B"){
+                    num = "×" + number;
+                }
 
-/* SHOW */
-numbers.forEach(n=>{
+                // ✅ NORMAL + COPY
+                else if(number !== null){
+                    num = String(number).padStart(2,'0');
+                }
 
-html+=`
-<div class="card">
-<div class="row">
-<div class="market">${item.market}</div>
-<div class="date">${new Date(item.created_at).toLocaleString()}</div>
-</div>
-<div class="row">
-<div>User: ${item.user_id} | Bet No: ${n.number}</div>
-<div class="amount">₹ ${n.amount}</div>
-</div>
-</div>
-`;
+                if(num !== ""){
+                    numbers.push({
+                        number:num,
+                        amount:Number(amount) || 0
+                    });
+                }
 
-});
+            });
 
-});
+        }catch(e){
+            console.log("BAD DATA:", item.data);
+        }
 
-document.getElementById("history").innerHTML = html || "No Data";
+        numbers.forEach(n=>{
 
+            html+=`
+            <div class="card">
+                <div class="row">
+                    <div class="market">${item.market}</div>
+                    <div class="date">${new Date(item.created_at).toLocaleString()}</div>
+                </div>
+                <div class="row">
+                    <div>User: ${item.user_id} | Bet No: ${n.number}</div>
+                    <div class="amount">₹ ${n.amount}</div>
+                </div>
+            </div>
+            `;
+
+        });
+
+    });
+
+    document.getElementById("history").innerHTML = html || "No Data Found";
 }
 
 loadHistory();
