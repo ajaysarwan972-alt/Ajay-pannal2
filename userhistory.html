@@ -110,32 +110,34 @@ async function loadHistory(){
             let num = "";
             let amount = 0;
 
-            // ❌ ignore typing/image
+            // ❌ ignore typing
             if(n.number === "TYPING") return;
 
-            // ✅ format 1 (number/amount)
-            if(n.number && n.amount){
+            // ✅ ANDAR (× logic)
+            if(n.type === "A" && n.number != null){
+                num = n.number + "×";
+                amount = n.amount || 0;
+            }
+
+            // ✅ BAHAR (× logic)
+            else if(n.type === "B" && n.number != null){
+                num = "×" + n.number;
+                amount = n.amount || 0;
+            }
+
+            // ✅ NORMAL
+            else if(n.number && n.amount){
                 num = String(n.number).padStart(2,'0');
                 amount = n.amount;
             }
 
-            // ✅ format 2 (num/a copy-paste)
+            // ✅ COPY PASTE
             else if(n.num && n.a){
                 num = String(n.num).padStart(2,'0');
                 amount = n.a;
             }
 
-            // ✅ format 3 (A/B andar bahar)
-            else if(n.type && n.number != null){
-                if(n.type === "A"){
-                    num = "A" + n.number;
-                }else if(n.type === "B"){
-                    num = "B" + n.number;
-                }
-                amount = n.amount || 0;
-            }
-
-            // ❌ बाकी सब ignore
+            // ❌ बाकी ignore
             else{
                 return;
             }
