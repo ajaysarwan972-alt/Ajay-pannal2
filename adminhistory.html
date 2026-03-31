@@ -27,7 +27,7 @@ border:1px solid #ccc;
 .card{background:#fff;margin:10px;padding:15px;border-radius:12px;}
 .row{display:flex;justify-content:space-between;}
 .market{color:red;font-weight:bold;}
-.date{font-size:12px;color:#666;}
+.date{font-size:12px;color:#666;margin-top:5px;}
 .amount{background:red;color:#fff;padding:5px 10px;border-radius:6px;}
 </style>
 </head>
@@ -36,7 +36,7 @@ border:1px solid #ccc;
 
 <div class="header">Admin History</div>
 
-<!-- 🔥 FILTERS -->
+<!-- FILTERS -->
 <div class="filters">
 <select id="dateFilter" onchange="filterData()">
 <option value="">All Date</option>
@@ -67,7 +67,7 @@ const client = supabase.createClient(
 
 let fullData = [];
 
-// 🔥 LOAD HISTORY
+// LOAD
 async function loadHistory(){
 
 let {data,error} = await client
@@ -79,22 +79,20 @@ if(error){ console.log(error); return; }
 
 fullData = data;
 
-// 🔥 AUTO MARKET (DB se)
+// AUTO MARKET
 let markets = [...new Set(data.map(d => d.market))];
-let marketHTML = `<option value="">All Market</option>`;
+let html = `<option value="">All Market</option>`;
 
 markets.forEach(m=>{
-if(m){
-marketHTML += `<option value="${m}">${m}</option>`;
-}
+if(m) html += `<option value="${m}">${m}</option>`;
 });
 
-document.getElementById("marketFilter").innerHTML = marketHTML;
+document.getElementById("marketFilter").innerHTML = html;
 
 renderData(fullData);
 }
 
-// 🔥 RENDER
+// RENDER
 function renderData(data){
 
 let html="";
@@ -134,18 +132,23 @@ amount:Number(amount)||0
 
 }catch(e){ return; }
 
+// 🔥 HAR ENTRY PRINT
 numbers.forEach(n=>{
 
 html+=`
 <div class="card">
+
 <div class="row">
 <div class="market">${item.market}</div>
-<div class="date">${new Date(item.created_at).toLocaleString()}</div>
-</div>
-<div class="row">
-<div>User: ${item.user_id} | Bet No: ${n.number}</div>
 <div class="amount">₹ ${n.amount}</div>
 </div>
+
+<div>User: ${item.user_id} | Bet No: ${n.number}</div>
+
+<div class="date">
+${new Date(item.created_at).toLocaleString()}
+</div>
+
 </div>
 `;
 
@@ -156,7 +159,7 @@ html+=`
 document.getElementById("history").innerHTML = html || "No Data Found";
 }
 
-// 🔥 FILTER
+// FILTER
 function filterData(){
 
 let dateVal = document.getElementById("dateFilter").value;
@@ -192,7 +195,7 @@ match = false;
 }
 }
 
-// AMOUNT (total calc fix)
+// AMOUNT
 if(amtVal){
 let totalAmt = 0;
 
