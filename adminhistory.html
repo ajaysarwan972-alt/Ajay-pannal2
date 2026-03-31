@@ -46,10 +46,6 @@ border:1px solid #ccc;
 
 <select id="marketFilter" onchange="filterData()">
 <option value="">All Market</option>
-<option value="JODI">JODI</option>
-<option value="HARUF">HARUF</option>
-<option value="CROSSING">CROSSING</option>
-<option value="COPY">COPY</option>
 </select>
 
 <select id="amountFilter" onchange="filterData()">
@@ -69,8 +65,9 @@ const client = supabase.createClient(
 "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 );
 
-let fullData = []; // 🔥 store original data
+let fullData = [];
 
+// 🔥 LOAD HISTORY
 async function loadHistory(){
 
 let {data,error} = await client
@@ -80,10 +77,24 @@ let {data,error} = await client
 
 if(error){ console.log(error); return; }
 
-fullData = data; // save
+fullData = data;
+
+// 🔥 AUTO MARKET (DB se)
+let markets = [...new Set(data.map(d => d.market))];
+let marketHTML = `<option value="">All Market</option>`;
+
+markets.forEach(m=>{
+if(m){
+marketHTML += `<option value="${m}">${m}</option>`;
+}
+});
+
+document.getElementById("marketFilter").innerHTML = marketHTML;
+
 renderData(fullData);
 }
 
+// 🔥 RENDER
 function renderData(data){
 
 let html="";
@@ -145,7 +156,7 @@ html+=`
 document.getElementById("history").innerHTML = html || "No Data Found";
 }
 
-// 🔥 FILTER FUNCTION
+// 🔥 FILTER
 function filterData(){
 
 let dateVal = document.getElementById("dateFilter").value;
@@ -156,12 +167,12 @@ let filtered = fullData.filter(item=>{
 
 let match = true;
 
-// ✅ MARKET
+// MARKET
 if(marketVal && item.market !== marketVal){
 match = false;
 }
 
-// ✅ DATE
+// DATE
 if(dateVal){
 let itemDate = new Date(item.created_at);
 let today = new Date();
@@ -181,7 +192,7 @@ match = false;
 }
 }
 
-// ✅ AMOUNT (total per item)
+// AMOUNT (total calc fix)
 if(amtVal){
 let totalAmt = 0;
 
