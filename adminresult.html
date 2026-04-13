@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="font-family:Arial;padding:15px;">
+
+<h3>Add Result</h3>
+
+<input id="market" placeholder="Market Name (e.g. DISAWAR)">
+<br><br>
+
+<input id="number" placeholder="Result (00-99)">
+<br><br>
+
+<button onclick="save()">SAVE</button>
+
+<script>
+function save(){
+
+  let market = document.getElementById("market").value.trim()
+  let number = document.getElementById("number").value.trim()
+
+  if(!market || !number) return alert("Dono daal")
+
+  let data = JSON.parse(localStorage.getItem("results")) || {}
+
+  if(!data[market]){
+    data[market] = []
+  }
+
+  data[market].unshift({
+    number:number,
+    date:new Date().toISOString().split("T")[0]
+  })
+
+  localStorage.setItem("results", JSON.stringify(data))
+
+  alert("Saved ✅")
+
+  document.getElementById("market").value=""
+  document.getElementById("number").value=""
+}
+</script>
+
+</body>
+</html>
