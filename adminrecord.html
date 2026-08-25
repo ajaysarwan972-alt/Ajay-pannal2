@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,12 +34,18 @@ body{
     border-radius:10px;
 }
 
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
 select,
 input{
     width:100%;
     box-sizing:border-box;
     padding:12px;
-    margin-bottom:12px;
+    margin-bottom:15px;
     border:1px solid #ccc;
     border-radius:7px;
     font-size:16px;
@@ -61,6 +66,16 @@ button:disabled{
     background:#999;
 }
 
+.date-box{
+    background:#eee;
+    padding:12px;
+    border-radius:7px;
+    margin-bottom:15px;
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+}
+
 .status{
     text-align:center;
     padding:10px;
@@ -74,7 +89,6 @@ button:disabled{
 
 table{
     width:100%;
-    min-width:600px;
     border-collapse:collapse;
     background:white;
 }
@@ -91,14 +105,6 @@ td{
     padding:9px;
 }
 
-.delete{
-    background:red;
-    width:auto;
-    padding:7px 12px;
-    margin:0;
-    font-size:14px;
-}
-
 </style>
 
 </head>
@@ -112,28 +118,25 @@ Admin Result Panel
 </div>
 
 
-<!-- RESULT FORM -->
-
 <div class="box">
 
+<!-- CURRENT DATE -->
 
-<!-- DATE -->
+<label>Current Date</label>
 
-<select id="date">
-
-<option value="">
-Select Date
-</option>
-
-</select>
+<div class="date-box" id="currentDate">
+Loading...
+</div>
 
 
 <!-- MARKET -->
 
+<label>Market</label>
+
 <select id="market">
 
 <option value="">
-Loading Market...
+Loading Markets...
 </option>
 
 </select>
@@ -141,10 +144,13 @@ Loading Market...
 
 <!-- RESULT -->
 
+<label>Result</label>
+
 <input
 type="text"
 id="result"
 maxlength="2"
+inputmode="numeric"
 placeholder="Enter Result">
 
 
@@ -158,19 +164,16 @@ SUBMIT
 
 </button>
 
-
 </div>
 
 
-<div id="status"
-class="status">
-</div>
+<div id="status" class="status"></div>
 
 
 <!-- SAVED RESULTS -->
 
 <h3 style="text-align:center;">
-Saved Results
+Today's Results
 </h3>
 
 
@@ -181,18 +184,12 @@ Saved Results
 <thead>
 
 <tr>
-
-<th>ID</th>
 <th>Date</th>
 <th>Market</th>
 <th>Result</th>
-<th>Created At</th>
-<th>Action</th>
-
 </tr>
 
 </thead>
-
 
 <tbody id="resultBody">
 
@@ -203,62 +200,109 @@ Saved Results
 </div>
 
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
 
 
-// =====================================
-// SUPABASE
-// =====================================
+// ============================================
+// SUPABASE CONNECTION
+// ============================================
 
 const client = supabase.createClient(
 
-    "https://katbdbzoufiblnnsoxkk.supabase.co",
+"https://katbdbzoufiblnnsoxkk.supabase.co",
 
-    "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 
 );
 
 
-// =====================================
-// DATE DROPDOWN
-// =====================================
+// ============================================
+// DATE
+// ============================================
 
-const dateSelect =
-document.getElementById("date");
+// Date 1:00 AM par change hogi.
+
+function getCurrentDate(){
+
+    const now = new Date();
+
+    // India time
+    const indiaTime = new Date(
+        now.toLocaleString(
+            "en-US",
+            {
+                timeZone:"Asia/Kolkata"
+            }
+        )
+    );
 
 
-for(let i = 1; i <= 31; i++){
+    // Agar 1 AM se pehle hai
+    // to previous calendar date use hogi
 
-    dateSelect.innerHTML += `
+    if(indiaTime.getHours() < 1){
 
-        <option value="${i}">
-            ${i}
-        </option>
+        indiaTime.setDate(
+            indiaTime.getDate() - 1
+        );
 
-    `;
+    }
+
+
+    const year =
+        indiaTime.getFullYear();
+
+    const month =
+        String(
+            indiaTime.getMonth() + 1
+        ).padStart(2,"0");
+
+    const day =
+        String(
+            indiaTime.getDate()
+        ).padStart(2,"0");
+
+
+    return `${year}-${month}-${day}`;
 
 }
 
 
-// =====================================
-// LOAD MARKET FROM login.name
-// =====================================
+// ============================================
+// SHOW CURRENT DATE
+// ============================================
+
+function showDate(){
+
+    const date =
+        getCurrentDate();
+
+    document.getElementById(
+        "currentDate"
+    ).innerText = date;
+
+}
+
+
+// ============================================
+// LOAD MARKET
+// FROM results_chart.market
+// ============================================
 
 async function loadMarkets(){
 
     const marketSelect =
-    document.getElementById("market");
+        document.getElementById("market");
 
 
     const { data, error } =
 
         await client
-        .from("Game result")
-        .select("name");
+        .from("results_chart")
+        .select("market");
 
 
     if(error){
@@ -267,14 +311,17 @@ async function loadMarkets(){
 
         marketSelect.innerHTML = `
 
-            <option value="">
-                Market Load Error
-            </option>
+        <option value="">
+            Market Load Error
+        </option>
 
         `;
 
-        document.getElementById("status").innerText =
-            "Market load error: " + error.message;
+        document.getElementById(
+            "status"
+        ).innerText =
+            "Market load error: " +
+            error.message;
 
         return;
     }
@@ -294,9 +341,13 @@ async function loadMarkets(){
 
     data.forEach(row => {
 
-        let name =
-        String(row.name || "").trim();
+        const name =
+            String(
+                row.market || ""
+            ).trim();
 
+
+        // Empty aur duplicate market hatao
 
         if(
             name !== "" &&
@@ -312,77 +363,83 @@ async function loadMarkets(){
 
     markets.forEach(name => {
 
-        marketSelect.innerHTML += `
+        const option =
+            document.createElement(
+                "option"
+            );
 
-            <option value="${name}">
-                ${name}
-            </option>
+        option.value = name;
 
-        `;
+        option.textContent = name;
+
+        marketSelect.appendChild(
+            option
+        );
 
     });
 
 
-    document.getElementById("status").innerText =
-        markets.length + " market loaded.";
+    document.getElementById(
+        "status"
+    ).innerText =
+        markets.length +
+        " market loaded.";
 
 }
 
 
-// =====================================
+// ============================================
 // SAVE RESULT
-// =====================================
+// ============================================
 
 async function saveResult(){
 
     const date =
-    document.getElementById("date").value;
+        getCurrentDate();
 
 
     const market =
-    document.getElementById("market").value;
+        document.getElementById(
+            "market"
+        ).value;
 
 
     const result =
-    document.getElementById("result").value.trim();
+        document.getElementById(
+            "result"
+        ).value.trim();
 
 
-    // CHECK DATE
+    // Check market
 
-    if(date === ""){
+    if(!market){
 
-        alert("Date select karo.");
-
-        return;
-    }
-
-
-    // CHECK MARKET
-
-    if(market === ""){
-
-        alert("Market select karo.");
+        alert(
+            "Market select karo."
+        );
 
         return;
     }
 
 
-    // CHECK RESULT
+    // Check result
 
-    if(result === ""){
+    if(!result){
 
-        alert("Result enter karo.");
+        alert(
+            "Result enter karo."
+        );
 
         return;
     }
 
 
-    // ONLY 1 OR 2 DIGIT
+    // Result only 1-2 digit
 
     if(!/^[0-9]{1,2}$/.test(result)){
 
         alert(
-            "Result sirf 1 ya 2 digit ka hona chahiye."
+            "Result 1 ya 2 digit ka hona chahiye."
         );
 
         return;
@@ -390,7 +447,9 @@ async function saveResult(){
 
 
     const button =
-    document.getElementById("submitBtn");
+        document.getElementById(
+            "submitBtn"
+        );
 
 
     button.disabled = true;
@@ -399,9 +458,9 @@ async function saveResult(){
         "Saving...";
 
 
-    // =================================
+    // ========================================
     // INSERT INTO results_chart
-    // =================================
+    // ========================================
 
     const { data, error } =
 
@@ -409,7 +468,7 @@ async function saveResult(){
         .from("results_chart")
         .insert({
 
-            date: Number(date),
+            date: date,
 
             market: market,
 
@@ -425,14 +484,15 @@ async function saveResult(){
         "SUBMIT";
 
 
-    // ERROR
-
     if(error){
 
         console.error(error);
 
-        document.getElementById("status").innerText =
-            "ERROR: " + error.message;
+        document.getElementById(
+            "status"
+        ).innerText =
+            "ERROR: " +
+            error.message;
 
         alert(
             "Supabase Error:\n\n" +
@@ -443,42 +503,50 @@ async function saveResult(){
     }
 
 
-    // SUCCESS
+    // Clear result
 
-    document.getElementById("result").value = "";
-
-
-    document.getElementById("status").innerText =
-        "Result successfully saved in results_chart.";
+    document.getElementById(
+        "result"
+    ).value = "";
 
 
     alert(
-        "Result Supabase mein save ho gaya."
+        "Result successfully saved."
     );
 
 
-    // REFRESH TABLE
+    document.getElementById(
+        "status"
+    ).innerText =
+        "Result saved in results_chart.";
+
 
     loadResults();
 
 }
 
 
-// =====================================
-// LOAD RESULTS
-// =====================================
+// ============================================
+// LOAD TODAY'S RESULTS
+// ============================================
 
 async function loadResults(){
 
+    const today =
+        getCurrentDate();
+
+
     const body =
-    document.getElementById("resultBody");
+        document.getElementById(
+            "resultBody"
+        );
 
 
     body.innerHTML = `
 
         <tr>
 
-            <td colspan="6">
+            <td colspan="3">
                 Loading...
             </td>
 
@@ -491,10 +559,9 @@ async function loadResults(){
 
         await client
         .from("results_chart")
-        .select("*")
-        .order("id", {
-            ascending:false
-        });
+        .select("date,market,result")
+        .eq("date", today)
+        .order("market");
 
 
     if(error){
@@ -503,16 +570,15 @@ async function loadResults(){
 
         body.innerHTML = `
 
-            <tr>
+        <tr>
 
-                <td colspan="6">
+            <td colspan="3">
 
-                    ERROR:
-                    ${error.message}
+                ${error.message}
 
-                </td>
+            </td>
 
-            </tr>
+        </tr>
 
         `;
 
@@ -524,13 +590,13 @@ async function loadResults(){
 
         body.innerHTML = `
 
-            <tr>
+        <tr>
 
-                <td colspan="6">
-                    No Results Found
-                </td>
+            <td colspan="3">
+                Aaj ka koi result nahi hai.
+            </td>
 
-            </tr>
+        </tr>
 
         `;
 
@@ -548,35 +614,15 @@ async function loadResults(){
         <tr>
 
             <td>
-                ${row.id ?? ""}
+                ${row.date}
             </td>
 
             <td>
-                ${row.date ?? ""}
+                ${row.market}
             </td>
 
             <td>
-                ${row.market ?? ""}
-            </td>
-
-            <td>
-                ${row.result ?? ""}
-            </td>
-
-            <td>
-                ${row.created_at ?? ""}
-            </td>
-
-            <td>
-
-                <button
-                class="delete"
-                onclick="deleteResult(${row.id})">
-
-                    Delete
-
-                </button>
-
+                ${row.result}
             </td>
 
         </tr>
@@ -591,53 +637,39 @@ async function loadResults(){
 }
 
 
-// =====================================
-// DELETE RESULT
-// =====================================
+// ============================================
+// AUTOMATIC DATE CHECK
+// ============================================
 
-async function deleteResult(id){
-
-    const ok =
-    confirm(
-        "Kya ye result delete karna hai?"
-    );
+let lastDate =
+    getCurrentDate();
 
 
-    if(!ok){
+setInterval(() => {
 
-        return;
+    const newDate =
+        getCurrentDate();
+
+
+    if(newDate !== lastDate){
+
+        lastDate = newDate;
+
+
+        showDate();
+
+        loadResults();
+
     }
 
-
-    const { error } =
-
-        await client
-        .from("results_chart")
-        .delete()
-        .eq("id", id);
+}, 30000);
 
 
-    if(error){
-
-        console.error(error);
-
-        alert(
-            "Delete Error:\n\n" +
-            error.message
-        );
-
-        return;
-    }
-
-
-    loadResults();
-
-}
-
-
-// =====================================
+// ============================================
 // START
-// =====================================
+// ============================================
+
+showDate();
 
 loadMarkets();
 
@@ -650,4 +682,3 @@ loadResults();
 </body>
 
 </html>
-```
