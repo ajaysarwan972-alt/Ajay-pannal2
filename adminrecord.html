@@ -61,6 +61,12 @@ button:disabled{
     background:#999;
 }
 
+.status{
+    text-align:center;
+    padding:10px;
+    font-weight:bold;
+}
+
 .table-box{
     overflow-x:auto;
     margin:15px;
@@ -88,15 +94,9 @@ td{
 .delete{
     background:red;
     width:auto;
-    margin:0;
     padding:7px 12px;
+    margin:0;
     font-size:14px;
-}
-
-#status{
-    text-align:center;
-    padding:10px;
-    font-weight:bold;
 }
 
 </style>
@@ -112,9 +112,7 @@ Admin Result Panel
 </div>
 
 
-<!-- =========================
-     RESULT ENTRY
-========================= -->
+<!-- RESULT FORM -->
 
 <div class="box">
 
@@ -130,12 +128,12 @@ Select Date
 </select>
 
 
-<!-- MARKET FROM login.name -->
+<!-- MARKET -->
 
 <select id="market">
 
 <option value="">
-Loading Markets...
+Loading Market...
 </option>
 
 </select>
@@ -152,8 +150,9 @@ placeholder="Enter Result">
 
 <!-- SUBMIT -->
 
-<button id="submitBtn"
-onclick="submitResult()">
+<button
+id="submitBtn"
+onclick="saveResult()">
 
 SUBMIT
 
@@ -163,13 +162,12 @@ SUBMIT
 </div>
 
 
-<div id="status">
+<div id="status"
+class="status">
 </div>
 
 
-<!-- =========================
-     SAVED RESULTS
-========================= -->
+<!-- SAVED RESULTS -->
 
 <h3 style="text-align:center;">
 Saved Results
@@ -185,15 +183,10 @@ Saved Results
 <tr>
 
 <th>ID</th>
-
 <th>Date</th>
-
 <th>Market</th>
-
 <th>Result</th>
-
 <th>Created At</th>
-
 <th>Action</th>
 
 </tr>
@@ -201,7 +194,7 @@ Saved Results
 </thead>
 
 
-<tbody id="recordBody">
+<tbody id="resultBody">
 
 </tbody>
 
@@ -211,17 +204,15 @@ Saved Results
 
 
 
-<!-- SUPABASE -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
 
 
-// ==========================================
-// SUPABASE CONNECTION
-// ==========================================
+// =====================================
+// SUPABASE
+// =====================================
 
 const client = supabase.createClient(
 
@@ -232,9 +223,9 @@ const client = supabase.createClient(
 );
 
 
-// ==========================================
+// =====================================
 // DATE DROPDOWN
-// ==========================================
+// =====================================
 
 const dateSelect =
 document.getElementById("date");
@@ -253,23 +244,14 @@ for(let i = 1; i <= 31; i++){
 }
 
 
-// ==========================================
+// =====================================
 // LOAD MARKET FROM login.name
-// ==========================================
+// =====================================
 
 async function loadMarkets(){
 
     const marketSelect =
     document.getElementById("market");
-
-
-    marketSelect.innerHTML = `
-
-        <option value="">
-            Loading Markets...
-        </option>
-
-    `;
 
 
     const { data, error } =
@@ -286,13 +268,13 @@ async function loadMarkets(){
         marketSelect.innerHTML = `
 
             <option value="">
-                Market load error
+                Market Load Error
             </option>
 
         `;
 
         document.getElementById("status").innerText =
-            "Market load nahi hua.";
+            "Market load error: " + error.message;
 
         return;
     }
@@ -332,8 +314,8 @@ async function loadMarkets(){
 
         marketSelect.innerHTML += `
 
-            <option value="${escapeHtml(name)}">
-                ${escapeHtml(name)}
+            <option value="${name}">
+                ${name}
             </option>
 
         `;
@@ -347,32 +329,11 @@ async function loadMarkets(){
 }
 
 
-// ==========================================
-// HTML SAFE TEXT
-// ==========================================
+// =====================================
+// SAVE RESULT
+// =====================================
 
-function escapeHtml(value){
-
-    return String(value)
-
-        .replace(/&/g, "&amp;")
-
-        .replace(/</g, "&lt;")
-
-        .replace(/>/g, "&gt;")
-
-        .replace(/"/g, "&quot;")
-
-        .replace(/'/g, "&#039;");
-
-}
-
-
-// ==========================================
-// SUBMIT RESULT
-// ==========================================
-
-async function submitResult(){
+async function saveResult(){
 
     const date =
     document.getElementById("date").value;
@@ -386,9 +347,9 @@ async function submitResult(){
     document.getElementById("result").value.trim();
 
 
-    // DATE CHECK
+    // CHECK DATE
 
-    if(!date){
+    if(date === ""){
 
         alert("Date select karo.");
 
@@ -396,9 +357,9 @@ async function submitResult(){
     }
 
 
-    // MARKET CHECK
+    // CHECK MARKET
 
-    if(!market){
+    if(market === ""){
 
         alert("Market select karo.");
 
@@ -406,9 +367,9 @@ async function submitResult(){
     }
 
 
-    // RESULT CHECK
+    // CHECK RESULT
 
-    if(!result){
+    if(result === ""){
 
         alert("Result enter karo.");
 
@@ -416,11 +377,13 @@ async function submitResult(){
     }
 
 
-    // RESULT 2 DIGIT CHECK
+    // ONLY 1 OR 2 DIGIT
 
-    if(!/^\d{1,2}$/.test(result)){
+    if(!/^[0-9]{1,2}$/.test(result)){
 
-        alert("Result 1 ya 2 digit ka hona chahiye.");
+        alert(
+            "Result sirf 1 ya 2 digit ka hona chahiye."
+        );
 
         return;
     }
@@ -436,31 +399,24 @@ async function submitResult(){
         "Saving...";
 
 
-    // ======================================
-    // SAVE / UPDATE results_chart
-    // ======================================
+    // =================================
+    // INSERT INTO results_chart
+    // =================================
 
     const { data, error } =
 
         await client
-
         .from("results_chart")
+        .insert({
 
-        .upsert(
+            date: Number(date),
 
-            {
-                date: Number(date),
+            market: market,
 
-                market: market,
+            result: result
 
-                result: result
-            },
-
-            {
-                onConflict: "date,market"
-            }
-
-        );
+        })
+        .select();
 
 
     button.disabled = false;
@@ -475,8 +431,11 @@ async function submitResult(){
 
         console.error(error);
 
+        document.getElementById("status").innerText =
+            "ERROR: " + error.message;
+
         alert(
-            "Result save nahi hua:\n\n" +
+            "Supabase Error:\n\n" +
             error.message
         );
 
@@ -490,29 +449,29 @@ async function submitResult(){
 
 
     document.getElementById("status").innerText =
-        "Result Supabase mein save ho gaya.";
+        "Result successfully saved in results_chart.";
 
 
     alert(
-        "Result successfully saved!"
+        "Result Supabase mein save ho gaya."
     );
 
 
-    // TABLE REFRESH
+    // REFRESH TABLE
 
     loadResults();
 
 }
 
 
-// ==========================================
-// LOAD results_chart
-// ==========================================
+// =====================================
+// LOAD RESULTS
+// =====================================
 
 async function loadResults(){
 
     const body =
-    document.getElementById("recordBody");
+    document.getElementById("resultBody");
 
 
     body.innerHTML = `
@@ -531,13 +490,10 @@ async function loadResults(){
     const { data, error } =
 
         await client
-
         .from("results_chart")
-
         .select("*")
-
-        .order("date", {
-            ascending:true
+        .order("id", {
+            ascending:false
         });
 
 
@@ -545,14 +501,14 @@ async function loadResults(){
 
         console.error(error);
 
-
         body.innerHTML = `
 
             <tr>
 
                 <td colspan="6">
 
-                    ${escapeHtml(error.message)}
+                    ERROR:
+                    ${error.message}
 
                 </td>
 
@@ -571,7 +527,7 @@ async function loadResults(){
             <tr>
 
                 <td colspan="6">
-                    No Result Found
+                    No Results Found
                 </td>
 
             </tr>
@@ -592,37 +548,30 @@ async function loadResults(){
         <tr>
 
             <td>
-                ${escapeHtml(row.id ?? "")}
+                ${row.id ?? ""}
             </td>
-
 
             <td>
-                ${escapeHtml(row.date ?? "")}
+                ${row.date ?? ""}
             </td>
-
 
             <td>
-                ${escapeHtml(row.market ?? "")}
+                ${row.market ?? ""}
             </td>
-
 
             <td>
-                ${escapeHtml(row.result ?? "")}
+                ${row.result ?? ""}
             </td>
-
 
             <td>
-                ${escapeHtml(row.created_at ?? "")}
+                ${row.created_at ?? ""}
             </td>
-
 
             <td>
 
                 <button
-
-                    class="delete"
-
-                    onclick="deleteResult(${row.id})">
+                class="delete"
+                onclick="deleteResult(${row.id})">
 
                     Delete
 
@@ -642,19 +591,19 @@ async function loadResults(){
 }
 
 
-// ==========================================
+// =====================================
 // DELETE RESULT
-// ==========================================
+// =====================================
 
 async function deleteResult(id){
 
-    const confirmDelete =
+    const ok =
     confirm(
-        "Kya aap ye result delete karna chahte ho?"
+        "Kya ye result delete karna hai?"
     );
 
 
-    if(!confirmDelete){
+    if(!ok){
 
         return;
     }
@@ -663,11 +612,8 @@ async function deleteResult(id){
     const { error } =
 
         await client
-
         .from("results_chart")
-
         .delete()
-
         .eq("id", id);
 
 
@@ -676,7 +622,7 @@ async function deleteResult(id){
         console.error(error);
 
         alert(
-            "Result delete nahi hua:\n\n" +
+            "Delete Error:\n\n" +
             error.message
         );
 
@@ -684,19 +630,14 @@ async function deleteResult(id){
     }
 
 
-    alert(
-        "Result delete ho gaya."
-    );
-
-
     loadResults();
 
 }
 
 
-// ==========================================
+// =====================================
 // START
-// ==========================================
+// =====================================
 
 loadMarkets();
 
