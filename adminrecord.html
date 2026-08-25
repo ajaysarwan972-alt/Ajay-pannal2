@@ -57,9 +57,8 @@ button{
     cursor:pointer;
 }
 
-h3{
-    margin-top:25px;
-    text-align:center;
+button:disabled{
+    background:#999;
 }
 
 .table-box{
@@ -88,8 +87,16 @@ td{
 
 .delete{
     background:red;
-    padding:7px 10px;
+    width:auto;
+    margin:0;
+    padding:7px 12px;
     font-size:14px;
+}
+
+#status{
+    text-align:center;
+    padding:10px;
+    font-weight:bold;
 }
 
 </style>
@@ -105,28 +112,36 @@ Admin Result Panel
 </div>
 
 
-<!-- RESULT ENTRY -->
+<!-- =========================
+     RESULT ENTRY
+========================= -->
 
 <div class="box">
 
+
+<!-- DATE -->
+
 <select id="date">
 
-<option value="">Select Date</option>
+<option value="">
+Select Date
+</option>
 
 </select>
 
+
+<!-- MARKET FROM login.name -->
 
 <select id="market">
 
-<option value="">Select Market</option>
-
-<option value="DSWR">DSWR</option>
-<option value="FRBD">FRBD</option>
-<option value="GZBD">GZBD</option>
-<option value="GALI">GALI</option>
+<option value="">
+Loading Markets...
+</option>
 
 </select>
 
+
+<!-- RESULT -->
 
 <input
 type="text"
@@ -135,14 +150,30 @@ maxlength="2"
 placeholder="Enter Result">
 
 
-<button onclick="submitResult()">
+<!-- SUBMIT -->
+
+<button id="submitBtn"
+onclick="submitResult()">
+
 SUBMIT
+
 </button>
+
 
 </div>
 
 
-<h3>Saved Results</h3>
+<div id="status">
+</div>
+
+
+<!-- =========================
+     SAVED RESULTS
+========================= -->
+
+<h3 style="text-align:center;">
+Saved Results
+</h3>
 
 
 <div class="table-box">
@@ -152,71 +183,210 @@ SUBMIT
 <thead>
 
 <tr>
+
+<th>ID</th>
+
 <th>Date</th>
+
 <th>Market</th>
+
 <th>Result</th>
+
+<th>Created At</th>
+
 <th>Action</th>
+
 </tr>
 
 </thead>
 
-<tbody id="recordBody"></tbody>
+
+<tbody id="recordBody">
+
+</tbody>
 
 </table>
 
 </div>
 
 
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
 <script>
 
 
-// ==========================
+// ==========================================
+// SUPABASE CONNECTION
+// ==========================================
+
+const client = supabase.createClient(
+
+    "https://katbdbzoufiblnnsoxkk.supabase.co",
+
+    "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+
+);
+
+
+// ==========================================
 // DATE DROPDOWN
-// ==========================
+// ==========================================
 
 const dateSelect =
 document.getElementById("date");
 
 
-for(let i=1;i<=31;i++){
+for(let i = 1; i <= 31; i++){
 
     dateSelect.innerHTML += `
+
         <option value="${i}">
             ${i}
         </option>
+
     `;
 
 }
 
 
-// ==========================
-// LOAD RECORDS
-// ==========================
+// ==========================================
+// LOAD MARKET FROM login.name
+// ==========================================
 
-function getRecords(){
+async function loadMarkets(){
 
-    return JSON.parse(
-        localStorage.getItem("chartRecords")
-    ) || [];
+    const marketSelect =
+    document.getElementById("market");
+
+
+    marketSelect.innerHTML = `
+
+        <option value="">
+            Loading Markets...
+        </option>
+
+    `;
+
+
+    const { data, error } =
+
+        await client
+        .from("login")
+        .select("name");
+
+
+    if(error){
+
+        console.error(error);
+
+        marketSelect.innerHTML = `
+
+            <option value="">
+                Market load error
+            </option>
+
+        `;
+
+        document.getElementById("status").innerText =
+            "Market load nahi hua.";
+
+        return;
+    }
+
+
+    marketSelect.innerHTML = `
+
+        <option value="">
+            Select Market
+        </option>
+
+    `;
+
+
+    let markets = [];
+
+
+    data.forEach(row => {
+
+        let name =
+        String(row.name || "").trim();
+
+
+        if(
+            name !== "" &&
+            !markets.includes(name)
+        ){
+
+            markets.push(name);
+
+        }
+
+    });
+
+
+    markets.forEach(name => {
+
+        marketSelect.innerHTML += `
+
+            <option value="${escapeHtml(name)}">
+                ${escapeHtml(name)}
+            </option>
+
+        `;
+
+    });
+
+
+    document.getElementById("status").innerText =
+        markets.length + " market loaded.";
 
 }
 
 
-// ==========================
+// ==========================================
+// HTML SAFE TEXT
+// ==========================================
+
+function escapeHtml(value){
+
+    return String(value)
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
+
+}
+
+
+// ==========================================
 // SUBMIT RESULT
-// ==========================
+// ==========================================
 
-function submitResult(){
+async function submitResult(){
 
-    let date =
-        document.getElementById("date").value;
+    const date =
+    document.getElementById("date").value;
 
-    let market =
-        document.getElementById("market").value;
 
-    let result =
-        document.getElementById("result").value.trim();
+    const market =
+    document.getElementById("market").value;
 
+
+    const result =
+    document.getElementById("result").value.trim();
+
+
+    // DATE CHECK
 
     if(!date){
 
@@ -226,6 +396,8 @@ function submitResult(){
     }
 
 
+    // MARKET CHECK
+
     if(!market){
 
         alert("Market select karo.");
@@ -233,6 +405,8 @@ function submitResult(){
         return;
     }
 
+
+    // RESULT CHECK
 
     if(!result){
 
@@ -242,157 +416,291 @@ function submitResult(){
     }
 
 
-    let records = getRecords();
+    // RESULT 2 DIGIT CHECK
 
+    if(!/^\d{1,2}$/.test(result)){
 
-    // Agar same date + market already hai
-    // to uska result update hoga
+        alert("Result 1 ya 2 digit ka hona chahiye.");
 
-    let existing =
-        records.findIndex(item =>
-            item.date == date &&
-            item.market == market
-        );
-
-
-    if(existing !== -1){
-
-        records[existing].result = result;
-
-    }else{
-
-        records.push({
-
-            date:date,
-
-            market:market,
-
-            result:result
-
-        });
-
+        return;
     }
 
 
-    localStorage.setItem(
-        "chartRecords",
-        JSON.stringify(records)
-    );
+    const button =
+    document.getElementById("submitBtn");
 
+
+    button.disabled = true;
+
+    button.innerText =
+        "Saving...";
+
+
+    // ======================================
+    // SAVE / UPDATE results_chart
+    // ======================================
+
+    const { data, error } =
+
+        await client
+
+        .from("results_chart")
+
+        .upsert(
+
+            {
+                date: Number(date),
+
+                market: market,
+
+                result: result
+            },
+
+            {
+                onConflict: "date,market"
+            }
+
+        );
+
+
+    button.disabled = false;
+
+    button.innerText =
+        "SUBMIT";
+
+
+    // ERROR
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Result save nahi hua:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    // SUCCESS
 
     document.getElementById("result").value = "";
 
 
-    alert("Result Saved");
+    document.getElementById("status").innerText =
+        "Result Supabase mein save ho gaya.";
 
 
-    loadRecords();
+    alert(
+        "Result successfully saved!"
+    );
+
+
+    // TABLE REFRESH
+
+    loadResults();
 
 }
 
 
-// ==========================
-// SHOW RECORDS
-// ==========================
+// ==========================================
+// LOAD results_chart
+// ==========================================
 
-function loadRecords(){
+async function loadResults(){
 
-    let records = getRecords();
+    const body =
+    document.getElementById("recordBody");
 
-    let html = "";
 
+    body.innerHTML = `
 
-    if(records.length === 0){
-
-        html = `
         <tr>
-            <td colspan="4">
-                No Result Found
+
+            <td colspan="6">
+                Loading...
             </td>
+
         </tr>
-        `;
 
-    }else{
+    `;
 
-        records.forEach((item,index)=>{
 
-            html += `
+    const { data, error } =
+
+        await client
+
+        .from("results_chart")
+
+        .select("*")
+
+        .order("date", {
+            ascending:true
+        });
+
+
+    if(error){
+
+        console.error(error);
+
+
+        body.innerHTML = `
 
             <tr>
 
-                <td>
-                    ${item.date}
-                </td>
+                <td colspan="6">
 
-                <td>
-                    ${item.market}
-                </td>
-
-                <td>
-                    ${item.result}
-                </td>
-
-                <td>
-
-                    <button
-                    class="delete"
-                    onclick="deleteRecord(${index})">
-
-                    Delete
-
-                    </button>
+                    ${escapeHtml(error.message)}
 
                 </td>
 
             </tr>
 
-            `;
+        `;
 
-        });
-
+        return;
     }
 
 
-    document.getElementById("recordBody").innerHTML =
-        html;
+    if(!data || data.length === 0){
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td colspan="6">
+                    No Result Found
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+    }
+
+
+    let html = "";
+
+
+    data.forEach(row => {
+
+        html += `
+
+        <tr>
+
+            <td>
+                ${escapeHtml(row.id ?? "")}
+            </td>
+
+
+            <td>
+                ${escapeHtml(row.date ?? "")}
+            </td>
+
+
+            <td>
+                ${escapeHtml(row.market ?? "")}
+            </td>
+
+
+            <td>
+                ${escapeHtml(row.result ?? "")}
+            </td>
+
+
+            <td>
+                ${escapeHtml(row.created_at ?? "")}
+            </td>
+
+
+            <td>
+
+                <button
+
+                    class="delete"
+
+                    onclick="deleteResult(${row.id})">
+
+                    Delete
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+
+    body.innerHTML = html;
 
 }
 
 
-// ==========================
-// DELETE RECORD
-// ==========================
+// ==========================================
+// DELETE RESULT
+// ==========================================
 
-function deleteRecord(index){
+async function deleteResult(id){
 
-    if(!confirm("Delete this result?")){
-
-        return;
-
-    }
-
-
-    let records = getRecords();
-
-    records.splice(index,1);
-
-
-    localStorage.setItem(
-        "chartRecords",
-        JSON.stringify(records)
+    const confirmDelete =
+    confirm(
+        "Kya aap ye result delete karna chahte ho?"
     );
 
 
-    loadRecords();
+    if(!confirmDelete){
+
+        return;
+    }
+
+
+    const { error } =
+
+        await client
+
+        .from("results_chart")
+
+        .delete()
+
+        .eq("id", id);
+
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Result delete nahi hua:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    alert(
+        "Result delete ho gaya."
+    );
+
+
+    loadResults();
 
 }
 
 
-// ==========================
+// ==========================================
 // START
-// ==========================
+// ==========================================
 
-loadRecords();
+loadMarkets();
+
+loadResults();
 
 
 </script>
