@@ -1,0 +1,404 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Admin Chart</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f2f2f2;
+}
+
+.top{
+    background:#0057d8;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.box{
+    background:white;
+    margin:15px;
+    padding:15px;
+    border-radius:10px;
+}
+
+select,
+input{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    margin-bottom:12px;
+    border:1px solid #ccc;
+    border-radius:7px;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:13px;
+    border:none;
+    background:#0057d8;
+    color:white;
+    font-size:18px;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+h3{
+    margin-top:25px;
+    text-align:center;
+}
+
+.table-box{
+    overflow-x:auto;
+    margin:15px;
+}
+
+table{
+    width:100%;
+    min-width:600px;
+    border-collapse:collapse;
+    background:white;
+}
+
+th{
+    background:#ffcc00;
+    padding:10px;
+    border:1px solid #ccc;
+}
+
+td{
+    border:1px solid #ddd;
+    text-align:center;
+    padding:9px;
+}
+
+.delete{
+    background:red;
+    padding:7px 10px;
+    font-size:14px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="top">
+Admin Result Panel
+</div>
+
+
+<!-- RESULT ENTRY -->
+
+<div class="box">
+
+<select id="date">
+
+<option value="">Select Date</option>
+
+</select>
+
+
+<select id="market">
+
+<option value="">Select Market</option>
+
+<option value="DSWR">DSWR</option>
+<option value="FRBD">FRBD</option>
+<option value="GZBD">GZBD</option>
+<option value="GALI">GALI</option>
+
+</select>
+
+
+<input
+type="text"
+id="result"
+maxlength="2"
+placeholder="Enter Result">
+
+
+<button onclick="submitResult()">
+SUBMIT
+</button>
+
+</div>
+
+
+<h3>Saved Results</h3>
+
+
+<div class="table-box">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Date</th>
+<th>Market</th>
+<th>Result</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="recordBody"></tbody>
+
+</table>
+
+</div>
+
+
+<script>
+
+
+// ==========================
+// DATE DROPDOWN
+// ==========================
+
+const dateSelect =
+document.getElementById("date");
+
+
+for(let i=1;i<=31;i++){
+
+    dateSelect.innerHTML += `
+        <option value="${i}">
+            ${i}
+        </option>
+    `;
+
+}
+
+
+// ==========================
+// LOAD RECORDS
+// ==========================
+
+function getRecords(){
+
+    return JSON.parse(
+        localStorage.getItem("chartRecords")
+    ) || [];
+
+}
+
+
+// ==========================
+// SUBMIT RESULT
+// ==========================
+
+function submitResult(){
+
+    let date =
+        document.getElementById("date").value;
+
+    let market =
+        document.getElementById("market").value;
+
+    let result =
+        document.getElementById("result").value.trim();
+
+
+    if(!date){
+
+        alert("Date select karo.");
+
+        return;
+    }
+
+
+    if(!market){
+
+        alert("Market select karo.");
+
+        return;
+    }
+
+
+    if(!result){
+
+        alert("Result enter karo.");
+
+        return;
+    }
+
+
+    let records = getRecords();
+
+
+    // Agar same date + market already hai
+    // to uska result update hoga
+
+    let existing =
+        records.findIndex(item =>
+            item.date == date &&
+            item.market == market
+        );
+
+
+    if(existing !== -1){
+
+        records[existing].result = result;
+
+    }else{
+
+        records.push({
+
+            date:date,
+
+            market:market,
+
+            result:result
+
+        });
+
+    }
+
+
+    localStorage.setItem(
+        "chartRecords",
+        JSON.stringify(records)
+    );
+
+
+    document.getElementById("result").value = "";
+
+
+    alert("Result Saved");
+
+
+    loadRecords();
+
+}
+
+
+// ==========================
+// SHOW RECORDS
+// ==========================
+
+function loadRecords(){
+
+    let records = getRecords();
+
+    let html = "";
+
+
+    if(records.length === 0){
+
+        html = `
+        <tr>
+            <td colspan="4">
+                No Result Found
+            </td>
+        </tr>
+        `;
+
+    }else{
+
+        records.forEach((item,index)=>{
+
+            html += `
+
+            <tr>
+
+                <td>
+                    ${item.date}
+                </td>
+
+                <td>
+                    ${item.market}
+                </td>
+
+                <td>
+                    ${item.result}
+                </td>
+
+                <td>
+
+                    <button
+                    class="delete"
+                    onclick="deleteRecord(${index})">
+
+                    Delete
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+
+    document.getElementById("recordBody").innerHTML =
+        html;
+
+}
+
+
+// ==========================
+// DELETE RECORD
+// ==========================
+
+function deleteRecord(index){
+
+    if(!confirm("Delete this result?")){
+
+        return;
+
+    }
+
+
+    let records = getRecords();
+
+    records.splice(index,1);
+
+
+    localStorage.setItem(
+        "chartRecords",
+        JSON.stringify(records)
+    );
+
+
+    loadRecords();
+
+}
+
+
+// ==========================
+// START
+// ==========================
+
+loadRecords();
+
+
+</script>
+
+
+</body>
+
+</html>
+```
