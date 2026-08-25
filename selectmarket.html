@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Market Result</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f2f2f2;
+}
+
+.top{
+    background:#0057d8;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.back{
+    display:block;
+    margin:15px;
+    padding:12px;
+    background:#333;
+    color:white;
+    text-align:center;
+    text-decoration:none;
+    border-radius:8px;
+}
+
+.title{
+    background:white;
+    margin:15px;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.table-box{
+    margin:15px;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+th{
+    background:#ffcc00;
+    padding:12px;
+    border:1px solid #ccc;
+}
+
+td{
+    padding:12px;
+    text-align:center;
+    border:1px solid #ddd;
+}
+
+.result{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.message{
+    text-align:center;
+    padding:20px;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="top">
+Result Chart
+</div>
+
+
+<a href="chart.html"
+class="back">
+
+← BACK TO MARKETS
+
+</a>
+
+
+<div class="title"
+id="marketTitle">
+
+Loading...
+
+</div>
+
+
+<div class="table-box">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>DATE</th>
+
+<th>RESULT</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="resultBody">
+
+<tr>
+
+<td colspan="2">
+Loading...
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<script>
+
+
+// =====================================
+// SUPABASE
+// =====================================
+
+const client = supabase.createClient(
+
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+
+);
+
+
+// =====================================
+// GET MARKET FROM URL
+// =====================================
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const market =
+    params.get("market");
+
+
+const marketName =
+    params.get("name");
+
+
+// =====================================
+// CHECK MARKET
+// =====================================
+
+if(!market){
+
+    document.getElementById(
+        "marketTitle"
+    ).innerText =
+        "Market Not Found";
+
+
+    document.getElementById(
+        "resultBody"
+    ).innerHTML = `
+
+        <tr>
+
+            <td colspan="2"
+                class="message">
+
+                Market not found.
+
+            </td>
+
+        </tr>
+
+    `;
+
+}else{
+
+
+    document.getElementById(
+        "marketTitle"
+    ).innerText =
+        marketName || market;
+
+
+    loadResults();
+
+}
+
+
+// =====================================
+// LOAD MARKET RECORD
+// =====================================
+
+async function loadResults(){
+
+    const body =
+        document.getElementById(
+            "resultBody"
+        );
+
+
+    // Sirf selected column
+
+    const selectColumn =
+        "date," + market;
+
+
+    const {
+        data,
+        error
+    } = await client
+
+        .from("results_chart")
+
+        .select(
+            selectColumn
+        )
+
+        .not(
+            market,
+            "is",
+            null
+        )
+
+        .order(
+            "date",
+            {
+                ascending:false
+            }
+        );
+
+
+    // =================================
+    // ERROR
+    // =================================
+
+    if(error){
+
+        console.error(error);
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td colspan="2"
+                    class="message">
+
+                    ${error.message}
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    // =================================
+    // NO RESULT
+    // =================================
+
+    if(
+        !data ||
+        data.length === 0
+    ){
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td colspan="2"
+                    class="message">
+
+                    No Result Found
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    // =================================
+    // SHOW RESULTS
+    // =================================
+
+    let html = "";
+
+
+    data.forEach(function(row){
+
+        html += `
+
+            <tr>
+
+                <td>
+                    ${row.date}
+                </td>
+
+                <td class="result">
+                    ${row[market]}
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+
+    body.innerHTML =
+        html;
+
+}
+
+</script>
+
+
+</body>
+
+</html>
