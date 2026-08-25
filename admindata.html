@@ -1,0 +1,311 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Users Admin</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f2f2f2;
+    padding:20px;
+    margin:0;
+}
+
+h2{
+    text-align:center;
+}
+
+.update-box{
+    background:#fff;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+select,
+input{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#2196f3;
+    color:#fff;
+}
+
+.table-box{
+    background:#fff;
+    padding:10px;
+    border-radius:10px;
+    overflow-x:auto;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:800px;
+}
+
+th,
+td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+th{
+    background:#eee;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Users / Login</h2>
+
+<div class="update-box">
+
+    <select id="userId">
+        <option value="">Select User</option>
+    </select>
+
+    <input
+        type="number"
+        id="amount"
+        placeholder="Enter amount"
+    >
+
+    <select id="action">
+        <option value="deposit">Deposit</option>
+        <option value="withdraw">Withdraw</option>
+    </select>
+
+    <button onclick="updateBalance()">
+        Update Balance
+    </button>
+
+</div>
+
+<div class="table-box">
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Mobile</th>
+<th>Password</th>
+<th>Balance</th>
+</tr>
+</thead>
+
+<tbody id="userData"></tbody>
+
+</table>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const client = supabase.createClient(
+    "https://katbdbzoufiblnnsoxkk.supabase.co",
+    "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+
+// =========================
+// LOAD USERS
+// =========================
+
+async function loadUsers(){
+
+    const { data, error } =
+        await client
+        .from("login")
+        .select("*");
+
+    if(error){
+
+        console.error(error);
+        alert("Users load nahi ho rahe.");
+
+        return;
+    }
+
+    let html = "";
+    let options = '<option value="">Select User</option>';
+
+    data.forEach(r => {
+
+        html += `
+        <tr>
+
+            <td>${r.id ?? ""}</td>
+
+            <td>${r.name ?? ""}</td>
+
+            <td>${r.mobile ?? ""}</td>
+
+            <td>${r.password ?? ""}</td>
+
+            <td>${r.balance ?? 0}</td>
+
+        </tr>
+        `;
+
+
+        options += `
+        <option value="${r.id}">
+            ${r.id} - ${r.name ?? ""}
+        </option>
+        `;
+
+    });
+
+
+    document.getElementById("userData").innerHTML = html;
+
+    document.getElementById("userId").innerHTML = options;
+}
+
+
+// =========================
+// UPDATE BALANCE
+// =========================
+
+async function updateBalance(){
+
+    const id =
+        document.getElementById("userId").value;
+
+    const amount =
+        parseInt(
+            document.getElementById("amount").value
+        );
+
+    const action =
+        document.getElementById("action").value;
+
+
+    if(!id){
+
+        alert("Pehle user select karo.");
+
+        return;
+    }
+
+
+    if(!amount || amount <= 0){
+
+        alert("Valid amount enter karo.");
+
+        return;
+    }
+
+
+    const { data, error } =
+        await client
+        .from("login")
+        .select("balance")
+        .eq("id", id)
+        .single();
+
+
+    if(error){
+
+        console.error(error);
+
+        alert("User balance nahi mila.");
+
+        return;
+    }
+
+
+    const oldBalance =
+        Number(data.balance || 0);
+
+
+    let newBalance;
+
+
+    if(action === "deposit"){
+
+        newBalance =
+            oldBalance + amount;
+
+    }else{
+
+        newBalance =
+            oldBalance - amount;
+
+    }
+
+
+    if(newBalance < 0){
+
+        alert("Balance 0 se kam nahi ho sakta.");
+
+        return;
+    }
+
+
+    const { error: updateError } =
+        await client
+        .from("login")
+        .update({
+            balance: newBalance
+        })
+        .eq("id", id);
+
+
+    if(updateError){
+
+        console.error(updateError);
+
+        alert("Balance update nahi hua.");
+
+        return;
+    }
+
+
+    alert(
+        action === "deposit"
+        ? "Deposit successful."
+        : "Withdraw successful."
+    );
+
+
+    document.getElementById("amount").value = "";
+
+    loadUsers();
+}
+
+
+// =========================
+// START
+// =========================
+
+loadUsers();
+
+</script>
+
+</body>
+</html>
+```
