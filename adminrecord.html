@@ -2,13 +2,12 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Admin Result Chart</title>
+<title>Admin Result Panel</title>
 
 <style>
 
@@ -39,7 +38,7 @@ body{
 }
 
 .date-box{
-    background:#eeeeee;
+    background:#eee;
     padding:13px;
     border-radius:8px;
     text-align:center;
@@ -48,38 +47,38 @@ body{
     margin-bottom:20px;
 }
 
-.market-row{
-    margin-bottom:15px;
-}
-
-.market-name{
+label{
     display:block;
     font-weight:bold;
-    margin-bottom:6px;
+    margin-bottom:7px;
 }
 
-.market-input{
+select,
+input{
     width:100%;
     padding:12px;
     border:1px solid #ccc;
     border-radius:7px;
-    font-size:18px;
+    font-size:17px;
+    margin-bottom:15px;
+}
+
+input{
     text-align:center;
 }
 
-.submit-btn{
+button{
     width:100%;
-    padding:14px;
+    padding:13px;
     border:none;
+    border-radius:7px;
     background:#0057d8;
     color:white;
     font-size:18px;
-    border-radius:7px;
     cursor:pointer;
-    margin-top:5px;
 }
 
-.submit-btn:disabled{
+button:disabled{
     background:#999;
 }
 
@@ -114,7 +113,6 @@ td{
 }
 
 </style>
-
 </head>
 
 
@@ -128,7 +126,7 @@ Admin Result Panel
 
 <div class="box">
 
-<h3>Enter Today's Result</h3>
+<h3>Enter Result</h3>
 
 
 <!-- DATE -->
@@ -143,201 +141,79 @@ Loading...
 </div>
 
 
-<!-- MARKET 1 -->
+<!-- MARKET DROPDOWN -->
 
-<div class="market-row">
+<label>
+Select Market
+</label>
 
-<span class="market-name">
+<select id="marketSelect">
+
+<option value="">
+Select Market
+</option>
+
+<option value="market1">
 MARKET 1
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market1"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 2 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market2">
 MARKET 2
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market2"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 3 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market3">
 MARKET 3
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market3"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 4 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market4">
 MARKET 4
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market4"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 5 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market5">
 MARKET 5
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market5"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 6 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market6">
 MARKET 6
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market6"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 7 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market7">
 MARKET 7
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market7"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 8 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market8">
 MARKET 8
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market8"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 9 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market9">
 MARKET 9
-</span>
+</option>
 
-<input
-class="market-input"
-type="text"
-id="market9"
-maxlength="2"
-inputmode="numeric"
-placeholder="Enter Result">
-
-</div>
-
-
-<!-- MARKET 10 -->
-
-<div class="market-row">
-
-<span class="market-name">
+<option value="market10">
 MARKET 10
-</span>
+</option>
+
+</select>
+
+
+<!-- RESULT -->
+
+<label>
+Result
+</label>
 
 <input
-class="market-input"
 type="text"
-id="market10"
+id="resultInput"
 maxlength="2"
 inputmode="numeric"
 placeholder="Enter Result">
-
-</div>
 
 
 <!-- SUBMIT -->
 
 <button
 id="submitBtn"
-class="submit-btn"
 onclick="saveResult()">
 
 SUBMIT RESULT
@@ -353,7 +229,7 @@ class="status">
 </div>
 
 
-<!-- SAVED RESULTS -->
+<!-- SAVED DATA -->
 
 <h3 style="text-align:center;">
 Saved Results
@@ -384,7 +260,6 @@ Saved Results
 
 </thead>
 
-
 <tbody id="resultBody">
 
 </tbody>
@@ -394,53 +269,45 @@ Saved Results
 </div>
 
 
-<!-- SUPABASE -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
 
 
-// ==========================================
+// ======================================
 // SUPABASE
-// ==========================================
+// ======================================
 
 const client = supabase.createClient(
 
-    "https://katbdbzoufiblnnsoxkk.supabase.co",
+"https://katbdbzoufiblnnsoxkk.supabase.co",
 
-    "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
 
 );
 
 
-// ==========================================
+// ======================================
 // INDIA DATE
-// DATE CHANGES AT 1:00 AM
-// ==========================================
+// DATE CHANGE AT 1 AM
+// ======================================
 
 function getCurrentDate(){
 
     const now = new Date();
 
-
     const india = new Date(
-
         now.toLocaleString(
             "en-US",
             {
                 timeZone:"Asia/Kolkata"
             }
         )
-
     );
 
 
-    /*
-       1 AM se pehle previous date
-       1 AM ke baad current date
-    */
+    // 1 AM se pehle previous date
 
     if(india.getHours() < 1){
 
@@ -454,12 +321,10 @@ function getCurrentDate(){
     const year =
         india.getFullYear();
 
-
     const month =
         String(
             india.getMonth() + 1
         ).padStart(2,"0");
-
 
     const day =
         String(
@@ -472,9 +337,9 @@ function getCurrentDate(){
 }
 
 
-// ==========================================
+// ======================================
 // SHOW DATE
-// ==========================================
+// ======================================
 
 function showDate(){
 
@@ -486,9 +351,9 @@ function showDate(){
 }
 
 
-// ==========================================
-// LOAD TODAY'S RESULT
-// ==========================================
+// ======================================
+// LOAD TODAY'S DATA
+// ======================================
 
 async function loadToday(){
 
@@ -496,9 +361,10 @@ async function loadToday(){
         getCurrentDate();
 
 
-    const { data, error } =
-
-        await client
+    const {
+        data,
+        error
+    } = await client
 
         .from("results_chart")
 
@@ -506,7 +372,7 @@ async function loadToday(){
             "id,date,market1,market2,market3,market4,market5,market6,market7,market8,market9,market10"
         )
 
-        .eq("date", date)
+        .eq("date",date)
 
         .maybeSingle();
 
@@ -526,18 +392,17 @@ async function loadToday(){
     }
 
 
-    // Agar aaj ka data already hai
+    // Agar aaj ki row hai
 
     if(data){
 
-        for(let i = 1; i <= 10; i++){
+        window.todayData =
+            data;
 
-            document.getElementById(
-                "market" + i
-            ).value =
-                data["market" + i] || "";
+    }else{
 
-        }
+        window.todayData =
+            null;
 
     }
 
@@ -547,9 +412,47 @@ async function loadToday(){
 }
 
 
-// ==========================================
+// ======================================
+// MARKET CHANGE
+// ======================================
+
+document.getElementById(
+    "marketSelect"
+).addEventListener(
+    "change",
+    function(){
+
+        const market =
+            this.value;
+
+
+        const input =
+            document.getElementById(
+                "resultInput"
+            );
+
+
+        if(
+            market &&
+            window.todayData
+        ){
+
+            input.value =
+                window.todayData[market] || "";
+
+        }else{
+
+            input.value = "";
+
+        }
+
+    }
+);
+
+
+// ======================================
 // SAVE RESULT
-// ==========================================
+// ======================================
 
 async function saveResult(){
 
@@ -557,42 +460,53 @@ async function saveResult(){
         getCurrentDate();
 
 
-    const values = {};
+    const market =
+        document.getElementById(
+            "marketSelect"
+        ).value;
 
 
-    // 10 markets ka data
-
-    for(let i = 1; i <= 10; i++){
-
-        const value =
-            document.getElementById(
-                "market" + i
-            ).value.trim();
+    const result =
+        document.getElementById(
+            "resultInput"
+        ).value.trim();
 
 
-        // Empty allowed hai
+    // MARKET CHECK
 
-        if(value !== ""){
+    if(!market){
 
-            // Sirf 1 ya 2 digit
+        alert(
+            "Market select karo."
+        );
 
-            if(!/^[0-9]{1,2}$/.test(value)){
+        return;
 
-                alert(
-                    "Market " +
-                    i +
-                    " ka result galat hai."
-                );
-
-                return;
-
-            }
-
-        }
+    }
 
 
-        values["market" + i] =
-            value === "" ? null : value;
+    // RESULT CHECK
+
+    if(result === ""){
+
+        alert(
+            "Result enter karo."
+        );
+
+        return;
+
+    }
+
+
+    // ONLY 1 OR 2 DIGIT
+
+    if(!/^[0-9]{1,2}$/.test(result)){
+
+        alert(
+            "Result 1 ya 2 digit ka hona chahiye."
+        );
+
+        return;
 
     }
 
@@ -609,22 +523,20 @@ async function saveResult(){
         "SAVING...";
 
 
-    // ======================================
-    // PEHLE CHECK KARO KI DATE KI ROW HAI YA NAHI
-    // ======================================
+    // ==================================
+    // CHECK TODAY ROW
+    // ==================================
 
     const {
         data: existing,
         error: checkError
-    } =
-
-        await client
+    } = await client
 
         .from("results_chart")
 
         .select("id")
 
-        .eq("date", date)
+        .eq("date",date)
 
         .maybeSingle();
 
@@ -651,42 +563,47 @@ async function saveResult(){
     let response;
 
 
-    // ======================================
-    // EXISTING ROW → UPDATE
-    // ======================================
+    // ==================================
+    // EXISTING ROW = UPDATE
+    // ==================================
 
     if(existing){
 
         response =
-
             await client
 
             .from("results_chart")
 
-            .update(values)
+            .update({
 
-            .eq("id", existing.id);
+                [market]: result
+
+            })
+
+            .eq(
+                "id",
+                existing.id
+            );
 
     }
 
 
-    // ======================================
-    // NEW DATE → INSERT
-    // ======================================
+    // ==================================
+    // NEW ROW = INSERT
+    // ==================================
 
     else{
 
         response =
-
             await client
 
             .from("results_chart")
 
             .insert({
 
-                date:date,
+                date: date,
 
-                ...values
+                [market]: result
 
             });
 
@@ -699,21 +616,13 @@ async function saveResult(){
         "SUBMIT RESULT";
 
 
-    // ======================================
     // ERROR
-    // ======================================
 
     if(response.error){
 
         console.error(
             response.error
         );
-
-        document.getElementById(
-            "status"
-        ).innerText =
-            "ERROR: " +
-            response.error.message;
 
         alert(
             "Supabase Error:\n\n" +
@@ -725,29 +634,55 @@ async function saveResult(){
     }
 
 
-    // ======================================
-    // SUCCESS
-    // ======================================
-
-    document.getElementById(
-        "status"
-    ).innerText =
-        "Result saved successfully.";
-
-
     alert(
         "Result save ho gaya."
     );
 
 
-    loadTable();
+    document.getElementById(
+        "resultInput"
+    ).value = "";
+
+
+    // Reload data
+
+    await loadToday();
+
+
+    // Selected market ka latest value
+
+    if(window.todayData){
+
+        const {
+            data
+        } = await client
+
+            .from("results_chart")
+
+            .select(
+                "market1,market2,market3,market4,market5,market6,market7,market8,market9,market10"
+            )
+
+            .eq("date",date)
+
+            .maybeSingle();
+
+
+        if(data){
+
+            window.todayData =
+                data;
+
+        }
+
+    }
 
 }
 
 
-// ==========================================
-// LOAD SAVED RESULTS
-// ==========================================
+// ======================================
+// LOAD TABLE
+// ======================================
 
 async function loadTable(){
 
@@ -773,9 +708,7 @@ async function loadTable(){
     const {
         data,
         error
-    } =
-
-        await client
+    } = await client
 
         .from("results_chart")
 
@@ -792,8 +725,6 @@ async function loadTable(){
 
 
     if(error){
-
-        console.error(error);
 
         body.innerHTML = `
 
@@ -897,9 +828,9 @@ async function loadTable(){
 }
 
 
-// ==========================================
-// CHECK DATE EVERY 30 SECONDS
-// ==========================================
+// ======================================
+// AUTOMATIC DATE CHECK
+// ======================================
 
 let oldDate =
     getCurrentDate();
@@ -920,15 +851,14 @@ setInterval(function(){
         showDate();
 
 
-        // Purane result boxes clear
+        document.getElementById(
+            "marketSelect"
+        ).value = "";
 
-        for(let i = 1; i <= 10; i++){
 
-            document.getElementById(
-                "market" + i
-            ).value = "";
-
-        }
+        document.getElementById(
+            "resultInput"
+        ).value = "";
 
 
         loadToday();
@@ -938,9 +868,9 @@ setInterval(function(){
 },30000);
 
 
-// ==========================================
+// ======================================
 // START
-// ==========================================
+// ======================================
 
 showDate();
 
@@ -949,7 +879,5 @@ loadToday();
 
 </script>
 
-
 </body>
-
 </html>
