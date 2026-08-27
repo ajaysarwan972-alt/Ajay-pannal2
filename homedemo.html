@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ajay Demo</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f5f5;
+  color:#222;
+  padding-bottom:95px;
+}
+
+/* ================= TOP ================= */
+
+.top{
+  height:180px;
+  background:white;
+  position:relative;
+}
+
+/* Menu */
+
+.menu{
+  position:absolute;
+  left:22px;
+  top:40px;
+  font-size:42px;
+  cursor:pointer;
+}
+
+/* User ID */
+
+.userId{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  top:22px;
+  background:#008b08;
+  color:white;
+  padding:14px 27px;
+  border-radius:40px;
+  font-size:27px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+/* Balance */
+
+.balance{
+  position:absolute;
+  right:18px;
+  top:22px;
+  background:#f10d16;
+  color:white;
+  padding:14px 25px;
+  border-radius:40px;
+  font-size:27px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+/* ================= ACTION ================= */
+
+.actions{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:15px;
+
+  display:flex;
+  justify-content:space-around;
+  gap:10px;
+  padding:0 12px;
+}
+
+.action{
+  flex:1;
+  border-radius:40px;
+  padding:16px 8px;
+  color:white;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.add{
+  background:#008b08;
+}
+
+.withdraw{
+  background:#ff4d55;
+}
+
+.share{
+  background:#6d58df;
+}
+
+/* ================= TABLE ================= */
+
+.tableBox{
+  margin:0 14px 12px;
+  background:white;
+  border-radius:0 0 15px 15px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+
+.tableHead{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  background:#008b08;
+  color:white;
+  padding:13px 8px;
+  font-size:22px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  padding:12px 8px;
+  margin:7px 14px;
+  border-radius:16px;
+  background:white;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+  font-size:21px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.market{
+  color:#2674aa;
+}
+
+.winning{
+  color:#008b08;
+}
+
+/* ================= GAME CARDS ================= */
+
+.games{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  padding:15px 14px;
+}
+
+.game{
+  background:white;
+  border:4px solid #008b08;
+  border-radius:28px;
+  min-height:345px;
+  padding:20px 10px;
+  text-align:center;
+}
+
+.gameName{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.number{
+  margin-top:14px;
+  font-size:43px;
+  font-weight:bold;
+  color:#ed1017;
+}
+
+.time{
+  margin-top:12px;
+  color:#2877aa;
+  font-size:20px;
+}
+
+.check{
+  margin:25px auto 0;
+  width:78px;
+  height:78px;
+  border-radius:50%;
+  background:#2dbb83;
+  color:white;
+  font-size:57px;
+  line-height:72px;
+  font-weight:bold;
+}
+
+/* ================= CHAT ================= */
+
+.chat{
+  position:fixed;
+  right:20px;
+  bottom:110px;
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  background:#20c66b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:35px;
+  z-index:900;
+}
+
+/* ================= BOTTOM ================= */
+
+.bottom{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  height:85px;
+  background:white;
+  box-shadow:0 -3px 10px rgba(0,0,0,.12);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:1000;
+}
+
+.bottomBtn{
+  width:30%;
+  height:62px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:23px;
+  cursor:pointer;
+}
+
+.bottomBtn.active{
+  background:#008b08;
+  color:white;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:420px){
+
+  .top{
+    height:190px;
+  }
+
+  .menu{
+    left:20px;
+    top:42px;
+    font-size:38px;
+  }
+
+  .userId{
+    top:22px;
+    font-size:25px;
+    padding:14px 24px;
+  }
+
+  .balance{
+    right:12px;
+    top:22px;
+    font-size:24px;
+    padding:15px 20px;
+  }
+
+  .actions{
+    bottom:14px;
+    padding:0 8px;
+    gap:7px;
+  }
+
+  .action{
+    font-size:18px;
+    padding:16px 5px;
+  }
+
+  .tableHead{
+    font-size:20px;
+  }
+
+  .row{
+    font-size:19px;
+  }
+
+  .games{
+    gap:14px;
+    padding:14px 10px;
+  }
+
+  .game{
+    min-height:300px;
+    padding:18px 5px;
+  }
+
+  .gameName{
+    font-size:23px;
+  }
+
+  .number{
+    font-size:38px;
+  }
+
+  .time{
+    font-size:17px;
+  }
+
+  .check{
+    width:68px;
+    height:68px;
+    font-size:49px;
+    line-height:63px;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- ================= TOP ================= -->
+
+<div class="top">
+
+  <div class="menu">
+    ☰
+  </div>
+
+  <!-- User ID -->
+
+  <div class="userId" id="userId">
+    ID: --
+  </div>
+
+  <!-- Wallet Balance -->
+
+  <div class="balance" id="balance">
+    ₹0
+  </div>
+
+
+  <!-- Buttons -->
+
+  <div class="actions">
+
+    <div
+      class="action add"
+      onclick="openWallet()">
+      Add Money
+    </div>
+
+    <div
+      class="action withdraw"
+      onclick="openWallet()">
+      Withdraw
+    </div>
+
+    <div
+      class="action share"
+      onclick="sharePage()">
+      Share
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= TABLE ================= -->
+
+<div class="tableBox">
+
+  <div class="tableHead">
+
+    <div>User</div>
+    <div>Market</div>
+    <div>Winning</div>
+
+  </div>
+
+
+  <div class="row">
+
+    <div>AJAY</div>
+    <div class="market">DELHI BAZAR</div>
+    <div class="winning">₹450</div>
+
+  </div>
+
+
+  <div class="row">
+
+    <div>AJAY</div>
+    <div class="market">DELHI BAZAR</div>
+    <div class="winning">₹180</div>
+
+  </div>
+
+
+  <div class="row">
+
+    <div>Gurudayal</div>
+    <div class="market">DELHI BAZAR</div>
+    <div class="winning">₹90</div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= GAME CARDS ================= -->
+
+<div class="games">
+
+
+  <div class="game">
+
+    <div class="gameName">
+      Gali
+    </div>
+
+    <div class="number">
+      77
+    </div>
+
+    <div class="time">
+      06:00:00 - 23:00:00
+    </div>
+
+    <div class="check">
+      ✓
+    </div>
+
+  </div>
+
+
+  <div class="game">
+
+    <div class="gameName">
+      SHRI GANESH
+    </div>
+
+    <div class="number">
+      ××
+    </div>
+
+    <div class="time">
+      06:00:00 - 16:00:00
+    </div>
+
+    <div class="check">
+      ✓
+    </div>
+
+  </div>
+
+
+  <div class="game">
+
+    <div class="gameName">
+      Taj
+    </div>
+
+    <div class="number">
+      ××
+    </div>
+
+    <div class="time">
+      06:00:00 - 14:50:00
+    </div>
+
+    <div class="check">
+      ✓
+    </div>
+
+  </div>
+
+
+  <div class="game">
+
+    <div class="gameName">
+      Deshawar
+    </div>
+
+    <div class="number">
+      99
+    </div>
+
+    <div class="time">
+      06:00:00 - 03:00:00
+    </div>
+
+    <div class="check">
+      ✓
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= CHAT ================= -->
+
+<div class="chat">
+  💬
+</div>
+
+
+<!-- ================= BOTTOM ================= -->
+
+<div class="bottom">
+
+  <div
+    class="bottomBtn active"
+    onclick="goHome()">
+    Home
+  </div>
+
+  <div
+    class="bottomBtn"
+    onclick="openWallet()">
+    Wallet
+  </div>
+
+  <div
+    class="bottomBtn"
+    onclick="goProfile()">
+    Profile
+  </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- SUPABASE LIBRARY -->
+<!-- ================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<!-- ================================================= -->
+<!-- YOUR SUPABASE.JS -->
+<!-- ================================================= -->
+
+<script src="supabase.js"></script>
+
+
+<!-- ================================================= -->
+<!-- YOUR WALLET.JS -->
+<!-- ================================================= -->
+
+<script src="wallet.js"></script>
+
+
+<script>
+
+/* ================= WALLET PAGE ================= */
+
+function openWallet(){
+
+  /*
+    wallet.js ke andar
+    openWallet() function hai.
+    Agar wallet.js load na ho to
+    wallet.html par jayega.
+  */
+
+  window.location.href =
+    "wallet.html";
+
+}
+
+
+/* ================= HOME ================= */
+
+function goHome(){
+
+  window.location.href =
+    "home.html";
+
+}
+
+
+/* ================= PROFILE ================= */
+
+function goProfile(){
+
+  window.location.href =
+    "profile.html";
+
+}
+
+
+/* ================= SHARE ================= */
+
+function sharePage(){
+
+  if(navigator.share){
+
+    navigator.share({
+
+      title:"Ajay Demo",
+
+      text:"Ajay Demo",
+
+      url:window.location.href
+
+    });
+
+  }
+  else{
+
+    alert(
+      "Share option is not available on this device."
+    );
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
