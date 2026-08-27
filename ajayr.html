@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Home</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f5f5;
+  color:#222;
+  padding-bottom:85px;
+}
+
+/* ================= TOP HEADER ================= */
+
+.topHeader{
+  height:188px;
+  background:#d9a92f;
+  position:relative;
+  padding-top:1px;
+}
+
+#menuBtn{
+  position:absolute;
+  left:28px;
+  top:104px;
+  color:white;
+  font-size:42px;
+  line-height:35px;
+  z-index:999;
+  cursor:pointer;
+  font-weight:300;
+}
+
+#userId{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  top:73px;
+  background:white;
+  color:#222;
+  min-width:238px;
+  text-align:center;
+  padding:14px 25px;
+  border-radius:35px;
+  font-size:27px;
+  font-weight:bold;
+  z-index:999;
+}
+
+/* Headphone */
+
+#wallet{
+  position:absolute;
+  right:28px;
+  top:72px;
+  color:white;
+  padding:8px 4px;
+  font-size:17px;
+  font-weight:bold;
+  z-index:999;
+  cursor:pointer;
+  width:65px;
+  text-align:center;
+}
+
+/* Help */
+
+.helpBox{
+  position:absolute;
+  right:25px;
+  top:116px;
+  color:white;
+  text-align:center;
+  font-size:19px;
+  font-weight:bold;
+}
+
+.helpIcon{
+  font-size:31px;
+  display:block;
+  margin-bottom:1px;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+  padding:18px 14px 0;
+}
+
+/* ================= AJAYQ FRAME ================= */
+
+.banner{
+  width:100%;
+  height:238px;
+  border:4px solid #111;
+  border-radius:8px;
+  overflow:hidden;
+  background:#fff;
+  margin-bottom:18px;
+}
+
+.banner iframe{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+
+/* ================= RUNNING SLOGAN ================= */
+
+.sloganBox{
+  width:100%;
+  overflow:hidden;
+  background:#fff;
+  border-radius:6px;
+  margin:8px 0 24px;
+  padding:8px 0;
+}
+
+.sloganRunning{
+  display:inline-block;
+  white-space:nowrap;
+  color:#e52b23;
+  font-size:24px;
+  font-weight:bold;
+  padding-left:100%;
+  animation:sloganMove 10s linear infinite;
+}
+
+@keyframes sloganMove{
+
+  from{
+    transform:translateX(0);
+  }
+
+  to{
+    transform:translateX(-100%);
+  }
+
+}
+
+/* ================= ACTION BUTTONS ================= */
+
+.actionBar{
+  display:flex;
+  justify-content:space-around;
+  align-items:flex-start;
+  padding:0 5px 20px;
+  gap:8px;
+}
+
+.actionBtn{
+  width:25%;
+  background:transparent;
+  border:0;
+  color:#222;
+  text-align:center;
+  font-weight:bold;
+  cursor:pointer;
+  padding:0;
+}
+
+.actionIcon{
+  width:70px;
+  height:70px;
+  margin:auto;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:45px;
+  background:#fff;
+}
+
+.actionText{
+  margin-top:8px;
+  font-size:17px;
+  white-space:nowrap;
+}
+
+/* ================= DEMO CONTENT ================= */
+
+.container{
+  width:100%;
+  padding:0;
+}
+
+.demoBox{
+  width:100%;
+  background:#11151e;
+  border-radius:25px;
+  padding:28px 25px;
+  margin-bottom:18px;
+  text-align:center;
+  color:white;
+  box-shadow:0 5px 12px rgba(0,0,0,.18);
+}
+
+.demoTitle{
+  font-size:21px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.demoText{
+  color:#ccc;
+  font-size:16px;
+}
+
+/* ================= WHATSAPP ================= */
+
+.whatsapp{
+  position:fixed;
+  right:18px;
+  bottom:95px;
+  width:58px;
+  height:58px;
+  background:#25D366;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:30px;
+  text-decoration:none;
+  z-index:500;
+  box-shadow:0 3px 8px rgba(0,0,0,.25);
+}
+
+/* ================= BOTTOM NAV ================= */
+
+#bottomNav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:82px;
+  background:#0b0b0b;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:1000;
+  padding:5px 3px;
+}
+
+.navBtn{
+  width:19%;
+  height:70px;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-radius:20px;
+  cursor:pointer;
+  font-size:14px;
+  text-align:center;
+}
+
+.navIcon{
+  font-size:29px;
+  margin-bottom:5px;
+}
+
+.navText{
+  font-size:15px;
+}
+
+.navBtn.active{
+  background:#171717;
+  box-shadow:0 0 18px rgba(220,170,45,.45);
+  color:white;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:420px){
+
+  .topHeader{
+    height:188px;
+  }
+
+  #menuBtn{
+    left:28px;
+    top:108px;
+    font-size:39px;
+  }
+
+  #userId{
+    top:73px;
+    min-width:238px;
+    font-size:26px;
+  }
+
+  #wallet{
+    right:25px;
+    top:74px;
+  }
+
+  .helpBox{
+    right:24px;
+    top:118px;
+  }
+
+  .banner{
+    height:238px;
+  }
+
+  .sloganRunning{
+    font-size:23px;
+  }
+
+  .actionIcon{
+    width:65px;
+    height:65px;
+    font-size:41px;
+  }
+
+  .actionText{
+    font-size:16px;
+  }
+
+}
+
+/* ================= SMALL PHONE ================= */
+
+@media(max-width:360px){
+
+  #userId{
+    min-width:205px;
+    font-size:22px;
+  }
+
+  .banner{
+    height:205px;
+  }
+
+  .sloganRunning{
+    font-size:19px;
+  }
+
+  .actionIcon{
+    width:57px;
+    height:57px;
+    font-size:36px;
+  }
+
+  .actionText{
+    font-size:13px;
+  }
+
+  .demoBox{
+    padding:24px 18px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= TOP HEADER ================= -->
+
+<div class="topHeader">
+
+  <div id="menuBtn" onclick="openMenu()">
+    ☰
+  </div>
+
+  <div id="userId">
+    AJAY DEMO
+  </div>
+
+  <div id="wallet" onclick="go('ajay.html')">
+    <span style="font-size:27px;">🎧</span>
+  </div>
+
+  <div class="helpBox">
+    <span class="helpIcon">🎧</span>
+    Help
+  </div>
+
+</div>
+
+
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+
+
+  <!-- ================= AJAYQ FRAME ================= -->
+
+  <div class="banner">
+
+    <iframe
+      src="ajayq.html"
+      title="AjayQ">
+    </iframe>
+
+  </div>
+
+
+  <!-- ================= RUNNING SLOGAN ================= -->
+
+  <div class="sloganBox">
+
+    <div class="sloganRunning">
+
+      किस्मत आपका इंतज़ार कर रही है! 🍀💵🛡️ सुरक्षित
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= ACTION BUTTONS ================= -->
+
+  <div class="actionBar">
+
+
+    <!-- AjayD -->
+
+    <div
+      class="actionBtn"
+      onclick="go('ajay.html')">
+
+      <div class="actionIcon">
+        👛
+      </div>
+
+      <div class="actionText">
+        AjayD
+      </div>
+
+    </div>
+
+
+    <!-- AjayF -->
+
+    <div
+      class="actionBtn"
+      onclick="go('ajay.html')">
+
+      <div class="actionIcon">
+        💰
+      </div>
+
+      <div class="actionText">
+        AjayF
+      </div>
+
+    </div>
+
+
+    <!-- Contact -->
+
+    <div
+      class="actionBtn"
+      onclick="go('ajay.html')">
+
+      <div class="actionIcon">
+        🟢
+      </div>
+
+      <div class="actionText">
+        WhatsApp
+      </div>
+
+    </div>
+
+
+    <!-- More -->
+
+    <div
+      class="actionBtn"
+      onclick="go('ajay.html')">
+
+      <div class="actionIcon">
+        ➤
+      </div>
+
+      <div class="actionText">
+        Telegram
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= DEMO CONTENT ================= -->
+
+  <div class="container">
+
+    <div class="demoBox">
+
+      <div class="demoTitle">
+        Welcome to Ajay Demo
+      </div>
+
+      <div class="demoText">
+        यह केवल Demo Page है
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= FLOATING BUTTON ================= -->
+
+<a
+  class="whatsapp"
+  href="ajay.html">
+
+  💬
+
+</a>
+
+
+<!-- ================= BOTTOM NAV ================= -->
+
+<div id="bottomNav">
+
+
+  <!-- Results -->
+
+  <div
+    class="navBtn"
+    onclick="go('ajayc.html')">
+
+    <div class="navIcon">
+      ♛
+    </div>
+
+    <div class="navText">
+      Results
+    </div>
+
+  </div>
+
+
+  <!-- History -->
+
+  <div
+    class="navBtn"
+    onclick="go('ajayc.html')">
+
+    <div class="navIcon">
+      ◷
+    </div>
+
+    <div class="navText">
+      History
+    </div>
+
+  </div>
+
+
+  <!-- Home -->
+
+  <div
+    class="navBtn active"
+    onclick="go('ajayc.html')">
+
+    <div class="navIcon">
+      🎮
+    </div>
+
+    <div class="navText">
+      Home
+    </div>
+
+  </div>
+
+
+  <!-- Chart -->
+
+  <div
+    class="navBtn"
+    onclick="go('ajayc.html')">
+
+    <div class="navIcon">
+      ◔
+    </div>
+
+    <div class="navText">
+      Chart
+    </div>
+
+  </div>
+
+
+  <!-- Share -->
+
+  <div
+    class="navBtn"
+    onclick="go('ajayc.html')">
+
+    <div class="navIcon">
+      ▷
+    </div>
+
+    <div class="navText">
+      Share
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= MENU ================= -->
+
+<script src="menu.js"></script>
+
+
+<script>
+
+/* ================= PAGE NAVIGATION ================= */
+
+function go(page){
+
+  window.location.href = page;
+
+}
+
+
+/* ================= SHARE ================= */
+
+function shareApp(){
+
+  if(navigator.share){
+
+    navigator.share({
+
+      title:"Ajay Demo",
+
+      text:"Join now",
+
+      url:window.location.href
+
+    });
+
+  }
+
+}
+
+</script>
+
+</body>
+    </html>
