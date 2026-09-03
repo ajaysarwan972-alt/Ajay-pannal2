@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Cancel Transaction</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+    font-family:Arial;
+    margin:0;
+    background:#e5e7eb;
+    padding:15px;
+}
+
+h2{
+    text-align:center;
+}
+
+.box{
+    background:#fff;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+select,
+input{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    margin-bottom:12px;
+}
+
+.showBtn{
+    width:100%;
+    padding:13px;
+    border:0;
+    border-radius:10px;
+    background:#0984e3;
+    color:white;
+    font-weight:bold;
+}
+
+.history{
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:12px;
+    box-shadow:0 2px 5px #ccc;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px solid #eee;
+}
+
+.cancelBtn{
+    width:100%;
+    margin-top:12px;
+    padding:12px;
+    border:0;
+    border-radius:10px;
+    background:#e17055;
+    color:white;
+    font-weight:bold;
+}
+
+.cancelled{
+    color:green;
+    font-weight:bold;
+    text-align:center;
+    margin-top:12px;
+}
+
+.empty{
+    background:white;
+    padding:25px;
+    text-align:center;
+    border-radius:15px;
+    color:#777;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Cancel Transaction</h2>
+
+
+<div class="box">
+
+<label>Select ID</label>
+
+<select id="userSelect">
+
+<option value="">
+Select User ID
+</option>
+
+</select>
+
+
+<label>Select Date</label>
+
+<input
+type="date"
+id="dateSelect"
+>
+
+
+<button
+class="showBtn"
+onclick="loadHistory()">
+
+SHOW HISTORY
+
+</button>
+
+</div>
+
+
+<div id="historyList">
+
+<div class="empty">
+Select ID and Date
+</div>
+
+</div>
+
+
+<script>
+
+
+const client = supabase.createClient(
+
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+
+);
+
+
+// ==========================
+// LOAD USERS
+// ==========================
+
+async function loadUsers(){
+
+    const {data,error} =
+    await client
+    .from("login")
+    .select("id")
+    .order("id");
+
+
+    if(error){
+
+        console.log(error);
+
+        alert("User IDs load nahi hui");
+
+        return;
+    }
+
+
+    const select =
+    document.getElementById("userSelect");
+
+
+    select.innerHTML =
+    '<option value="">Select User ID</option>';
+
+
+    data.forEach(user=>{
+
+        select.innerHTML += `
+
+        <option value="${user.id}">
+            ${user.id}
+        </option>
+
+        `;
+
+    });
+
+}
+
+
+
+// ==========================
+// LOAD HISTORY
+// ==========================
+
+async function loadHistory(){
+
+    const userId =
+    document.getElementById("userSelect").value;
+
+
+    const date =
+    document.getElementById("dateSelect").value;
+
+
+    if(!userId){
+
+        alert("ID select karo");
+
+        return;
+    }
+
+
+    if(!date){
+
+        alert("Date select karo");
+
+        return;
+    }
+
+
+    const {data,error} =
+    await client
+
+    .from("history")
+
+    .select("*")
+
+    .eq("user_id",userId)
+
+    .eq("date",date)
+
+    .order("created_at",{
+        ascending:false
+    });
+
+
+    if(error){
+
+        console.log(error);
+
+        alert(
+            "History load nahi hui: "
+            + error.message
+        );
+
+        return;
+    }
+
+
+    showHistory(data);
+
+}
+
+
+
+// ==========================
+// SHOW HISTORY
+// ==========================
+
+function showHistory(data){
+
+    const list =
+    document.getElementById("historyList");
+
+
+    list.innerHTML="";
+
+
+    if(!data || data.length===0){
+
+        list.innerHTML=`
+
+        <div class="empty">
+            Is ID aur date ki history nahi mili.
+        </div>
+
+        `;
+
+        return;
+    }
+
+
+    data.forEach(item=>{
+
+        const status =
+        item.status || "active";
+
+
+        const time =
+        item.created_at
+        ?
+        new Date(item.created_at)
+        .toLocaleString()
+        :
+        "-";
+
+
+        let action;
+
+
+        if(status === "cancelled"){
+
+            action=`
+
+            <div class="cancelled">
+                CANCELLED / REFUNDED
+            </div>
+
+            `;
+
+        }else{
+
+            action=`
+
+            <button
+            class="cancelBtn"
+            onclick="cancelTransaction(${item.id})">
+
+                CANCEL + REFUND
+
+            </button>
+
+            `;
+
+        }
+
+
+        list.innerHTML +=`
+
+        <div class="history">
+
+            <div class="row">
+                <b>History ID</b>
+                <span>${item.id}</span>
+            </div>
+
+            <div class="row">
+                <b>User ID</b>
+                <span>${item.user_id}</span>
+            </div>
+
+            <div class="row">
+                <b>Market</b>
+                <span>${item.market || "-"}</span>
+            </div>
+
+            <div class="row">
+                <b>Total</b>
+                <span>₹ ${item.total || 0}</span>
+            </div>
+
+            <div class="row">
+                <b>Mode</b>
+                <span>${item.mode || "-"}</span>
+            </div>
+
+            <div class="row">
+                <b>Status</b>
+                <span>${status}</span>
+            </div>
+
+            <div class="row">
+                <b>Time</b>
+                <span>${time}</span>
+            </div>
+
+            ${action}
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+
+// ==========================
+// CANCEL + REFUND
+// ==========================
+
+async function cancelTransaction(historyId){
+
+    const ok =
+    confirm(
+        "Is transaction ko cancel karke refund karna hai?"
+    );
+
+
+    if(!ok){
+
+        return;
+    }
+
+
+    const {data,error} =
+    await client.rpc(
+        "cancel_demo_transaction",
+        {
+            p_history_id:historyId
+        }
+    );
+
+
+    if(error){
+
+        console.log(error);
+
+        alert(
+            "Error: " + error.message
+        );
+
+        return;
+    }
+
+
+    if(!data.success){
+
+        alert(data.message);
+
+        return;
+    }
+
+
+    alert(
+        "Transaction cancelled.\n" +
+        "Refund amount: ₹" +
+        data.amount
+    );
+
+
+    loadHistory();
+
+}
+
+
+// ==========================
+// START
+// ==========================
+
+loadUsers();
+
+</script>
+
+</body>
+
+</html>
