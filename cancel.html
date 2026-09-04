@@ -48,6 +48,18 @@ input{
     margin-bottom:12px;
 }
 
+.userInfo{
+    background:#f1f5f9;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:12px;
+    display:none;
+}
+
+.userInfo div{
+    padding:5px 0;
+}
+
 .showBtn{
     width:100%;
     padding:13px;
@@ -129,13 +141,35 @@ input{
 
     <label>Select ID</label>
 
-    <select id="userSelect">
+    <select id="userSelect"
+            onchange="showUserInfo()">
 
         <option value="">
-            Select User ID
+            Loading User IDs...
         </option>
 
     </select>
+
+
+    <div id="userInfo"
+         class="userInfo">
+
+        <div>
+            <b>Name:</b>
+            <span id="userName">-</span>
+        </div>
+
+        <div>
+            <b>Mobile:</b>
+            <span id="userMobile">-</span>
+        </div>
+
+        <div>
+            <b>Balance:</b>
+            ₹ <span id="userBalance">0</span>
+        </div>
+
+    </div>
 
 
     <label>Select Date</label>
@@ -192,17 +226,24 @@ async function loadUsers(){
     const select =
         document.getElementById("userSelect");
 
+
     select.innerHTML =
         '<option value="">Loading IDs...</option>';
 
 
-    const { data, error } = await client
+    const { data, error } =
+
+        await client
+
         .from("login")
-        .select("id")
+
+        .select("id,name,mobile,balance")
+
         .order("id");
 
 
     console.log("LOGIN DATA:", data);
+
     console.log("LOGIN ERROR:", error);
 
 
@@ -212,6 +253,7 @@ async function loadUsers(){
 
         select.innerHTML =
             '<option value="">Select User ID</option>';
+
 
         alert(
             "User IDs load nahi hui:\n" +
@@ -228,7 +270,9 @@ async function loadUsers(){
 
     if(!data || data.length === 0){
 
-        alert("login table mein koi ID nahi mili.");
+        alert(
+            "login table mein koi user nahi mila."
+        );
 
         return;
     }
@@ -239,9 +283,26 @@ async function loadUsers(){
         const option =
             document.createElement("option");
 
-        option.value = user.id;
 
-        option.textContent = user.id;
+        option.value =
+            user.id;
+
+
+        option.textContent =
+            user.id;
+
+
+        option.dataset.name =
+            user.name || "";
+
+
+        option.dataset.mobile =
+            user.mobile || "";
+
+
+        option.dataset.balance =
+            user.balance || 0;
+
 
         select.appendChild(option);
 
@@ -252,7 +313,54 @@ async function loadUsers(){
 
 
 // ========================================
-// LOAD HISTORY BY USER ID
+// SHOW USER INFO
+// ========================================
+
+function showUserInfo(){
+
+    const select =
+        document.getElementById("userSelect");
+
+
+    const option =
+        select.options[select.selectedIndex];
+
+
+    const info =
+        document.getElementById("userInfo");
+
+
+    if(!select.value){
+
+        info.style.display = "none";
+
+        return;
+    }
+
+
+    document.getElementById("userName")
+        .textContent =
+        option.dataset.name || "-";
+
+
+    document.getElementById("userMobile")
+        .textContent =
+        option.dataset.mobile || "-";
+
+
+    document.getElementById("userBalance")
+        .textContent =
+        option.dataset.balance || "0";
+
+
+    info.style.display = "block";
+
+}
+
+
+
+// ========================================
+// LOAD HISTORY
 // ========================================
 
 async function loadHistory(){
@@ -273,29 +381,87 @@ async function loadHistory(){
     }
 
 
-    /*
-       IMPORTANT:
+    if(!date){
 
-       Abhi hum DATE FILTER use nahi kar rahe.
+        alert("Date select karo");
 
-       Pehle selected User ID ki saari history
-       load karke check karenge ki user_id match
-       ho raha hai ya nahi.
-    */
+        return;
+    }
 
 
     const list =
         document.getElementById("historyList");
 
+
     list.innerHTML =
         '<div class="loading">History loading...</div>';
 
 
-    console.log("--------------------------------");
-    console.log("Selected User ID:", userId);
-    console.log("Selected Date:", date);
-    console.log("--------------------------------");
+    // ====================================
+    // SELECTED DATE START
+    // ====================================
 
+    const startDate =
+        date + " 00:00:00";
+
+
+    // ====================================
+    // NEXT DATE
+    // ====================================
+
+    const parts =
+        date.split("-");
+
+
+    const year =
+        Number(parts[0]);
+
+
+    const month =
+        Number(parts[1]) - 1;
+
+
+    const day =
+        Number(parts[2]);
+
+
+    const nextDay =
+        new Date(
+            year,
+            month,
+            day + 1
+        );
+
+
+    const nextDate =
+
+        nextDay.getFullYear() +
+
+        "-" +
+
+        String(
+            nextDay.getMonth() + 1
+        ).padStart(2,"0") +
+
+        "-" +
+
+        String(
+            nextDay.getDate()
+        ).padStart(2,"0") +
+
+        " 00:00:00";
+
+
+    console.log("User ID:", userId);
+
+    console.log("Start:", startDate);
+
+    console.log("Next:", nextDate);
+
+
+    // ====================================
+    // HISTORY QUERY
+    // ====================================
 
     const { data, error } =
 
@@ -306,6 +472,10 @@ async function loadHistory(){
         .select("*")
 
         .eq("user_id", userId)
+
+        .gte("created_at", startDate)
+
+        .lt("created_at", nextDate)
 
         .order("created_at", {
             ascending:false
@@ -321,6 +491,7 @@ async function loadHistory(){
 
         console.log(error);
 
+
         list.innerHTML = `
 
             <div class="empty">
@@ -330,30 +501,6 @@ async function loadHistory(){
                 <br><br>
 
                 ${error.message}
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    if(!data || data.length === 0){
-
-        list.innerHTML = `
-
-            <div class="empty">
-
-                Is User ID ki history nahi mili.
-
-                <br><br>
-
-                <b>User ID:</b> ${userId}
-
-                <br><br>
-
-                Date filter abhi OFF hai.
 
             </div>
 
@@ -388,7 +535,7 @@ function showHistory(data){
 
             <div class="empty">
 
-                History nahi mili.
+                Is ID aur date ki history nahi mili.
 
             </div>
 
@@ -408,8 +555,9 @@ function showHistory(data){
         const time =
             item.created_at
             ?
-            new Date(item.created_at)
-                .toLocaleString("en-IN")
+            new Date(
+                item.created_at
+            ).toLocaleString("en-IN")
             :
             "-";
 
@@ -417,7 +565,10 @@ function showHistory(data){
         let action;
 
 
-        if(status === "cancelled"){
+        if(
+            String(status).toLowerCase()
+            === "cancelled"
+        ){
 
             action = `
 
@@ -547,18 +698,15 @@ function showHistory(data){
 
 async function cancelTransaction(historyId){
 
-
-    const ok = confirm(
-
-        "Is transaction ko cancel karke refund karna hai?"
-
-    );
+    const ok =
+        confirm(
+            "Is transaction ko cancel karke refund karna hai?"
+        );
 
 
     if(!ok){
 
         return;
-
     }
 
 
@@ -585,7 +733,7 @@ async function cancelTransaction(historyId){
         console.log(error);
 
         alert(
-            "Error:\n" +
+            "Refund Error:\n" +
             error.message
         );
 
@@ -595,7 +743,9 @@ async function cancelTransaction(historyId){
 
     if(!data){
 
-        alert("Server se response nahi mila.");
+        alert(
+            "Server se response nahi mila."
+        );
 
         return;
     }
@@ -614,7 +764,7 @@ async function cancelTransaction(historyId){
 
     alert(
 
-        "Transaction cancelled.\n\n" +
+        "Transaction cancelled successfully.\n\n" +
 
         "Refund amount: ₹" +
 
@@ -623,7 +773,64 @@ async function cancelTransaction(historyId){
     );
 
 
-    loadHistory();
+    // History dobara load
+    await loadHistory();
+
+
+    // User balance dobara load
+    await refreshUserBalance();
+
+}
+
+
+
+// ========================================
+// REFRESH BALANCE
+// ========================================
+
+async function refreshUserBalance(){
+
+    const userId =
+        document.getElementById("userSelect").value;
+
+
+    if(!userId){
+
+        return;
+    }
+
+
+    const { data, error } =
+
+        await client
+
+        .from("login")
+
+        .select("balance")
+
+        .eq("id", userId)
+
+        .maybeSingle();
+
+
+    if(error){
+
+        console.log(
+            "Balance refresh error:",
+            error
+        );
+
+        return;
+    }
+
+
+    if(data){
+
+        document.getElementById("userBalance")
+            .textContent =
+            data.balance ?? 0;
+
+    }
 
 }
 
