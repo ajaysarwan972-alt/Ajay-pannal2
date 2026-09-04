@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,7 +16,7 @@
 <style>
 
 body{
-    font-family:Arial;
+    font-family:Arial,sans-serif;
     margin:0;
     background:#e5e7eb;
     padding:15px;
@@ -23,6 +24,7 @@ body{
 
 h2{
     text-align:center;
+    margin-top:5px;
 }
 
 .box{
@@ -46,6 +48,7 @@ input{
     border:1px solid #ccc;
     border-radius:10px;
     margin-bottom:12px;
+    font-size:15px;
 }
 
 .userInfo{
@@ -83,8 +86,12 @@ input{
     display:flex;
     justify-content:space-between;
     gap:10px;
-    padding:7px 0;
+    padding:8px 0;
     border-bottom:1px solid #eee;
+}
+
+.row b{
+    color:#333;
 }
 
 .row span{
@@ -102,6 +109,10 @@ input{
     color:white;
     font-weight:bold;
     cursor:pointer;
+}
+
+.cancelBtn:active{
+    transform:scale(.98);
 }
 
 .cancelled{
@@ -128,9 +139,18 @@ input{
     font-weight:bold;
 }
 
+.errorBox{
+    background:#fff;
+    color:#d63031;
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+}
+
 </style>
 
 </head>
+
 
 <body>
 
@@ -141,8 +161,9 @@ input{
 
     <label>Select ID</label>
 
-    <select id="userSelect"
-            onchange="showUserInfo()">
+    <select
+        id="userSelect"
+        onchange="showUserInfo()">
 
         <option value="">
             Loading User IDs...
@@ -151,8 +172,9 @@ input{
     </select>
 
 
-    <div id="userInfo"
-         class="userInfo">
+    <div
+        id="userInfo"
+        class="userInfo">
 
         <div>
             <b>Name:</b>
@@ -176,8 +198,7 @@ input{
 
     <input
         type="date"
-        id="dateSelect"
-    >
+        id="dateSelect">
 
 
     <button
@@ -203,23 +224,27 @@ input{
 <script>
 
 
-// ========================================
-// SUPABASE
-// ========================================
+// ==================================================
+// SUPABASE CONNECTION
+// ==================================================
 
-const client = supabase.createClient(
+const SUPABASE_URL =
+    "https://katbdbzoufiblnnsoxkk.supabase.co";
 
-    "https://katbdbzoufiblnnsoxkk.supabase.co",
-
-    "sb_publishable_--fdpQMmSlUyt2ywjUErg_LXGvQH-a"
-
-);
+const SUPABASE_KEY =
+    "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a";
 
 
+const client =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
-// ========================================
+
+// ==================================================
 // LOAD USERS
-// ========================================
+// ==================================================
 
 async function loadUsers(){
 
@@ -249,16 +274,24 @@ async function loadUsers(){
 
     if(error){
 
-        console.log(error);
-
         select.innerHTML =
-            '<option value="">Select User ID</option>';
+            '<option value="">ID Load Error</option>';
 
 
-        alert(
-            "User IDs load nahi hui:\n" +
-            error.message
-        );
+        document.getElementById("historyList")
+            .innerHTML = `
+
+            <div class="errorBox">
+
+                <b>Supabase Error</b>
+
+                <br><br>
+
+                ${error.message}
+
+            </div>
+
+            `;
 
         return;
     }
@@ -270,9 +303,8 @@ async function loadUsers(){
 
     if(!data || data.length === 0){
 
-        alert(
-            "login table mein koi user nahi mila."
-        );
+        select.innerHTML =
+            '<option value="">No Users Found</option>';
 
         return;
     }
@@ -293,15 +325,15 @@ async function loadUsers(){
 
 
         option.dataset.name =
-            user.name || "";
+            user.name ?? "";
 
 
         option.dataset.mobile =
-            user.mobile || "";
+            user.mobile ?? "";
 
 
         option.dataset.balance =
-            user.balance || 0;
+            user.balance ?? 0;
 
 
         select.appendChild(option);
@@ -311,19 +343,14 @@ async function loadUsers(){
 }
 
 
-
-// ========================================
-// SHOW USER INFO
-// ========================================
+// ==================================================
+// SHOW USER INFORMATION
+// ==================================================
 
 function showUserInfo(){
 
     const select =
         document.getElementById("userSelect");
-
-
-    const option =
-        select.options[select.selectedIndex];
 
 
     const info =
@@ -336,6 +363,10 @@ function showUserInfo(){
 
         return;
     }
+
+
+    const option =
+        select.options[select.selectedIndex];
 
 
     document.getElementById("userName")
@@ -353,15 +384,15 @@ function showUserInfo(){
         option.dataset.balance || "0";
 
 
-    info.style.display = "block";
+    info.style.display =
+        "block";
 
 }
 
 
-
-// ========================================
+// ==================================================
 // LOAD HISTORY
-// ========================================
+// ==================================================
 
 async function loadHistory(){
 
@@ -375,7 +406,7 @@ async function loadHistory(){
 
     if(!userId){
 
-        alert("ID select karo");
+        alert("Pehle ID select karo.");
 
         return;
     }
@@ -383,7 +414,7 @@ async function loadHistory(){
 
     if(!date){
 
-        alert("Date select karo");
+        alert("Pehle date select karo.");
 
         return;
     }
@@ -397,17 +428,17 @@ async function loadHistory(){
         '<div class="loading">History loading...</div>';
 
 
-    // ====================================
-    // SELECTED DATE START
-    // ====================================
+    // ----------------------------------------------
+    // START DATE
+    // ----------------------------------------------
 
     const startDate =
         date + " 00:00:00";
 
 
-    // ====================================
+    // ----------------------------------------------
     // NEXT DATE
-    // ====================================
+    // ----------------------------------------------
 
     const parts =
         date.split("-");
@@ -452,16 +483,16 @@ async function loadHistory(){
         " 00:00:00";
 
 
-    console.log("User ID:", userId);
+    console.log("Selected ID:",userId);
 
-    console.log("Start:", startDate);
+    console.log("Start:",startDate);
 
-    console.log("Next:", nextDate);
+    console.log("Next:",nextDate);
 
 
-    // ====================================
-    // HISTORY QUERY
-    // ====================================
+    // ----------------------------------------------
+    // GET HISTORY
+    // ----------------------------------------------
 
     const { data, error } =
 
@@ -471,32 +502,41 @@ async function loadHistory(){
 
         .select("*")
 
-        .eq("user_id", userId)
+        .eq(
+            "user_id",
+            userId
+        )
 
-        .gte("created_at", startDate)
+        .gte(
+            "created_at",
+            startDate
+        )
 
-        .lt("created_at", nextDate)
+        .lt(
+            "created_at",
+            nextDate
+        )
 
-        .order("created_at", {
-            ascending:false
-        });
+        .order(
+            "created_at",
+            {
+                ascending:false
+            }
+        );
 
 
-    console.log("HISTORY DATA:", data);
+    console.log("HISTORY DATA:",data);
 
-    console.log("HISTORY ERROR:", error);
+    console.log("HISTORY ERROR:",error);
 
 
     if(error){
 
-        console.log(error);
-
-
         list.innerHTML = `
 
-            <div class="empty">
+            <div class="errorBox">
 
-                History load nahi hui.
+                <b>History Error</b>
 
                 <br><br>
 
@@ -515,10 +555,9 @@ async function loadHistory(){
 }
 
 
-
-// ========================================
+// ==================================================
 // SHOW HISTORY
-// ========================================
+// ==================================================
 
 function showHistory(data){
 
@@ -562,7 +601,7 @@ function showHistory(data){
             "-";
 
 
-        let action;
+        let action = "";
 
 
         if(
@@ -691,16 +730,15 @@ function showHistory(data){
 }
 
 
-
-// ========================================
+// ==================================================
 // CANCEL + REFUND
-// ========================================
+// ==================================================
 
 async function cancelTransaction(historyId){
 
     const ok =
         confirm(
-            "Is transaction ko cancel karke refund karna hai?"
+            "Is transaction ko cancel karke balance mein refund karna hai?"
         );
 
 
@@ -717,23 +755,29 @@ async function cancelTransaction(historyId){
             "cancel_demo_transaction",
 
             {
-                p_history_id: historyId
+                p_history_id:
+                    historyId
             }
 
         );
 
 
-    console.log("RPC DATA:", data);
+    console.log(
+        "RPC DATA:",
+        data
+    );
 
-    console.log("RPC ERROR:", error);
+
+    console.log(
+        "RPC ERROR:",
+        error
+    );
 
 
     if(error){
 
-        console.log(error);
-
         alert(
-            "Refund Error:\n" +
+            "Refund Error:\n\n" +
             error.message
         );
 
@@ -773,20 +817,19 @@ async function cancelTransaction(historyId){
     );
 
 
-    // History dobara load
+    // History refresh
     await loadHistory();
 
 
-    // User balance dobara load
+    // Balance refresh
     await refreshUserBalance();
 
 }
 
 
-
-// ========================================
+// ==================================================
 // REFRESH BALANCE
-// ========================================
+// ==================================================
 
 async function refreshUserBalance(){
 
@@ -808,7 +851,10 @@ async function refreshUserBalance(){
 
         .select("balance")
 
-        .eq("id", userId)
+        .eq(
+            "id",
+            userId
+        )
 
         .maybeSingle();
 
@@ -816,7 +862,7 @@ async function refreshUserBalance(){
     if(error){
 
         console.log(
-            "Balance refresh error:",
+            "BALANCE ERROR:",
             error
         );
 
@@ -826,8 +872,9 @@ async function refreshUserBalance(){
 
     if(data){
 
-        document.getElementById("userBalance")
-            .textContent =
+        document.getElementById(
+            "userBalance"
+        ).textContent =
             data.balance ?? 0;
 
     }
@@ -835,10 +882,9 @@ async function refreshUserBalance(){
 }
 
 
-
-// ========================================
+// ==================================================
 // START
-// ========================================
+// ==================================================
 
 loadUsers();
 
@@ -848,3 +894,4 @@ loadUsers();
 </body>
 
 </html>
+```
