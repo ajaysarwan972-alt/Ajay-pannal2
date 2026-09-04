@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+      content="width=device-width, initial-scale=1.0">
 
 <title>Cancel Transaction</title>
 
@@ -56,6 +56,7 @@ input{
     background:#0984e3;
     color:white;
     font-weight:bold;
+    cursor:pointer;
 }
 
 .history{
@@ -74,6 +75,11 @@ input{
     border-bottom:1px solid #eee;
 }
 
+.row span{
+    text-align:right;
+    word-break:break-word;
+}
+
 .cancelBtn{
     width:100%;
     margin-top:12px;
@@ -83,6 +89,7 @@ input{
     background:#e17055;
     color:white;
     font-weight:bold;
+    cursor:pointer;
 }
 
 .cancelled{
@@ -100,6 +107,15 @@ input{
     color:#777;
 }
 
+.loading{
+    background:white;
+    padding:25px;
+    text-align:center;
+    border-radius:15px;
+    color:#0984e3;
+    font-weight:bold;
+}
+
 </style>
 
 </head>
@@ -111,41 +127,41 @@ input{
 
 <div class="box">
 
-<label>Select ID</label>
+    <label>Select ID</label>
 
-<select id="userSelect">
+    <select id="userSelect">
 
-<option value="">
-Select User ID
-</option>
+        <option value="">
+            Select User ID
+        </option>
 
-</select>
-
-
-<label>Select Date</label>
-
-<input
-type="date"
-id="dateSelect"
->
+    </select>
 
 
-<button
-class="showBtn"
-onclick="loadHistory()">
+    <label>Select Date</label>
 
-SHOW HISTORY
+    <input
+        type="date"
+        id="dateSelect"
+    >
 
-</button>
+
+    <button
+        class="showBtn"
+        onclick="loadHistory()">
+
+        SHOW HISTORY
+
+    </button>
 
 </div>
 
 
 <div id="historyList">
 
-<div class="empty">
-Select ID and Date
-</div>
+    <div class="empty">
+        Select ID and Date
+    </div>
 
 </div>
 
@@ -153,55 +169,81 @@ Select ID and Date
 <script>
 
 
+// ========================================
+// SUPABASE
+// ========================================
+
 const client = supabase.createClient(
 
-"https://katbdbzoufiblnnsoxkk.supabase.co",
+    "https://katbdbzoufiblnnsoxkk.supabase.co",
 
-"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+    "sb_publishable_--fdpQMmSlUyt2ywjUErg_LXGvQH-a"
 
 );
 
 
-// ==========================
+
+// ========================================
 // LOAD USERS
-// ==========================
+// ========================================
 
 async function loadUsers(){
 
-    const {data,error} =
-    await client
-    .from("login")
-    .select("id")
-    .order("id");
+    const select =
+        document.getElementById("userSelect");
+
+    select.innerHTML =
+        '<option value="">Loading IDs...</option>';
+
+
+    const { data, error } = await client
+        .from("login")
+        .select("id")
+        .order("id");
+
+
+    console.log("LOGIN DATA:", data);
+    console.log("LOGIN ERROR:", error);
 
 
     if(error){
 
         console.log(error);
 
-        alert("User IDs load nahi hui");
+        select.innerHTML =
+            '<option value="">Select User ID</option>';
+
+        alert(
+            "User IDs load nahi hui:\n" +
+            error.message
+        );
 
         return;
     }
 
 
-    const select =
-    document.getElementById("userSelect");
-
-
     select.innerHTML =
-    '<option value="">Select User ID</option>';
+        '<option value="">Select User ID</option>';
 
 
-    data.forEach(user=>{
+    if(!data || data.length === 0){
 
-        select.innerHTML += `
+        alert("login table mein koi ID nahi mili.");
 
-        <option value="${user.id}">
-            ${user.id}
-        </option>
+        return;
+    }
 
-        `;
+
+    data.forEach(user => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = user.id;
+
+        option.textContent = user.id;
+
+        select.appendChild(option);
 
     });
 
@@ -209,18 +251,18 @@ async function loadUsers(){
 
 
 
-// ==========================
-// LOAD HISTORY
-// ==========================
+// ========================================
+// LOAD HISTORY BY USER ID
+// ========================================
 
 async function loadHistory(){
 
     const userId =
-    document.getElementById("userSelect").value;
+        document.getElementById("userSelect").value;
 
 
     const date =
-    document.getElementById("dateSelect").value;
+        document.getElementById("dateSelect").value;
 
 
     if(!userId){
@@ -231,64 +273,91 @@ async function loadHistory(){
     }
 
 
-    if(!date){
+    /*
+       IMPORTANT:
 
-        alert("Date select karo");
+       Abhi hum DATE FILTER use nahi kar rahe.
 
-        return;
-    }
-
-
-    // Selected date ka start
-    const startDate =
-        date + " 00:00:00";
+       Pehle selected User ID ki saari history
+       load karke check karenge ki user_id match
+       ho raha hai ya nahi.
+    */
 
 
-    // Next date nikalna
-    const parts = date.split("-");
+    const list =
+        document.getElementById("historyList");
 
-    const year = Number(parts[0]);
-    const month = Number(parts[1]) - 1;
-    const day = Number(parts[2]);
-
-    const nextDay =
-        new Date(year, month, day + 1);
-
-    const nextDate =
-        nextDay.getFullYear() +
-        "-" +
-        String(nextDay.getMonth() + 1).padStart(2,"0") +
-        "-" +
-        String(nextDay.getDate()).padStart(2,"0") +
-        " 00:00:00";
+    list.innerHTML =
+        '<div class="loading">History loading...</div>';
 
 
-    const {data,error} =
-    await client
+    console.log("--------------------------------");
+    console.log("Selected User ID:", userId);
+    console.log("Selected Date:", date);
+    console.log("--------------------------------");
 
-    .from("history")
 
-    .select("*")
+    const { data, error } =
 
-    .eq("user_id",userId)
+        await client
 
-    .gte("created_at",startDate)
+        .from("history")
 
-    .lt("created_at",nextDate)
+        .select("*")
 
-    .order("created_at",{
-        ascending:false
-    });
+        .eq("user_id", userId)
+
+        .order("created_at", {
+            ascending:false
+        });
+
+
+    console.log("HISTORY DATA:", data);
+
+    console.log("HISTORY ERROR:", error);
 
 
     if(error){
 
         console.log(error);
 
-        alert(
-            "History load nahi hui: "
-            + error.message
-        );
+        list.innerHTML = `
+
+            <div class="empty">
+
+                History load nahi hui.
+
+                <br><br>
+
+                ${error.message}
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    if(!data || data.length === 0){
+
+        list.innerHTML = `
+
+            <div class="empty">
+
+                Is User ID ki history nahi mili.
+
+                <br><br>
+
+                <b>User ID:</b> ${userId}
+
+                <br><br>
+
+                Date filter abhi OFF hai.
+
+            </div>
+
+        `;
 
         return;
     }
@@ -300,26 +369,28 @@ async function loadHistory(){
 
 
 
-// ==========================
+// ========================================
 // SHOW HISTORY
-// ==========================
+// ========================================
 
 function showHistory(data){
 
     const list =
-    document.getElementById("historyList");
+        document.getElementById("historyList");
 
 
-    list.innerHTML="";
+    list.innerHTML = "";
 
 
-    if(!data || data.length===0){
+    if(!data || data.length === 0){
 
-        list.innerHTML=`
+        list.innerHTML = `
 
-        <div class="empty">
-            Is ID aur date ki history nahi mili.
-        </div>
+            <div class="empty">
+
+                History nahi mili.
+
+            </div>
 
         `;
 
@@ -327,19 +398,20 @@ function showHistory(data){
     }
 
 
-    data.forEach(item=>{
+    data.forEach(item => {
+
 
         const status =
-        item.status || "active";
+            item.status || "active";
 
 
         const time =
-        item.created_at
-        ?
-        new Date(item.created_at)
-        .toLocaleString()
-        :
-        "-";
+            item.created_at
+            ?
+            new Date(item.created_at)
+                .toLocaleString("en-IN")
+            :
+            "-";
 
 
         let action;
@@ -347,73 +419,119 @@ function showHistory(data){
 
         if(status === "cancelled"){
 
-            action=`
+            action = `
 
-            <div class="cancelled">
-                CANCELLED / REFUNDED
-            </div>
+                <div class="cancelled">
+
+                    CANCELLED / REFUNDED
+
+                </div>
 
             `;
 
         }else{
 
-            action=`
+            action = `
 
-            <button
-            class="cancelBtn"
-            onclick="cancelTransaction(${item.id})">
+                <button
+                    class="cancelBtn"
+                    onclick="cancelTransaction('${item.id}')">
 
-                CANCEL + REFUND
+                    CANCEL + REFUND
 
-            </button>
+                </button>
 
             `;
 
         }
 
 
-        list.innerHTML +=`
+        list.innerHTML += `
 
-        <div class="history">
+            <div class="history">
 
-            <div class="row">
-                <b>History ID</b>
-                <span>${item.id}</span>
+
+                <div class="row">
+
+                    <b>History ID</b>
+
+                    <span>
+                        ${item.id ?? "-"}
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <b>User ID</b>
+
+                    <span>
+                        ${item.user_id ?? "-"}
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <b>Market</b>
+
+                    <span>
+                        ${item.market ?? "-"}
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <b>Total</b>
+
+                    <span>
+                        ₹ ${item.total ?? 0}
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <b>Mode</b>
+
+                    <span>
+                        ${item.mode ?? "-"}
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <b>Status</b>
+
+                    <span>
+                        ${status}
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <b>Time</b>
+
+                    <span>
+                        ${time}
+                    </span>
+
+                </div>
+
+
+                ${action}
+
+
             </div>
-
-            <div class="row">
-                <b>User ID</b>
-                <span>${item.user_id}</span>
-            </div>
-
-            <div class="row">
-                <b>Market</b>
-                <span>${item.market || "-"}</span>
-            </div>
-
-            <div class="row">
-                <b>Total</b>
-                <span>₹ ${item.total || 0}</span>
-            </div>
-
-            <div class="row">
-                <b>Mode</b>
-                <span>${item.mode || "-"}</span>
-            </div>
-
-            <div class="row">
-                <b>Status</b>
-                <span>${status}</span>
-            </div>
-
-            <div class="row">
-                <b>Time</b>
-                <span>${time}</span>
-            </div>
-
-            ${action}
-
-        </div>
 
         `;
 
@@ -423,31 +541,43 @@ function showHistory(data){
 
 
 
-// ==========================
+// ========================================
 // CANCEL + REFUND
-// ==========================
+// ========================================
 
 async function cancelTransaction(historyId){
 
-    const ok =
-    confirm(
+
+    const ok = confirm(
+
         "Is transaction ko cancel karke refund karna hai?"
+
     );
 
 
     if(!ok){
 
         return;
+
     }
 
 
-    const {data,error} =
-    await client.rpc(
-        "cancel_demo_transaction",
-        {
-            p_history_id:historyId
-        }
-    );
+    const { data, error } =
+
+        await client.rpc(
+
+            "cancel_demo_transaction",
+
+            {
+                p_history_id: historyId
+            }
+
+        );
+
+
+    console.log("RPC DATA:", data);
+
+    console.log("RPC ERROR:", error);
 
 
     if(error){
@@ -455,8 +585,17 @@ async function cancelTransaction(historyId){
         console.log(error);
 
         alert(
-            "Error: " + error.message
+            "Error:\n" +
+            error.message
         );
+
+        return;
+    }
+
+
+    if(!data){
+
+        alert("Server se response nahi mila.");
 
         return;
     }
@@ -464,16 +603,23 @@ async function cancelTransaction(historyId){
 
     if(!data.success){
 
-        alert(data.message);
+        alert(
+            data.message ||
+            "Transaction cancel nahi hui."
+        );
 
         return;
     }
 
 
     alert(
-        "Transaction cancelled.\n" +
+
+        "Transaction cancelled.\n\n" +
+
         "Refund amount: ₹" +
-        data.amount
+
+        (data.amount || 0)
+
     );
 
 
@@ -482,11 +628,13 @@ async function cancelTransaction(historyId){
 }
 
 
-// ==========================
+
+// ========================================
 // START
-// ==========================
+// ========================================
 
 loadUsers();
+
 
 </script>
 
