@@ -111,10 +111,6 @@ input{
     cursor:pointer;
 }
 
-.cancelBtn:active{
-    transform:scale(.98);
-}
-
 .cancelled{
     color:green;
     font-weight:bold;
@@ -194,6 +190,7 @@ input{
     </div>
 
 
+    <!-- Date abhi sirf display ke liye hai -->
     <label>Select Date</label>
 
     <input
@@ -215,7 +212,7 @@ input{
 <div id="historyList">
 
     <div class="empty">
-        Select ID and Date
+        Select ID
     </div>
 
 </div>
@@ -225,7 +222,7 @@ input{
 
 
 // ==================================================
-// SUPABASE CONNECTION
+// SUPABASE
 // ==================================================
 
 const SUPABASE_URL =
@@ -240,6 +237,7 @@ const client =
         SUPABASE_URL,
         SUPABASE_KEY
     );
+
 
 
 // ==================================================
@@ -281,15 +279,15 @@ async function loadUsers(){
         document.getElementById("historyList")
             .innerHTML = `
 
-            <div class="errorBox">
+                <div class="errorBox">
 
-                <b>Supabase Error</b>
+                    <b>Login Table Error</b>
 
-                <br><br>
+                    <br><br>
 
-                ${error.message}
+                    ${error.message}
 
-            </div>
+                </div>
 
             `;
 
@@ -343,8 +341,9 @@ async function loadUsers(){
 }
 
 
+
 // ==================================================
-// SHOW USER INFORMATION
+// SHOW USER INFO
 // ==================================================
 
 function showUserInfo(){
@@ -366,7 +365,9 @@ function showUserInfo(){
 
 
     const option =
-        select.options[select.selectedIndex];
+        select.options[
+            select.selectedIndex
+        ];
 
 
     document.getElementById("userName")
@@ -390,6 +391,7 @@ function showUserInfo(){
 }
 
 
+
 // ==================================================
 // LOAD HISTORY
 // ==================================================
@@ -400,21 +402,11 @@ async function loadHistory(){
         document.getElementById("userSelect").value;
 
 
-    const date =
-        document.getElementById("dateSelect").value;
-
-
     if(!userId){
 
-        alert("Pehle ID select karo.");
-
-        return;
-    }
-
-
-    if(!date){
-
-        alert("Pehle date select karo.");
+        alert(
+            "Pehle ID select karo."
+        );
 
         return;
     }
@@ -428,71 +420,17 @@ async function loadHistory(){
         '<div class="loading">History loading...</div>';
 
 
-    // ----------------------------------------------
-    // START DATE
-    // ----------------------------------------------
-
-    const startDate =
-        date + " 00:00:00";
+    console.log(
+        "SELECTED USER ID:",
+        userId
+    );
 
 
-    // ----------------------------------------------
-    // NEXT DATE
-    // ----------------------------------------------
-
-    const parts =
-        date.split("-");
-
-
-    const year =
-        Number(parts[0]);
-
-
-    const month =
-        Number(parts[1]) - 1;
-
-
-    const day =
-        Number(parts[2]);
-
-
-    const nextDay =
-        new Date(
-            year,
-            month,
-            day + 1
-        );
-
-
-    const nextDate =
-
-        nextDay.getFullYear() +
-
-        "-" +
-
-        String(
-            nextDay.getMonth() + 1
-        ).padStart(2,"0") +
-
-        "-" +
-
-        String(
-            nextDay.getDate()
-        ).padStart(2,"0") +
-
-        " 00:00:00";
-
-
-    console.log("Selected ID:",userId);
-
-    console.log("Start:",startDate);
-
-    console.log("Next:",nextDate);
-
-
-    // ----------------------------------------------
-    // GET HISTORY
-    // ----------------------------------------------
+    // =================================================
+    // IMPORTANT:
+    // DATE FILTER ABHI OFF HAI
+    // Selected ID ki SAARI history load hogi.
+    // =================================================
 
     const { data, error } =
 
@@ -507,16 +445,6 @@ async function loadHistory(){
             userId
         )
 
-        .gte(
-            "created_at",
-            startDate
-        )
-
-        .lt(
-            "created_at",
-            nextDate
-        )
-
         .order(
             "created_at",
             {
@@ -525,9 +453,16 @@ async function loadHistory(){
         );
 
 
-    console.log("HISTORY DATA:",data);
+    console.log(
+        "HISTORY DATA:",
+        data
+    );
 
-    console.log("HISTORY ERROR:",error);
+
+    console.log(
+        "HISTORY ERROR:",
+        error
+    );
 
 
     if(error){
@@ -550,9 +485,31 @@ async function loadHistory(){
     }
 
 
+    if(!data || data.length === 0){
+
+        list.innerHTML = `
+
+            <div class="empty">
+
+                Is User ID ki history nahi mili.
+
+                <br><br>
+
+                <b>User ID:</b>
+                ${userId}
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
     showHistory(data);
 
 }
+
 
 
 // ==================================================
@@ -566,22 +523,6 @@ function showHistory(data){
 
 
     list.innerHTML = "";
-
-
-    if(!data || data.length === 0){
-
-        list.innerHTML = `
-
-            <div class="empty">
-
-                Is ID aur date ki history nahi mili.
-
-            </div>
-
-        `;
-
-        return;
-    }
 
 
     data.forEach(item => {
@@ -601,7 +542,7 @@ function showHistory(data){
             "-";
 
 
-        let action = "";
+        let action;
 
 
         if(
@@ -730,6 +671,7 @@ function showHistory(data){
 }
 
 
+
 // ==================================================
 // CANCEL + REFUND
 // ==================================================
@@ -817,14 +759,12 @@ async function cancelTransaction(historyId){
     );
 
 
-    // History refresh
     await loadHistory();
 
-
-    // Balance refresh
     await refreshUserBalance();
 
 }
+
 
 
 // ==================================================
@@ -880,6 +820,7 @@ async function refreshUserBalance(){
     }
 
 }
+
 
 
 // ==================================================
