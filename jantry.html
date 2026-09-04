@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dealer</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Arial;
+  text-align:center;
+  padding-bottom:70px;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+}
+
+#grid,
+#gridA,
+#gridB{
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  gap:5px;
+  padding:10px;
+}
+
+.box{
+  border:1px solid #0ff;
+  border-radius:5px;
+  padding:7px 3px;
+  font-size:12px;
+  min-height:32px;
+}
+
+.number{
+  font-weight:bold;
+  font-size:13px;
+}
+
+.amount{
+  margin-top:4px;
+  color:#0f0;
+  font-weight:bold;
+}
+
+.sectionTitle{
+  margin-top:15px;
+  padding:10px;
+  background:#222;
+  font-size:18px;
+  font-weight:bold;
+}
+
+select{
+  padding:10px;
+  margin:5px;
+  border-radius:6px;
+}
+
+button{
+  padding:10px 15px;
+  margin:10px;
+  background:#0f0;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+}
+
+#total{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:red;
+  padding:12px;
+  z-index:999;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <div id="dealerId">ID</div>
+  <div id="wallet">₹0</div>
+</div>
+
+<button onclick="goList()">List View</button>
+
+<br>
+
+<select id="dateFilter" onchange="loadData()">
+  <option value="">All Date</option>
+</select>
+
+<select id="userFilter" onchange="loadData()">
+  <option value="">All Users</option>
+</select>
+
+
+<!-- ================= JODI ================= -->
+
+<div class="sectionTitle">
+  JODI 00 - 99
+</div>
+
+<div id="grid"></div>
+
+
+<!-- ================= ANDAR ================= -->
+
+<div class="sectionTitle">
+  A - ANDAR
+</div>
+
+<div id="gridA"></div>
+
+
+<!-- ================= BAHAR ================= -->
+
+<div class="sectionTitle">
+  B - BAHAR
+</div>
+
+<div id="gridB"></div>
+
+
+<div id="total">
+  Total Demo Points: 0
+</div>
+
+
+<script>
+
+/* ==================================================
+   SUPABASE
+================================================== */
+
+const client = supabase.createClient(
+  "https://katbdbzoufiblnnsoxkk.supabase.co",
+  "sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+);
+
+
+/* ==================================================
+   MARKET
+================================================== */
+
+const market =
+  localStorage.getItem("market") || "faridabad";
+
+
+/* ==================================================
+   LIST PAGE
+================================================== */
+
+function goList(){
+  window.location.href = "list.html";
+}
+
+
+/* ==================================================
+   JODI 00-99 BOXES
+================================================== */
+
+for(let i=0;i<100;i++){
+
+  let n =
+    i.toString().padStart(2,"0");
+
+  document.getElementById("grid").innerHTML += `
+    <div class="box" id="b${n}">
+      <div class="number">${n}</div>
+      <div class="amount">0</div>
+    </div>
+  `;
+}
+
+
+/* ==================================================
+   ANDAR A0-A9
+================================================== */
+
+for(let i=0;i<10;i++){
+
+  document.getElementById("gridA").innerHTML += `
+    <div class="box" id="a${i}">
+      <div class="number">${i}</div>
+      <div class="amount">0</div>
+    </div>
+  `;
+}
+
+
+/* ==================================================
+   BAHAR B0-B9
+================================================== */
+
+for(let i=0;i<10;i++){
+
+  document.getElementById("gridB").innerHTML += `
+    <div class="box" id="bb${i}">
+      <div class="number">${i}</div>
+      <div class="amount">0</div>
+    </div>
+  `;
+}
+
+
+/* ==================================================
+   LOAD DATES
+================================================== */
+
+async function loadDates(){
+
+  const {data,error} =
+    await client
+      .from("history")
+      .select("created_at")
+      .eq("market",market);
+
+  if(error){
+
+    console.error("Date error:",error);
+    return;
+
+  }
+
+  let dates = {};
+
+  (data || []).forEach(row => {
+
+    if(!row.created_at)
+      return;
+
+    let d =
+      row.created_at.split("T")[0];
+
+    dates[d] = true;
+
+  });
+
+
+  const select =
+    document.getElementById("dateFilter");
+
+  select.innerHTML =
+    `<option value="">All Date</option>`;
+
+
+  Object.keys(dates)
+    .sort()
+    .reverse()
+    .forEach(date => {
+
+      select.innerHTML +=
+        `<option value="${date}">
+          ${date}
+        </option>`;
+
+    });
+
+}
+
+
+/* ==================================================
+   LOAD USERS
+================================================== */
+
+async function loadUsers(){
+
+  const {data,error} =
+    await client
+      .from("history")
+      .select("user_id")
+      .eq("market",market);
+
+  if(error){
+
+    console.error("User error:",error);
+    return;
+
+  }
+
+  let users = {};
+
+  (data || []).forEach(row => {
+
+    if(row.user_id){
+      users[row.user_id] = true;
+    }
+
+  });
+
+
+  const select =
+    document.getElementById("userFilter");
+
+  select.innerHTML =
+    `<option value="">All Users</option>`;
+
+
+  Object.keys(users)
+    .sort()
+    .forEach(user => {
+
+      select.innerHTML +=
+        `<option value="${user}">
+          ${user}
+        </option>`;
+
+    });
+
+}
+
+
+/* ==================================================
+   LOAD HISTORY DATA
+================================================== */
+
+async function loadData(){
+
+  const date =
+    document.getElementById("dateFilter").value;
+
+  const user =
+    document.getElementById("userFilter").value;
+
+
+ let query = 
+  client 
+    .from("history") 
+    .select("*") 
+    .eq("market",market)
+    .not("status", "in", '("cancelled","canceled","refunded")');
+
+  /* DATE FILTER */
+
+  if(date){
+
+    query =
+      query
+        .gte(
+          "created_at",
+          date + "T00:00:00"
+        )
+        .lte(
+          "created_at",
+          date + "T23:59:59"
+        );
+
+  }
+
+
+  /* USER FILTER */
+
+  if(user){
+
+    query =
+      query.eq(
+        "user_id",
+        user
+      );
+
+  }
+
+
+  const {data,error} =
+    await query;
+
+
+  if(error){
+
+    console.error(
+      "History error:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  /* ==================================================
+     RESET MAPS
+  ================================================== */
+
+  let jodi = {};
+  let andar = {};
+  let bahar = {};
+
+  let total = 0;
+
+
+  for(let i=0;i<100;i++){
+
+    let n =
+      i.toString().padStart(2,"0");
+
+    jodi[n] = 0;
+
+  }
+
+
+  for(let i=0;i<10;i++){
+
+    andar[i] = 0;
+    bahar[i] = 0;
+
+  }
+
+
+  /* ==================================================
+     READ EVERY HISTORY ROW
+  ================================================== */
+
+  (data || []).forEach(row => {
+
+    try{
+
+      let arr = row.data;
+
+
+      /*
+        Agar Supabase se string aayi
+        to JSON parse karo.
+      */
+
+      if(typeof arr === "string"){
+
+        arr = JSON.parse(arr);
+
+      }
+
+
+      if(!Array.isArray(arr))
+        return;
+
+
+      /* ==================================================
+         EACH ENTRY
+      ================================================== */
+
+      arr.forEach(item => {
+
+        if(!item)
+          return;
+
+
+        /*
+          Amount / points dono support
+        */
+
+        let amount =
+          Number(
+            item.amount ??
+            item.points ??
+            item.a ??
+            0
+          );
+
+
+        if(!Number.isFinite(amount))
+          return;
+
+
+        /* ==================================================
+           NUMBER
+        ================================================== */
+
+        let number =
+          String(
+            item.number ??
+            item.num ??
+            ""
+          ).trim();
+
+
+        /* ==================================================
+           A - ANDAR
+        ================================================== */
+
+        if(/^A[0-9]$/i.test(number)){
+
+          let digit =
+            number.substring(1);
+
+          andar[digit] += amount;
+
+          total += amount;
+
+          return;
+
+        }
+
+
+        /* ==================================================
+           B - BAHAR
+        ================================================== */
+
+        if(/^B[0-9]$/i.test(number)){
+
+          let digit =
+            number.substring(1);
+
+          bahar[digit] += amount;
+
+          total += amount;
+
+          return;
+
+        }
+
+
+        /* ==================================================
+           TYPE A
+        ================================================== */
+
+        if(
+          String(item.type || "").toUpperCase()
+          === "A"
+        ){
+
+          let digit =
+            String(
+              item.number ??
+              item.num ??
+              ""
+            ).trim();
+
+
+          if(/^[0-9]$/.test(digit)){
+
+            andar[digit] += amount;
+
+            total += amount;
+
+          }
+
+          return;
+
+        }
+
+
+        /* ==================================================
+           TYPE B
+        ================================================== */
+
+        if(
+          String(item.type || "").toUpperCase()
+          === "B"
+        ){
+
+          let digit =
+            String(
+              item.number ??
+              item.num ??
+              ""
+            ).trim();
+
+
+          if(/^[0-9]$/.test(digit)){
+
+            bahar[digit] += amount;
+
+            total += amount;
+
+          }
+
+          return;
+
+        }
+
+
+        /* ==================================================
+           NORMAL JODI
+        ================================================== */
+
+        if(
+          /^[0-9]{1,2}$/.test(number)
+        ){
+
+          let n =
+            number.padStart(2,"0");
+
+
+          if(jodi[n] !== undefined){
+
+            jodi[n] += amount;
+
+          }
+
+
+          total += amount;
+
+        }
+
+      });
+
+    }
+    catch(error){
+
+      console.error(
+        "Data read error:",
+        error
+      );
+
+    }
+
+  });
+
+
+  /* ==================================================
+     UPDATE JODI BOXES
+  ================================================== */
+
+  for(let i=0;i<100;i++){
+
+    let n =
+      i.toString().padStart(2,"0");
+
+
+    document.getElementById(
+      "b"+n
+    ).innerHTML = `
+      <div class="number">${n}</div>
+      <div class="amount">${jodi[n]}</div>
+    `;
+
+  }
+
+
+  /* ==================================================
+     UPDATE ANDAR
+  ================================================== */
+
+  for(let i=0;i<10;i++){
+
+    document.getElementById(
+      "a"+i
+    ).innerHTML = `
+      <div class="number">${i}</div>
+      <div class="amount">${andar[i]}</div>
+    `;
+
+  }
+
+
+  /* ==================================================
+     UPDATE BAHAR
+  ================================================== */
+
+  for(let i=0;i<10;i++){
+
+    document.getElementById(
+      "bb"+i
+    ).innerHTML = `
+      <div class="number">${i}</div>
+      <div class="amount">${bahar[i]}</div>
+    `;
+
+  }
+
+
+  /* ==================================================
+     TOTAL
+  ================================================== */
+
+  document.getElementById(
+    "total"
+  ).innerText =
+    "Total Demo Points: " +
+    total;
+
+}
+
+
+/* ==================================================
+   START
+================================================== */
+
+loadDates();
+loadUsers();
+loadData();
+
+</script>
+
+</body>
+</html>
