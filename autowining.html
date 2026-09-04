@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Result Settlement Demo</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+    font-family:Arial;
+    margin:0;
+    padding:15px;
+    background:#e5e7eb;
+}
+
+h2{
+    text-align:center;
+}
+
+.box{
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+select,
+input{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    margin-bottom:12px;
+}
+
+button{
+    width:100%;
+    padding:13px;
+    border:0;
+    border-radius:10px;
+    color:white;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.findBtn{
+    background:#0984e3;
+}
+
+.settleBtn{
+    background:#00a884;
+}
+
+.resultBox{
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:12px;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px solid #eee;
+}
+
+.winner{
+    color:green;
+    font-weight:bold;
+}
+
+.noWinner{
+    background:white;
+    padding:20px;
+    text-align:center;
+    border-radius:15px;
+    color:#777;
+}
+
+.tables{
+    background:#fff;
+    padding:15px;
+    border-radius:15px;
+    margin-top:15px;
+}
+
+.tables ul{
+    line-height:1.8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Result Settlement Demo</h2>
+
+
+<div class="box">
+
+<label>Select Market</label>
+
+<select id="marketSelect">
+
+<option value="">
+Loading Markets...
+</option>
+
+</select>
+
+
+<label>Select Date</label>
+
+<input
+type="date"
+id="dateSelect"
+>
+
+
+<label>Enter Result (00 - 99)</label>
+
+<input
+type="text"
+id="resultNumber"
+maxlength="2"
+placeholder="Example: 54"
+>
+
+
+<button
+class="findBtn"
+onclick="findWinners()">
+
+FIND WINNERS
+
+</button>
+
+</div>
+
+
+<div id="resultList">
+
+<div class="noWinner">
+Market, date और result select करें
+</div>
+
+</div>
+
+
+<div class="tables">
+
+<h3>Tables Used</h3>
+
+<ul>
+
+<li>
+<b>Game result</b> —
+Market, Result और Date
+</li>
+
+<li>
+<b>history</b> —
+User entries और winning record
+</li>
+
+<li>
+<b>login</b> —
+User information / balance reference
+</li>
+
+</ul>
+
+<p>
+<b>Note:</b>
+इस demo में login.balance को update नहीं किया जाता।
+</p>
+
+</div>
+
+
+<script>
+
+
+const client = supabase.createClient(
+
+"https://katbdbzoufiblnnsoxkk.supabase.co",
+
+"sb_publishable_--fdpQMmSlUyt2ywjUErgQ_LXGvQH-a"
+
+);
+
+
+// ======================================
+// LOAD MARKETS FROM GAME RESULT
+// ======================================
+
+async function loadMarkets(){
+
+    const {data,error} =
+
+    await client
+
+    .from("Game result")
+
+    .select("name")
+
+    .order("name");
+
+
+    if(error){
+
+        console.log(error);
+
+        alert(
+            "Market load nahi hui: "
+            + error.message
+        );
+
+        return;
+    }
+
+
+    const select =
+    document.getElementById("marketSelect");
+
+
+    select.innerHTML =
+    '<option value="">Select Market</option>';
+
+
+    const markets = [];
+
+
+    data.forEach(row=>{
+
+        if(
+            row.name &&
+            !markets.includes(row.name)
+        ){
+
+            markets.push(row.name);
+
+            select.innerHTML += `
+
+            <option value="${escapeHtml(row.name)}">
+                ${escapeHtml(row.name)}
+            </option>
+
+            `;
+
+        }
+
+    });
+
+}
+
+
+
+// ======================================
+// FIND WINNERS
+// ======================================
+
+async function findWinners(){
+
+    const market =
+    document.getElementById("marketSelect").value;
+
+    const date =
+    document.getElementById("dateSelect").value;
+
+    let result =
+    document.getElementById("resultNumber").value.trim();
+
+
+    if(!market){
+
+        alert("Market select karo");
+
+        return;
+    }
+
+
+    if(!date){
+
+        alert("Date select karo");
+
+        return;
+    }
+
+
+    if(!/^\d{1,2}$/.test(result)){
+
+        alert(
+            "Result 00 se 99 ke beech hona chahiye"
+        );
+
+        return;
+    }
+
+
+    // 4 -> 04
+    result =
+    result.padStart(2,"0");
+
+
+    const startDate =
+    date + " 00:00:00";
+
+
+    const parts =
+    date.split("-");
+
+
+    const year =
+    Number(parts[0]);
+
+    const month =
+    Number(parts[1]) - 1;
+
+    const day =
+    Number(parts[2]);
+
+
+    const nextDay =
+    new Date(
+        year,
+        month,
+        day + 1
+    );
+
+
+    const nextDate =
+
+        nextDay.getFullYear()
+        + "-"
+        +
+        String(
+            nextDay.getMonth()+1
+        ).padStart(2,"0")
+        + "-"
+        +
+        String(
+            nextDay.getDate()
+        ).padStart(2,"0")
+        +
+        " 00:00:00";
+
+
+    // ==================================
+    // HISTORY LOAD
+    // ==================================
+
+    const {data,error} =
+
+    await client
+
+    .from("history")
+
+    .select("*")
+
+    .eq("market",market)
+
+    .gte(
+        "created_at",
+        startDate
+    )
+
+    .lt(
+        "created_at",
+        nextDate
+    )
+    
+    .eq(
+        "data",
+        result
+    )
+
+    .order(
+        "created_at",
+        {
+            ascending:false
+        }
+    );
+
+
+    if(error){
+
+        console.log(error);
+
+        alert(
+            "History load nahi hui: "
+            + error.message
+        );
+
+        return;
+    }
+
+
+    showWinners(
+        data,
+        market,
+        date,
+        result
+    );
+
+}
+
+
+
+// ======================================
+// SHOW WINNERS
+// ======================================
+
+function showWinners(
+    data,
+    market,
+    date,
+    result
+){
+
+    const list =
+    document.getElementById(
+        "resultList"
+    );
+
+
+    list.innerHTML = "";
+
+
+    if(
+        !data ||
+        data.length === 0
+    ){
+
+        list.innerHTML = `
+
+        <div class="noWinner">
+
+            <b>Winner nahi mila</b>
+
+            <br><br>
+
+            Market: ${escapeHtml(market)}
+
+            <br>
+
+            Date: ${escapeHtml(date)}
+
+            <br>
+
+            Result: ${escapeHtml(result)}
+
+        </div>
+
+        `;
+
+        return;
+    }
+
+
+    let html = `
+
+    <div class="resultBox">
+
+        <h3>
+            Matching Winners
+        </h3>
+
+        <div class="row">
+            <b>Market</b>
+            <span>${escapeHtml(market)}</span>
+        </div>
+
+        <div class="row">
+            <b>Result</b>
+            <span>${escapeHtml(result)}</span>
+        </div>
+
+        <div class="row">
+            <b>Total Winners</b>
+            <span>${data.length}</span>
+        </div>
+
+    </div>
+
+    `;
+
+
+    data.forEach(item=>{
+
+        const total =
+            Number(item.total) || 0;
+
+
+        const winAmount =
+            total * 95;
+
+
+        html += `
+
+        <div class="resultBox">
+
+            <div class="row">
+                <b>History ID</b>
+                <span>${item.id}</span>
+            </div>
+
+            <div class="row">
+                <b>User ID</b>
+                <span>
+                    ${escapeHtml(
+                        item.user_id || "-"
+                    )}
+                </span>
+            </div>
+
+            <div class="row">
+                <b>Number</b>
+                <span>
+                    ${escapeHtml(
+                        item.data || "-"
+                    )}
+                </span>
+            </div>
+
+            <div class="row">
+                <b>Amount</b>
+                <span>
+                    ₹ ${total}
+                </span>
+            </div>
+
+            <div class="row">
+                <b>Demo Winning</b>
+                <span class="winner">
+                    ₹ ${winAmount}
+                </span>
+            </div>
+
+            <div class="row">
+                <b>Status</b>
+                <span>
+                    ${escapeHtml(
+                        item.status || "active"
+                    )}
+                </span>
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+
+    html += `
+
+    <button
+    class="settleBtn"
+    onclick="settleWinners(
+        '${escapeJs(market)}',
+        '${escapeJs(date)}',
+        '${escapeJs(result)}'
+    )">
+
+        SETTLE DEMO WINNERS
+
+    </button>
+
+    `;
+
+
+    list.innerHTML = html;
+
+}
+
+
+
+// ======================================
+// SETTLE DEMO WINNERS
+// ======================================
+
+async function settleWinners(
+    market,
+    date,
+    result
+){
+
+    const ok =
+    confirm(
+        "Demo winners ko settle karna hai?"
+    );
+
+
+    if(!ok){
+
+        return;
+    }
+
+
+    const startDate =
+    date + " 00:00:00";
+
+
+    const parts =
+    date.split("-");
+
+
+    const year =
+    Number(parts[0]);
+
+    const month =
+    Number(parts[1]) - 1;
+
+    const day =
+    Number(parts[2]);
+
+
+    const nextDay =
+    new Date(
+        year,
+        month,
+        day + 1
+    );
+
+
+    const nextDate =
+
+        nextDay.getFullYear()
+        + "-"
+        +
+        String(
+            nextDay.getMonth()+1
+        ).padStart(2,"0")
+        + "-"
+        +
+        String(
+            nextDay.getDate()
+        ).padStart(2,"0")
+        +
+        " 00:00:00";
+
+
+    // पहले matching records निकालें
+
+    const {data,error} =
+
+    await client
+
+    .from("history")
+
+    .select("*")
+
+    .eq("market",market)
+
+    .eq("data",result)
+
+    .gte(
+        "created_at",
+        startDate
+    )
+
+    .lt(
+        "created_at",
+        nextDate
+    );
+
+
+    if(error){
+
+        alert(
+            "Settlement error: "
+            + error.message
+        );
+
+        return;
+    }
+
+
+    if(
+        !data ||
+        data.length === 0
+    ){
+
+        alert("Koi winner nahi mila.");
+
+        return;
+    }
+
+
+    let count = 0;
+
+
+    for(
+        const item of data
+    ){
+
+        // Already settled winner को दोबारा
+        // process नहीं करेंगे
+
+        if(
+            item.status === "won"
+        ){
+
+            continue;
+
+        }
+
+
+        const total =
+            Number(item.total) || 0;
+
+
+        const winAmount =
+            total * 95;
+
+
+        const {error:updateError} =
+
+        await client
+
+        .from("history")
+
+        .update({
+
+            status:"won",
+
+            win_amount:winAmount
+
+        })
+
+        .eq(
+            "id",
+            item.id
+        );
+
+
+        if(updateError){
+
+            console.log(
+                updateError
+            );
+
+            alert(
+                "History ID "
+                + item.id
+                + " update nahi hui: "
+                + updateError.message
+            );
+
+            continue;
+        }
+
+
+        count++;
+
+    }
+
+
+    alert(
+
+        "Demo settlement complete.\n\n"
+        +
+        "Updated winners: "
+        +
+        count
+        +
+        "\n\n"
+        +
+        "login.balance update nahi kiya gaya."
+
+    );
+
+
+    findWinners();
+
+}
+
+
+
+// ======================================
+// SECURITY HELPERS
+// ======================================
+
+function escapeHtml(value){
+
+    return String(value)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+function escapeJs(value){
+
+    return String(value)
+
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+
+        .replace(
+            /'/g,
+            "\\'"
+        );
+
+}
+
+
+
+// ======================================
+// START
+// ======================================
+
+loadMarkets();
+
+</script>
+
+</body>
+
+  </html>
