@@ -223,48 +223,83 @@ updateTotal();
 }
 
 // ✅ ONLY ADD THIS FUNCTION (no other change)
+
 async function submitAll(){
 
-if(dataArr.length===0){
-alert("Kuch add karo pehle");
-return;
+    if(dataArr.length === 0){
+        alert("Kuch add karo pehle");
+        return;
+    }
+
+    if(total <= 0){
+        alert("Amount enter karo");
+        return;
+    }
+
+    const { data:userData, error:balanceError } = await client
+        .from("login")
+        .select("balance")
+        .eq("id", user.id)
+        .single();
+
+    if(balanceError){
+        console.error(balanceError);
+        alert("Wallet load nahi hua");
+        return;
+    }
+
+    const balance = Number(userData.balance) || 0;
+
+    if(balance < total){
+        alert("YOUR BALANCE IS LOW GAME CANCEL❌");
+        return;
+    }
+
+    const newBalance = balance - total;
+
+    const { error:updateError } = await client
+        .from("login")
+        .update({ balance: newBalance })
+        .eq("id", user.id);
+
+    if(updateError){
+        console.error(updateError);
+        alert("Wallet update nahi hua");
+        return;
+    }
+
+    const { error:historyError } = await client
+        .from("history")
+        .insert({
+            user_id: user.id,
+            market: market,
+            data: dataArr,
+            total: total,
+            created_at: new Date()
+        });
+
+    if(historyError){
+        console.error(historyError);
+        alert("History save nahi hui");
+        return;
+    }
+
+    alert("GAME OK✅");
+
+    await loadUser();
+
+    dataArr = [];
+    total = 0;
+
+    updateTotal();
+
+    document.querySelectorAll("input").forEach(i => i.value = "");
+
+    document.getElementById("table").innerHTML =
+        `<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
+
+    document.getElementById("crossGrid").innerHTML = "";
 }
-
-let {data:userData} = await client
-.from("login")
-.select("balance")
-.eq("id", user.id)
-.single();
-
-if(userData.balance < total){
-alert("YOUR BALANCE IS LOW GAME CANCEL❌");
-return;
-}
-
-await client.from("login")
-.update({balance: userData.balance - total})
-.eq("id", user.id);
-
-await client.from("history")
-.insert({
-user_id: user.id,
-market: market,
-data: dataArr,
-total: total,
-created_at: new Date()
-});
-
-alert("GAME OK✅");
-  await loadUser();
-
-dataArr=[];
-total=0;
-updateTotal();
-document.querySelectorAll("input").forEach(i=>i.value="");
-document.getElementById("table").innerHTML=`<tr><th>NUMBER</th><th>AMOUNT</th><th>DEL</th></tr>`;
-document.getElementById("crossGrid").innerHTML="";
-}
-
 </script>
 
 </body>
