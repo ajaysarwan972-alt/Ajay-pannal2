@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,12 +50,21 @@ button{
 <h1>Login</h1>
 
 <input type="text" id="mobile" class="input-box" placeholder="Mobile Number">
+
 <input type="password" id="password" class="input-box" placeholder="Password">
+
+<label style="display:block; width:80%; margin:-5px auto 15px; text-align:left; font-size:14px;">
+  <input type="checkbox" id="showPassword" onchange="togglePassword()">
+  Show Password
+</label>
 
 <button onclick="login()">LOGIN</button>
 
 <p>New User?</p>
-<button class="register" onclick="window.location.href='signup.html'">REGISTER NOW</button>
+
+<button class="register" onclick="window.location.href='signup.html'">
+  REGISTER NOW
+</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -67,9 +77,26 @@ const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 🔥 AUTO LOGIN CHECK
 let user = localStorage.getItem("user");
+
 if(user){
   window.location.href = "home.html";
 }
+
+
+// 👁️ SHOW / HIDE PASSWORD
+function togglePassword(){
+
+  const password = document.getElementById("password");
+  const checkbox = document.getElementById("showPassword");
+
+  if(checkbox.checked){
+    password.type = "text";
+  }else{
+    password.type = "password";
+  }
+
+}
+
 
 async function login(){
 
@@ -110,11 +137,14 @@ localStorage.setItem("user_id", data.id);
 console.log("LOGIN USER:", data);
 
 alert("Login Success ✅");
+
 window.location.href = "home.html";
 
 }catch(err){
+
   console.log("LOGIN ERROR:", err);
   alert("Server Error ❌");
+
 }
 
 }
@@ -123,3 +153,4 @@ window.location.href = "home.html";
 
 </body>
 </html>
+```
